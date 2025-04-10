@@ -86,6 +86,19 @@ label {
     width: 100%;
     border-radius: 5px;
     padding: 8px;
+    cursor: pointer;
+}
+
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.error-message {
+    color: #ff5252;
+    font-size: 0.8rem;
+    text-align: center;
+    margin: 5px 0;
 }
 form input {
     background-color: transparent;
