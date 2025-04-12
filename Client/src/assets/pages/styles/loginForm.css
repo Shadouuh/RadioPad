@@ -5,6 +5,7 @@
     height: 100vh;
     text-align: center;
     justify-content: center;
+    
 }
 .login-form{
     -webkit-box-shadow: 0px 0px 30px 7px rgba(0,0,0,0.4);
@@ -30,7 +31,7 @@ box-shadow: 0px 0px 80px 7px rgba(0,0,0,0.35);
 .login-header {
     padding: 30px 12px;
     gap: 10px;
-    width: 342px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -59,6 +60,7 @@ form {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 380px;
     border-radius: 0px 0px 5px 5px ;
     border: solid 1px var(--border);
     border-top: none;
@@ -72,7 +74,8 @@ label {
 .input-container{
     display: flex;
     gap: 10px;
-    width: 300px;
+    width: 100%;
+    min-width: 300px;
     align-items: center;
     padding: 7px;
     background-color: #11151b;
@@ -101,6 +104,8 @@ label {
     font-size: 0.8rem;
     text-align: center;
     margin: 5px 0;
+    position: absolute;
+    transform: translateY(1300%);
     transition: ease-in-out .2s;
     cursor: pointer;
     border: solid 1px transparent;
@@ -112,6 +117,7 @@ form input {
     background-color: transparent;
     border: none;
     font-size: 0.8rem;
+    width: 100%;
     font-weight: 400;
     outline: none;
 }

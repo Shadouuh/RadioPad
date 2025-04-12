@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { LuRadio, LuCirclePlay, LuAudioWaveform, LuUsers, LuSettings, LuMusic, LuRadioTower, LuLayoutDashboard } from "react-icons/lu";
 import { useState } from "react";
+import profilePf from '../images/profile-pics/1.png';
 // Estilos
 import './styles/Sidebar.css';
 
@@ -77,9 +78,9 @@ const Sidebar = () => {
                 </ul>
             </div>
             <footer>
-                <div className="footer-logo">
-                <LuUsers size={16} />
-                </div>
+                
+                <img src={profilePf} alt="Foto de Perfil" />
+                
                 <p className="foot-text">Thiago Gonzalez</p>
             </footer>
         </section>

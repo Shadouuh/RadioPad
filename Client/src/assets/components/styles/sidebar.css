@@ -31,13 +31,23 @@ header h4{
     font-size: 0.7rem;
 }
 footer p{
-    font-weight: 500;
+    font-weight: 300;
     font-size: 0.9rem;
+}
+footer img{
+    width: 40px;
+    height: 40px;
+    padding: 1px;
+    border-radius: 50%;
+    border: solid var(--border) 1px;
+    -webkit-box-shadow: 0px 0px 30px 7px rgba(0,0,0,0.8);
+-moz-box-shadow: 0px 0px 30px 7px rgba(0,0,0,0.4);
+box-shadow: 0px 0px 80px 7px rgba(0,0,0,0.35);
 }
 .header-logo, .footer-logo{
     padding: 8px;
     border-radius: 50%;
-    border: solid var(--border) 1px;
+    border: solid transparent 1px;
     color: white;
     display: grid;
     place-content: center;
