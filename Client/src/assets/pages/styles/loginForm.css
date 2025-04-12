@@ -87,6 +87,8 @@ label {
     border-radius: 5px;
     padding: 8px;
     cursor: pointer;
+    transition: ease-in-out .2s;
+    border: solid 1px transparent;
 }
 
 .login-btn:disabled {
@@ -99,6 +101,12 @@ label {
     font-size: 0.8rem;
     text-align: center;
     margin: 5px 0;
+    transition: ease-in-out .2s;
+    cursor: pointer;
+    border: solid 1px transparent;
+}
+.login-btn:hover{
+    border: solid 1px snow;
 }
 form input {
     background-color: transparent;
