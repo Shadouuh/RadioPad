@@ -1,0 +1,274 @@
+/* Estilos generales para la página de usuarios */
+.users-container {
+  padding: 20px;
+  color: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Estilos para el encabezado */
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.users-title h1 {
+  font-size: 24px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.users-title p {
+  margin: 5px 0 0;
+  color: #a0a0a0;
+  font-size: 14px;
+}
+
+.add-user-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-user-btn:hover {
+  background-color: #2563eb;
+}
+
+/* Estilos para el contenido */
+.users-content {
+  background-color: #111827;
+  border-radius: 8px;
+  padding: 20px;
+  flex: 1;
+}
+
+.users-subtitle {
+  margin-bottom: 20px;
+}
+
+.users-subtitle h2 {
+  font-size: 18px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.users-subtitle p {
+  margin: 5px 0 0;
+  color: #a0a0a0;
+  font-size: 14px;
+}
+
+.user-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  position: relative;
+}
+
+.user-icon::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #111827;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Estilos para la tabla */
+.users-table-container {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+}
+
+.users-table th {
+  text-align: left;
+  padding: 12px 16px;
+  background-color: #1f2937;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.users-table th:first-child {
+  border-top-left-radius: 6px;
+}
+
+.users-table th:last-child {
+  border-top-right-radius: 6px;
+}
+
+.users-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #1f2937;
+  font-size: 14px;
+}
+
+.users-table tr:hover {
+  background-color: #1f2937;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn, .delete-btn {
+  background: none;
+  border: none;
+  color: #a0a0a0;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-btn:hover {
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.delete-btn:hover {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Estilos para el modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #111827;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #1f2937;
+  position: relative;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal-header p {
+  margin: 5px 0 0;
+  color: #a0a0a0;
+  font-size: 14px;
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #a0a0a0;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.close-modal-btn:hover {
+  color: #fff;
+}
+
+form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.form-group input, .form-group select {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #1f2937;
+  background-color: #1f2937;
+  color: #fff;
+  font-size: 14px;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.create-user-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-user-btn:hover {
+  background-color: #2563eb;
+}

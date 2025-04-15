@@ -3,7 +3,6 @@ import { LuUser } from "react-icons/lu";
 import { LuLock } from "react-icons/lu";
 import { LuRadio } from "react-icons/lu";
 import { LuAudioWaveform } from "react-icons/lu";
-// Estilos
 import { useAuth } from '../../context/AuthContext';
 import './styles/loginForm.css';
 
