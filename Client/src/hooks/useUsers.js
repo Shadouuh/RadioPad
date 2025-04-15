@@ -30,8 +30,8 @@ const useUsers = () => {
       const userDocRef = doc(collection(db, 'users'));
       const uid = userDocRef.id;
       
-      // Guardar información del usuario directamente en Firestore con la estructura solicitada
-      await setDoc(userDocRef, {
+      // Preparar el objeto de usuario
+      const userData = {
         displayName: `${formData.nombre} ${formData.apellido}`,
         efectos: [],
         email: formData.email,
@@ -39,8 +39,17 @@ const useUsers = () => {
         programas: formData.programas.includes(',') ? formData.programas.split(',').map(prog => prog.trim()) : [formData.programas], // Convertir a array
         role: formData.rol,
         nombre: formData.nombre,
-        apellido: formData.apellido
-      });
+        apellido: formData.apellido,
+        avatarColor: '#3b82f6', // Color por defecto
+        // Si hay una imagen de perfil, incluirla
+        profilePicture: formData.profilePicture ? {
+          url: formData.profilePicture.url,
+          public_id: formData.profilePicture.public_id
+        } : null
+      };
+      
+      // Guardar información del usuario directamente en Firestore
+      await setDoc(userDocRef, userData);
       
       console.log('Usuario guardado en Firestore correctamente');
       

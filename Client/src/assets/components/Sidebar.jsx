@@ -1,13 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
-import { LuRadio, LuAudioWaveform, LuUsers, LuSettings, LuMusic, LuRadioTower } from "react-icons/lu";
+import { LuRadio, LuAudioWaveform, LuUsers, LuSettings, LuMusic, LuRadioTower, LuUser } from "react-icons/lu";
 import { useState, useEffect } from "react";
-import profilePf from '../images/profile-pics/1.png';
+import { useAuth } from "../../context/AuthContext";
+import { db } from "../../firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 // Estilos
 import './styles/Sidebar.css';
 
 const Sidebar = () => {
     const [activeIndex, setActiveIndex] = useState(0);
+    const [profilePicture, setProfilePicture] = useState(null);
+    const [userName, setUserName] = useState('');
     const location = useLocation();
+    const { currentUser } = useAuth();
     
     const menuItems = [
         {
@@ -53,6 +58,43 @@ const Sidebar = () => {
             setActiveIndex(index);
         }
     }, [location.pathname]);
+    
+    // Cargar la foto de perfil y nombre del usuario
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (currentUser) {
+                // Establecer el nombre de usuario
+                if (currentUser.displayName) {
+                    setUserName(currentUser.displayName);
+                } else if (currentUser.email) {
+                    const emailUsername = currentUser.email.split('@')[0];
+                    setUserName(emailUsername);
+                }
+                
+                // Verificar si hay una foto de perfil en el objeto de usuario
+                if (currentUser.photoURL) {
+                    setProfilePicture(currentUser.photoURL);
+                } else {
+                    // Intentar obtener la foto de perfil desde Firestore
+                    try {
+                        const userDocRef = doc(db, 'users', currentUser.uid);
+                        const userDoc = await getDoc(userDocRef);
+                        
+                        if (userDoc.exists() && userDoc.data().profilePicture?.url) {
+                            setProfilePicture(userDoc.data().profilePicture.url);
+                        } else if (userDoc.exists() && userDoc.data().avatarColor) {
+                            // Si no hay foto pero hay un color de avatar, usar null para mostrar las iniciales
+                            setProfilePicture(null);
+                        }
+                    } catch (error) {
+                        console.error('Error al obtener datos del usuario:', error);
+                    }
+                }
+            }
+        };
+        
+        fetchUserData();
+    }, [currentUser]);
 
     const handleActive = (index) => {
         setActiveIndex(index);
@@ -86,10 +128,14 @@ const Sidebar = () => {
                 </ul>
             </div>
             <footer>
-                
-                <img src={profilePf} alt="Foto de Perfil" />
-                
-                <p className="foot-text">Thiago Gonzalez</p>
+                {profilePicture ? (
+                    <img src={profilePicture} alt="Foto de Perfil" />
+                ) : (
+                    <div className="avatar-placeholder">
+                        {userName ? userName.substring(0, 2).toUpperCase() : <LuUser />}
+                    </div>
+                )}
+                <p className="foot-text">{userName || 'Usuario'}</p>
             </footer>
         </section>
     );
