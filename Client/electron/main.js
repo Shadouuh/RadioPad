@@ -1,29 +1,28 @@
-/* eslint-disable no-undef */
-import { app, BrowserWindow } from "electron";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { app, BrowserWindow } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const isDev = !app.isPackaged;
+const __dirname = path.dirname(__filename);
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 1100,
-    height: 900,
+  const mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
     webPreferences: {
-      preload: join(__dirname, "preload.js"),
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
       contextIsolation: true,
-      nodeIntegration: false,
     },
+    icon: path.join(__dirname, '../public/icon.ico')
   });
-
-  win.setMenuBarVisibility(false);
-
-  if (isDev) {
-    win.loadURL("http://localhost:5173");
+  
+  mainWindow.setMenuBarVisibility(false);
+  
+  if (app.isPackaged) {
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   } else {
-    win.loadFile(join(__dirname, "../dist/index.html"));
+    mainWindow.loadURL('http://localhost:5173');
   }
 }
 

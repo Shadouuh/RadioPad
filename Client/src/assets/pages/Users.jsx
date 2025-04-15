@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import './styles/users.css';
 import UserModal from '../components/UserModal';
+import { LuUsers } from 'react-icons/lu';
 import useUsers from '../../hooks/useUsers';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import {  LuTrash2, LuPencil, LuUserRoundPlus} from "react-icons/lu";
 
 const Users = () => {
   const [showModal, setShowModal] = useState(false);
@@ -89,21 +91,23 @@ const Users = () => {
           <p>Administra los usuarios y sus permisos</p>
         </div>
         <button className="add-user-btn" onClick={handleOpenModal}>
-           Añadir Usuario
+           <LuUserRoundPlus/> Añadir Usuario
         </button>
       </div>
 
       <div className="users-content">
         <div className="users-subtitle">
-          <h2><span className="user-icon"></span> Usuarios</h2>
+          <h2><LuUsers/> Usuarios</h2>
           <p>Gestiona los usuarios y sus roles en la emisora</p>
         </div>
-
+{
+  error && (
+    <p className="error-message-users">{error}</p>
+  )
+}
         {loading ? (
           <p className="loading-message">Cargando usuarios...</p>
-        ) : error ? (
-          <p className="error-message">{error}</p>
-        ) : (
+        )  : (
           <div className="users-table-container">
             <table className="users-table">
               <thead>
@@ -121,17 +125,11 @@ const Users = () => {
                     <td>{user.rol}</td>
                     <td>{user.programas}</td>
                     <td className="actions-cell">
-                      <button 
-                        className="edit-btn" 
-                        onClick={() => handleEditUser(user.id)}
-                      >
-                        editar
+                      <button className="edit-btn" onClick={() => handleEditUser(user.id)}>
+                        <LuPencil size={18} />
                       </button>
-                      <button 
-                        className="delete-btn" 
-                        onClick={() => handleDeleteUser(user.id, user.nombre)}
-                      >
-                        borrar
+                      <button className="delete-btn" onClick={() => handleDeleteUser(user.id, user.nombre)}>
+                        <LuTrash2 size={18} />
                       </button>
                     </td>
                   </tr>

@@ -61,7 +61,7 @@ const LoginForm = () => {
             required
           />
         </div>
-        {error && <p className="error-message">{error}</p>}
+        {error && <p className="error-message-login">{error}</p>}
         <input 
           type="submit" 
           value={loading ? "Cargando..." : "Iniciar Sesión"} 

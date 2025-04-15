@@ -33,8 +33,31 @@ main{
     align-items: flex-start;
     justify-content: center;
     overflow-y: auto;
+    height: fit-content;
+    padding-bottom: 20px;
     width: 100%;
+    scrollbar-width: 5px;
+    scrollbar-color: #1a3366 #0d1423;
 }
+
+main::-webkit-scrollbar {
+    width: 8px;
+}
+
+main::-webkit-scrollbar-track {
+    background: #0d1423;
+    border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb {
+    background: #1a3366;
+    border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+    background: #2564db;
+}
+
 body::after {
     content: '';
     position: absolute;

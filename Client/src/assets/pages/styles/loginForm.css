@@ -99,7 +99,7 @@ label {
     cursor: not-allowed;
 }
 
-.error-message {
+.error-message-login {
     color: #ff5252;
     font-size: 0.8rem;
     text-align: center;

@@ -11,8 +11,22 @@
     "start": "electron .",
     "preview": "vite preview"
   },
+  "build": {
+    "appId": "com.radiopad.app",
+    "productName": "RadioPad",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "win": {
+      "icon": "public/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    }
+  },
   "dependencies": {
     "firebase": "^11.6.0",
+    "prop-types": "^15.8.1",
     "react": "^19.0.0",
     "react-confirm-alert": "^3.0.6",
     "react-dom": "^19.0.0",
@@ -26,6 +40,7 @@
     "@vitejs/plugin-react-swc": "^3.8.0",
     "concurrently": "^9.1.2",
     "electron": "^35.1.4",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",

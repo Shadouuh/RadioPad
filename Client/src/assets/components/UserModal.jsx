@@ -150,7 +150,7 @@ const UserModal = ({
               <option value="All Programs">All Programs</option>
             </select>
           </div>
-          {error && <p className="error-message" style={{ color: '#ef4444', marginBottom: '10px' }}>{error}</p>}
+          
           {successMessage && <p className="success-message" style={{ color: '#10b981', marginBottom: '10px' }}>{successMessage}</p>}
           <div className="form-actions">
             <button type="submit" className="create-user-btn" disabled={loading}>

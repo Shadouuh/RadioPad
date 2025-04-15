@@ -1,28 +1,29 @@
-import { Link } from "react-router-dom";
-import { LuRadio, LuCirclePlay, LuAudioWaveform, LuUsers, LuSettings, LuMusic, LuRadioTower, LuLayoutDashboard } from "react-icons/lu";
-import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { LuRadio, LuAudioWaveform, LuUsers, LuSettings, LuMusic, LuRadioTower } from "react-icons/lu";
+import { useState, useEffect } from "react";
 import profilePf from '../images/profile-pics/1.png';
 // Estilos
 import './styles/Sidebar.css';
 
 const Sidebar = () => {
     const [activeIndex, setActiveIndex] = useState(0);
-
+    const location = useLocation();
+    
     const menuItems = [
         {
             path: "/",
             name: "Dashboard",
-            icon: <LuLayoutDashboard size={16} />,
+            icon: <LuRadio size={16} />,
         },
         {
             path: "/programs",
             name: "Programas",
-            icon: <LuRadio size={16} />,
+            icon: <LuRadioTower size={16} />,
         },
         {
             path: "/pads",
             name: "Botonera",
-            icon: <LuCirclePlay size={16} />,
+            icon: <LuAudioWaveform size={16} />,
         },
         {
             path: "/library",
@@ -32,7 +33,7 @@ const Sidebar = () => {
         {
             path: "/company-pad",
             name: "Botonera Emisora",
-            icon: <LuRadioTower size={16} />,
+            icon: <LuRadio size={16} />,
         },
         {
             path: "/users",
@@ -45,6 +46,13 @@ const Sidebar = () => {
             icon: <LuSettings size={16} />,
         }
     ];
+    useEffect(() => {
+        const currentPath = location.pathname;
+        const index = menuItems.findIndex(item => item.path === currentPath);
+        if (index !== -1) {
+            setActiveIndex(index);
+        }
+    }, [location.pathname]);
 
     const handleActive = (index) => {
         setActiveIndex(index);
