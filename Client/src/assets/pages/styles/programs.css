@@ -1,0 +1,97 @@
+.contenido-programas{
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    padding: 40px;
+}
+
+.card-programa{
+    padding: 8px;
+    height: 250px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: #16243ebe;
+    border-radius: 10px;
+    border: 1px solid #414147;
+    box-shadow: 0px 0px 14px rgba(0, 0, 0, .9);
+    cursor: pointer;
+    transition: .3s;
+}
+
+.card-programa:hover{
+    box-shadow: 0px 0px 14px rgba(0, 0, 0, .5);
+    transform: translateY(-6px);
+}
+
+.profile-img{
+    margin-bottom: 4px;
+    padding: 2px;
+    border: 1px solid #414147;
+    width: 120px;
+    border-radius: 100px;
+}
+
+.card-div{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.card-añadir{
+    height: 250px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: #2565db1a;
+    border-radius: 10px;
+    border: 2px solid #2564db;
+    border-style: dashed;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.card-añadir:hover{
+    background-color: #2565db25;
+}
+
+.mas{
+    font-size: 26px;
+}
+
+.texto-delgado{
+    font-weight: 100;
+}
+
+.texto-delga2{
+    font-size: 11px;
+    font-weight: 100;
+    color: rgb(255, 255, 255, .6);
+}
+
+.texto-cantidad{
+    padding: 4px;
+    background-color: #2565db7e;
+    border: 1px solid #2564db;
+    border-radius: 4px;
+    font-weight: 400;
+}
+
+.linea{
+    margin: 6px;
+    width: 90%;
+    height: 1px;
+    background-color: #414147;
+}
