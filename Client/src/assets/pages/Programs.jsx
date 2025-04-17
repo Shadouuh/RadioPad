@@ -11,8 +11,8 @@ const Programs = () => {
         <h6 className='texto-delgado'>8:00PM - 10:00 PM</h6>
         <div className='linea'></div>
         <div className='card-div'>
-          <h5 className='texto-cantidad'>Efectos de sonido: 12</h5>
-          <h5 className='texto-delga2'>Operador: Micho Tito</h5>
+          <h5 className='texto-cantidad'>FX Disponibles: 12</h5>
+          <h5 className='texto-delgado'>Operador: Micho Tito</h5>
         </div>
       </div>
 

@@ -82,11 +82,11 @@
 }
 
 .texto-cantidad{
-    padding: 4px;
-    background-color: #2565db7e;
-    border: 1px solid #2564db;
-    border-radius: 4px;
-    font-weight: 400;
+    padding: 4px 8px;
+    background-color: #2565db48;
+    border-radius: 100px;
+    color: rgba(245, 245, 245, .9);
+    font-weight: 250;
 }
 
 .linea{
