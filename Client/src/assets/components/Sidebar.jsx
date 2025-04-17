@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LuRadio, LuAudioWaveform, LuUsers, LuSettings, LuMusic, LuRadioTower, LuUser } from "react-icons/lu";
+import { LuRadio, LuAudioWaveform, LuUsers, LuLogOut, LuSettings, LuMusic, LuRadioTower, LuUser } from "react-icons/lu";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { db } from "../../firebase/config";
@@ -12,8 +12,7 @@ const Sidebar = () => {
     const [profilePicture, setProfilePicture] = useState(null);
     const [userName, setUserName] = useState('');
     const location = useLocation();
-    const { currentUser } = useAuth();
-    
+    const { currentUser, logout } = useAuth();
     const menuItems = [
         {
             path: "/",
@@ -58,7 +57,7 @@ const Sidebar = () => {
             setActiveIndex(index);
         }
     }, [location.pathname]);
-    
+
     // Cargar la foto de perfil y nombre del usuario
     useEffect(() => {
         const fetchUserData = async () => {
@@ -70,7 +69,7 @@ const Sidebar = () => {
                     const emailUsername = currentUser.email.split('@')[0];
                     setUserName(emailUsername);
                 }
-                
+
                 // Verificar si hay una foto de perfil en el objeto de usuario
                 if (currentUser.photoURL) {
                     setProfilePicture(currentUser.photoURL);
@@ -79,7 +78,7 @@ const Sidebar = () => {
                     try {
                         const userDocRef = doc(db, 'users', currentUser.uid);
                         const userDoc = await getDoc(userDocRef);
-                        
+
                         if (userDoc.exists() && userDoc.data().profilePicture?.url) {
                             setProfilePicture(userDoc.data().profilePicture.url);
                         } else if (userDoc.exists() && userDoc.data().avatarColor) {
@@ -92,7 +91,7 @@ const Sidebar = () => {
                 }
             }
         };
-        
+
         fetchUserData();
     }, [currentUser]);
 
@@ -104,20 +103,20 @@ const Sidebar = () => {
         <section className="sidebar">
             <header>
                 <div className="header-logo">
-                <LuAudioWaveform size={18} />
+                    <LuAudioWaveform size={18} />
                 </div>
                 <div className="header-title">
-                <h1>RadioPad</h1>
-                <h4>Sound Manager</h4>
+                    <h1>RadioPad</h1>
+                    <h4>Sound Manager</h4>
                 </div>
-                
+
             </header>
             <div className="sidebar-menu">
                 <ul>
                     {menuItems.map((item, index) => (
-                        <Link 
-                            to={item.path} 
-                            className={activeIndex === index ? "active" : ""} 
+                        <Link
+                            to={item.path}
+                            className={activeIndex === index ? "active" : ""}
                             key={index}
                             onClick={() => handleActive(index)}
                         >
@@ -127,6 +126,7 @@ const Sidebar = () => {
                     ))}
                 </ul>
             </div>
+
             <footer>
                 {profilePicture ? (
                     <img src={profilePicture} alt="Foto de Perfil" />
@@ -137,6 +137,10 @@ const Sidebar = () => {
                 )}
                 <p className="foot-text">{userName || 'Usuario'}</p>
             </footer>
+            <button className="logout-btn" onClick={logout}>
+                <LuLogOut size={16} /> Cerrar sesión
+            </button>
+
         </section>
     );
 }

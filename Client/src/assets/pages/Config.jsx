@@ -306,8 +306,10 @@ const Config = () => {
                   </button>
                 ))}
               </div>
+              {/*
               <div className="profile-image-section">
                 <br />
+                
                 <p>O personaliza tu avatar</p>
                 <div className="profile-image-container">
                   {previewImage ? (
@@ -322,7 +324,10 @@ const Config = () => {
                       <p>Sin imagen</p>
                     </div>
                   )}
+                    
+                  
                 </div>
+                
                 <div className="file-input-container">
                   <input 
                     type="file" 
@@ -341,6 +346,7 @@ const Config = () => {
                   </button>
                 </div>
               </div>
+              */}
             </div>
 
             <div className="form-group">
@@ -431,9 +437,9 @@ const Config = () => {
         </div>
       </div>
 
-      {error && (
+      { error && (
         <div className="error-message">
-           {error}
+          {error}
         </div>
       )}
       

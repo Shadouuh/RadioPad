@@ -79,7 +79,35 @@ const Users = () => {
           label: 'Cancelar',
           onClick: () => {}
         }
-      ]
+      ],
+      customUI: ({ onClose, title, message, buttons }) => {
+        return (
+          <div className="custom-confirm-alert">
+            <h1>{title}</h1>
+            <p>{message}</p>
+            <div className="custom-confirm-buttons">
+              <button 
+                className="cancel-btn" 
+                onClick={() => {
+                  buttons[1].onClick();
+                  onClose();
+                }}
+              >
+                {buttons[1].label}
+              </button>
+              <button 
+                className="confirm-btn" 
+                onClick={() => {
+                  buttons[0].onClick();
+                  onClose();
+                }}
+              >
+                {buttons[0].label}
+              </button>
+            </div>
+          </div>
+        );
+      }
     });
   };
 

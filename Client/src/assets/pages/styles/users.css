@@ -25,6 +25,7 @@
   cursor: pointer;
 }
 
+
 /* Estilos para el encabezado */
 .users-header {
   display: flex;
@@ -343,4 +344,69 @@ option {
 
 .create-user-btn:hover {
   border: solid 1px white;
+}
+
+.react-confirm-alert-overlay {
+  background: rgba(0, 0, 0, 0.85) !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-confirm-alert {
+  background-color: #131822;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  width: 400px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.custom-confirm-alert h1 {
+  color: #fff;
+  font-size: 20px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.custom-confirm-alert p {
+  color: #a0a0a0;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.custom-confirm-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.custom-confirm-buttons button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-confirm-buttons .cancel-btn {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: #fff;
+}
+
+.custom-confirm-buttons .cancel-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.custom-confirm-buttons .confirm-btn {
+  background: linear-gradient(to right, #2564db, #123d8b);
+  border: none;
+  color: white;
+}
+
+.custom-confirm-buttons .confirm-btn:hover {
+  opacity: 0.9;
 }

@@ -14,8 +14,12 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: true,
     },
-    icon: path.join(__dirname, '../public/icon.ico')
+    icon: path.join(__dirname, '../public/icon.ico'),
+    iconSize: 512
   });
+  if (process.platform === 'win32') {
+    mainWindow.setIcon(path.join(__dirname, '../public/icon.ico'));
+  }
   
   mainWindow.setMenuBarVisibility(false);
   

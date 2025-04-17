@@ -17,7 +17,7 @@ const AppRoutes = () => {
       <div className="app-main-content">
         <aside>
             {isAuthenticated ? <Sidebar /> : null}
-        </aside>
+        </aside>s
       <main>
         <Routes>
           {/* Si no esta Autenticado lleva al Formulario de Login -- Santi */}
