@@ -34,7 +34,7 @@
     margin-bottom: 4px;
     padding: 2px;
     border: 1px solid #414147;
-    width: 120px;
+    width: 110px;
     border-radius: 100px;
 }
 
@@ -43,7 +43,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     width: 100%;
 }
 

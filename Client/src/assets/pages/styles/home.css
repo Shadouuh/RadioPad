@@ -20,7 +20,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     padding: 10px;
-    gap: 10px;
+    gap: 8px;
     background-color: #16243ebe;
     border: 1px solid #414147;
     border-radius: 10px;
@@ -31,9 +31,10 @@
 .celda-dashboard{
     display: flex;
     border-radius: 6px;
-    border: 1px solid #414147;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, .1);
+    background-color: #1c2e4f;
     width: 49%;
-    height: 49%;
+    height: 41%;
 }
 
 
@@ -42,7 +43,6 @@
     flex-direction: column;
     flex-wrap: wrap;
     padding: 10px;
-    gap: 10px;
     background-color: #16243ebe;
     border: 1px solid #414147;
     border-radius: 10px;
@@ -53,25 +53,76 @@
 .botones{
     display: flex;
     flex-wrap: wrap;
-    padding: 10px;
+    margin-top: 6px;
+    border-radius: 6px;
+    background-color: #1c2e4f;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, .1);
 }
 
 .boton{
-    width: 100px;
-    height: 100px;
+    width: 106px;
+    height: 104px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    padding: 8px;
+    align-items: center;    
     gap: 4px;
     border-radius: 10px;    
 }
 
 .boton-input{
-    background-color: orchid;
-    padding: 30px;
-    gap: 8px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.boton-input img{
+    width: 50px;
+    background-color: #2564db;
     border-radius: 100px;
-    border: 1px solid #414147;
+}
+
+.boton-input:hover{
+    filter: brightness(1.2) drop-shadow(0px 0px 6px #2564db);
+}
+
+.titulos{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.titulo{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.titulo img{
+    width: 25px;
+}
+
+.boton-añadir{
+    width: 100px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;    
+    gap: 4px;
+    border-radius: 10px;    
+}
+
+.boton-input-añadir{
+    cursor: pointer;
+    padding: 12px 19px;
+    border-radius: 100px;
+    background-color: #1c2e4f;
+    border: 2px solid #2564db;
+    border-style: dashed;
+    gap: 8px;
+    transition: .3s;
+}
+
+.boton-input-añadir:hover{
+    filter: brightness(1.2);
 }
