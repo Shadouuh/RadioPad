@@ -98,82 +98,85 @@ const Programs = () => {
 
       {showModal && (
         <ProgramModal title="Añadir Programa" onClose={() => setShowModal(false)}>
-          <form onSubmit={handleSubmit} className="program-form">
-            <div className="form-group">
-              <label htmlFor="name">Nombre del Programa</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="formulario-programas">
+            <div className="form-div">
+              <div className="grupo-form">
+                <label htmlFor="name">Nombre del Programa</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="image">URL de la Imagen</label>
-              <input
-                type="text"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+              <div className="grupo-form">
+                <label htmlFor="image">URL de la Imagen</label>
+                <input
+                  type="text"
+                  id="image"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="operators">Operadores (separados por coma)</label>
-              <input
-                type="text"
-                id="operators"
-                name="operators"
-                value={formData.operators}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+              <div className="grupo-form">
+                <label htmlFor="operators">Operadores (separados por coma)</label>
+                <input
+                  type="text"
+                  id="operators"
+                  name="operators"
+                  value={formData.operators}
+                  onChange={handleInputChange}
+                  required
+                  />
+                </div>
 
-            <div className="form-group">
-              <label htmlFor="producers">Productores (separados por coma)</label>
-              <input
-                type="text"
-                id="producers"
-                name="producers"
-                value={formData.producers}
-                onChange={handleInputChange}
-                required
-              />
+              <div className="grupo-form">
+                <label htmlFor="producers">Productores (separados por coma)</label>
+                <input
+                  type="text"
+                  id="producers"
+                  name="producers"
+                  value={formData.producers}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
             </div>
+            <div className="form-div">
+              <div className="grupo-form">
+                <label htmlFor="time-init">Hora de Inicio</label>
+                <input
+                  type="time"
+                  id="time-init"
+                  name="time-init"
+                  value={formData['time-init']}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="time-init">Hora de Inicio</label>
-              <input
-                type="time"
-                id="time-init"
-                name="time-init"
-                value={formData['time-init']}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+              <div className="grupo-form">
+                <label htmlFor="time-final">Hora de Finalización</label>
+                <input
+                  type="time"
+                  id="time-final"
+                  name="time-final"
+                  value={formData['time-final']}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="time-final">Hora de Finalización</label>
-              <input
-                type="time"
-                id="time-final"
-                name="time-final"
-                value={formData['time-final']}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="form-actions">
-              <button type="button" onClick={() => setShowModal(false)}>Cancelar</button>
-              <button type="submit">Guardar Programa</button>
+              <div className="grupo-form-btn">
+                <button type="submit" className='btn-guardar'>Guardar Programa</button>
+                <button type="button" className='btn-cancelar' onClick={() => setShowModal(false)}>Cancelar</button>
+              </div>
             </div>
           </form>
         </ProgramModal>

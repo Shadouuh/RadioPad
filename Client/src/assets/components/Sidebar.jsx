@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { db } from "../../firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 // Estilos
-import './styles/Sidebar.css';
+import './styles/sidebar.css';
 
 const Sidebar = () => {
     const [activeIndex, setActiveIndex] = useState(0);
