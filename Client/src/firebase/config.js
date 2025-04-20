@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+
 const firebaseConfig = {
     apiKey: "AIzaSyCvy30b_hCocxH9T4a0Ov-gDawTEIjryjQ",
     authDomain: "botonera-de929.firebaseapp.com",
@@ -16,5 +17,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 
 export { auth, db };

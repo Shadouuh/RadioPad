@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 // Rutas para la Autenticacion y tal -- Thiago
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
+
   return (
       <div className="app-main-content">
         <aside>

@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 // Constantes para la configuración de Cloudinary
-const CLOUDINARY_CLOUD_NAME = 'tu-cloud-name'; // Reemplazar con tu cloud_name
-const CLOUDINARY_UPLOAD_PRESET = 'radiopad_users'; // Preset configurado en Cloudinary
+const CLOUDINARY_CLOUD_NAME = 'botonera'; // Reemplazar con tu cloud_name
+const CLOUDINARY_UPLOAD_PRESET = 'botoneraPreset'; // Preset configurado en Cloudinary
 
 /**
  * Sube una imagen a Cloudinary directamente desde el frontend
@@ -54,4 +54,34 @@ export const deleteImageFromCloudinary = async (publicId) => {
     success: false,
     error: 'La eliminación de imágenes debe implementarse en un backend por seguridad.'
   };
+};
+
+//Sube un archivo de audio a Cloudinary
+export const uploadAudioToCloudinary = async (file) => {
+  try {
+    //Formdata envia archivos a travez de una peticion http
+    const formData = new FormData();
+    formData.append('file', file); //Agregas el archivo a l formulario "file"(!OBLIGATORIO¡)
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);//Agregar Upload Preset que sirve para comtrolar configracones de subida
+    formData.append('resource_type', 'auto'); // Detecta automáticamente si es audio o video
+    formData.append('folder', 'sounds'); // Directorio de los audios  
+
+    // Realiza la petición a la API de Cloudinary
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+      formData
+    );
+
+    return {
+      success: true,
+      url: response.data.secure_url, //URL del audio 
+      public_id: response.data.public_id //ID que claudio le da al archivo
+    };
+  } catch (error) {
+    console.error('Error al subir audio a Cloudinary:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error?.message || error.message
+    };
+  }
 };
