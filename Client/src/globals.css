@@ -3,6 +3,8 @@
     --primary: #2564db;
     --border: #414147;
     --text: #FFFAFA;
+    --btn-danger: #6a0000;
+    --btn-danger-light: #e53935;
 }
 @font-face {
     font-family: 'Geist';
@@ -72,4 +74,16 @@ body::after {
     opacity: 0.2;
     pointer-events: none;
     z-index: -1;
+}
+
+.btn {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.btn:hover {
+    filter: brightness(.8);
 }

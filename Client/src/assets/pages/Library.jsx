@@ -43,6 +43,17 @@ const UploadSoundForm = () => {
           onChange={(e) => setName(e.target.value)}
           required
         />
+
+
+{/* 
+
+  se tendria que agregar el id del programa al que pertenece el sonido
+  o que guarde el sonido directamente en la lista de sonidos del programa en su coleccion
+  
+*/}
+
+
+
         <select
           multiple
           value={category}

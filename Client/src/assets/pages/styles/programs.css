@@ -10,13 +10,12 @@
 
 .card-programa{
     padding: 8px;
-    height: 250px;
-    width: 200px;
+    height: 280px;
+    width: 220px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
-    flex-wrap: wrap;
     background-color: #16243ebe;
     border-radius: 10px;
     border: 1px solid #414147;
@@ -128,6 +127,21 @@
     width: 100%;
 }
 
+.btn-acciones {
+    display: flex;
+    flex-direction: row;
+    align-items: right;
+    gap: 10px;
+    width: 50%;
+    margin-top: 15px;
+}
+
+.btn-acciones button {
+    width: 100%;
+    border: none;
+    background-color: transparent;
+}
+
 .btn-cancelar{
     margin-top: 25px;
     cursor: pointer;
@@ -158,4 +172,21 @@
 
 .btn-guardar:hover{
     background-color: rgba(68, 74, 239, 0.1);
+}
+
+.delete-confirmation {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.delete-confirmation p {
+  margin-bottom: 15px;
+}
+
+.btn-delete {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  width: 100%;
+  padding: 10px;
 }

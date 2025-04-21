@@ -35,7 +35,6 @@ const useSoundLibrary = () => {
         name,
         category,
         sound: url,
-        createdAt: new Date(),//Fecha de creacion por si pinta
         userId: auth.currentUser ? auth.currentUser.uid : null,//Esto es por si despues queremos asociar los sonidos a un usuario especifico, aunque no se si va aca :v
       };
 

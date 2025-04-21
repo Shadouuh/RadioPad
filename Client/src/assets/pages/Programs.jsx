@@ -1,11 +1,16 @@
 import './styles/programs.css';
 import { useState, useEffect } from 'react';
+import { LuTrash2, LuPencil } from "react-icons/lu";
 import ProgramModal from './../components/ProgramModal';
 import usePrograms from './../../hooks/usePrograms';
 
 const Programs = () => {
-  const { programs, loading, error, createProgram, fetchPrograms } = usePrograms();
+  const { programs, loading, error, createProgram, fetchPrograms, updateProgram, deleteProgram } = usePrograms();
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [programId, setProgramId] = useState(null);
+  const [programToDelete, setProgramToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     image: '',
@@ -35,7 +40,7 @@ const Programs = () => {
       ...formData,
       operators: formData.operators.split(',').map(op => op.trim()),
       producers: formData.producers.split(',').map(prod => prod.trim()),
-      soundEffects: { count: parseInt(formData.soundEffectsCount) || 0 }
+      // soundEffects: { count: parseInt(formData.soundEffectsCount) || 0 }
     };
 
     const result = await createProgram(programData);
@@ -50,6 +55,72 @@ const Programs = () => {
         'time-init': '',
         'time-final': ''
       });
+    }
+  };
+
+  const openEditModal = (programId) => {
+    const programToEdit = programs.find(program => program.id === programId);
+    setFormData({
+      name: programToEdit.name || '',
+      image: programToEdit.image || '',
+      operators: Array.isArray(programToEdit.operators) ? programToEdit.operators.join(', ') : programToEdit.operators || '',
+      producers: Array.isArray(programToEdit.producers) ? programToEdit.producers.join(', ') : programToEdit.producers || '',
+      soundEffects: programToEdit.soundEffects || [],
+      'time-init': programToEdit['time-init'] || '',
+      'time-final': programToEdit['time-final'] || '',
+      soundEffectsCount: programToEdit.soundEffects && programToEdit.soundEffects.count ? programToEdit.soundEffects.count : 0
+    });
+    setShowModal(true);
+    setEditing(true);
+    setProgramId(programId);
+
+  }
+
+  const editProgram = async (e) => {
+    e.preventDefault();
+    try {
+      const programData = {
+        ...formData,
+        operators: formData.operators.split(',').map(op => op.trim()),
+        producers: formData.producers.split(',').map(prod => prod.trim()),
+      };
+
+      const result = await updateProgram(programId, programData);
+      if (result.success) {
+        setShowModal(false);
+        setEditing(false);
+        setProgramId(null);
+        setFormData({
+          name: '',
+          image: '',
+          operators: [],
+          producers: [],
+          soundEffects: [],
+          'time-init': '',
+          'time-final': ''
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const openDeleteModal = (program) => {
+    setProgramToDelete(program);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const result = await deleteProgram(programToDelete.id);
+      if (result.success) {
+        setShowDeleteModal(false);
+        setProgramToDelete(null);
+        // Refresh the programs list
+        await fetchPrograms();
+      }
+    } catch (err) {
+      console.error('Error deleting program:', err);
     }
   };
 
@@ -76,14 +147,13 @@ const Programs = () => {
                 <div className='linea'></div>
                 <div className='card-div'>
                   <h5 className='texto-cantidad'>
-                    Efectos de sonido: {program.soundEffects.length}
+                    Efectos de sonido: {program.soundEffects.length || 0}
                   </h5>
-                  <h5 className='texto-delga2'>
-                    Operador: {program.operators}
-                  </h5>
-                  <h5 className='texto-delga2'>
-                    Productor: {program.producers}
-                  </h5>
+                  
+                  <div className="btn-acciones">
+                    <button className='btn' onClick={() => openEditModal(program.id)}><LuPencil size={20} /></button>
+                    <button className='btn' onClick={() => openDeleteModal(program)}><LuTrash2 size={20} /></button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -97,8 +167,12 @@ const Programs = () => {
       </div>
 
       {showModal && (
-        <ProgramModal title="Añadir Programa" onClose={() => setShowModal(false)}>
-          <form onSubmit={handleSubmit} className="formulario-programas">
+        <ProgramModal title={editing ? "Editar Programa" : "Añadir Programa"} onClose={() => {
+          setShowModal(false);
+          setEditing(false);
+          setProgramId(null);
+        }}>
+          <form onSubmit={editing ? editProgram : handleSubmit} className="formulario-programas">
             <div className="form-div">
               <div className="grupo-form">
                 <label htmlFor="name">Nombre del Programa</label>
@@ -133,8 +207,8 @@ const Programs = () => {
                   value={formData.operators}
                   onChange={handleInputChange}
                   required
-                  />
-                </div>
+                />
+              </div>
 
               <div className="grupo-form">
                 <label htmlFor="producers">Productores (separados por coma)</label>
@@ -174,11 +248,39 @@ const Programs = () => {
               </div>
 
               <div className="grupo-form-btn">
-                <button type="submit" className='btn-guardar'>Guardar Programa</button>
-                <button type="button" className='btn-cancelar' onClick={() => setShowModal(false)}>Cancelar</button>
+                <button type="submit" className='btn-guardar'>{editing ? 'Actualizar Programa' : 'Guardar Programa'}</button>
+                <button type="button" className='btn-cancelar' onClick={() => {
+                  setShowModal(false);
+                  setEditing(false);
+                  setProgramId(null);
+                }}>Cancelar</button>
               </div>
             </div>
           </form>
+        </ProgramModal>
+      )}
+
+      {showDeleteModal && (
+        <ProgramModal title="Eliminar Programa" onClose={() => {
+          setShowDeleteModal(false);
+          setProgramToDelete(null);
+        }}>
+          <div className="delete-confirmation">
+            <p>¿Estás seguro que deseas eliminar el programa "{programToDelete.name}"?</p>
+            <p>Esta acción no se puede deshacer.</p>
+
+            <div className="grupo-form-btn">
+              <button type="button" className='btn btn-delete' onClick={handleDelete}>
+                Eliminar Programa
+              </button>
+              <button type="button" className='btn btn-cancelar' onClick={() => {
+                setShowDeleteModal(false);
+                setProgramToDelete(null);
+              }}>
+                Cancelar
+              </button>
+            </div>
+          </div>
         </ProgramModal>
       )}
     </>
