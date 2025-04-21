@@ -1,21 +1,19 @@
 import { useState, useEffect } from 'react';
 import { uploadAudioToCloudinary } from '../api/cloudinaryService';
-import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, getDoc, updateDoc, arrayUnion, getDocs, collection } from 'firebase/firestore';
 
 const useSoundLibrary = () => {
-    //Manejos de estado
+  //Manejos de estado
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [sounds, setSounds] = useState([]);
-  
+
   //Se conecta a fire
   const db = getFirestore();
-  const auth = getAuth();
 
-  // Subrir los temazos a claudio
-  const uploadSound = async (file, name, category) => {
+  // Subrir los temazos a claudio 💀
+  const uploadSound = async (file, name, category, programId) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -30,16 +28,26 @@ const useSoundLibrary = () => {
 
       const { url } = audioUploadResponse;//Esto extrae la url de lo que esta subido a claudio
 
-      //lo que se guarda en la coleccion
+      // Crear el objeto de sonido que se agregará al array
       const soundData = {
         name,
         category,
-        sound: url,
-        userId: auth.currentUser ? auth.currentUser.uid : null,//Esto es por si despues queremos asociar los sonidos a un usuario especifico, aunque no se si va aca :v
+        archive: url,
       };
 
-      // Guardar en Firebase
-      await addDoc(collection(db, 'soundLibrary'), soundData);
+      // Referencia al documento del programa
+      const programRef = doc(db, 'programs', programId);
+
+      // Verificar que el programa existe
+      const programDoc = await getDoc(programRef);
+      if (!programDoc.exists()) {
+        throw new Error('El programa especificado no existe');
+      }
+
+      // Actualizar el array de soundEffects en el documento del programa
+      await updateDoc(programRef, {
+        soundEffects: arrayUnion(soundData)
+      });
 
       setSuccess(true);
       // Después de subir, actualizamos la lista
@@ -51,14 +59,34 @@ const useSoundLibrary = () => {
     }
   };
 
-  // Ontener los Efects
+  // Obtener los Efectos de sonido del programa específico
   const fetchSounds = async () => {
     try {
-      const snapshot = await getDocs(collection(db, 'soundLibrary'));
-      const soundList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setSounds(soundList);
+      const programRef = collection(db, 'programs');
+      const programSnapshot = await getDocs(programRef);
+      
+      // Flatten the array of sound effects from all programs
+      const allSounds = [];
+      programSnapshot.docs.forEach(doc => {
+        const program = doc.data();
+        const programId = doc.id;
+        
+        if (program.soundEffects && Array.isArray(program.soundEffects)) {
+          // Add program info to each sound
+          const programSounds = program.soundEffects.map(sound => ({
+            ...sound,
+            programId,
+            programName: program.name
+          }));
+          allSounds.push(...programSounds);
+        }
+      });
+      
+      setSounds(allSounds);
+      console.log('Sonidos cargados:', allSounds);
     } catch (err) {
       console.error('Error al cargar sonidos:', err);
+      setSounds([]);
     }
   };
 
@@ -68,12 +96,12 @@ const useSoundLibrary = () => {
   }, []);
 
   return {
-    uploadSound,
     loading,
     error,
     success,
-    sounds,        
-    fetchSounds    
+    sounds,
+    uploadSound,
+    fetchSounds
   };
 };
 
