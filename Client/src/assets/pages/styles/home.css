@@ -1,6 +1,7 @@
 .contenido-home{
     display: flex;
     flex-direction: column;
+    padding: 20px 0px;
     width: 100%;
     height: 100vh;
     justify-content: center;
@@ -18,6 +19,7 @@
 .dashboard{
     display: flex;
     flex-direction: row;
+    justify-content: center;
     flex-wrap: wrap;
     padding: 10px;
     gap: 8px;
@@ -25,16 +27,22 @@
     border: 1px solid #414147;
     border-radius: 10px;
     width: 50%;
-    height: 60%;
+    height: 101%;
 }
 
 .celda-dashboard{
     display: flex;
     border-radius: 6px;
-    box-shadow: 0px 0px 6px rgba(0, 0, 0, .1);
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, .2);
     background-color: #1c2e4f;
     width: 49%;
-    height: 41%;
+    height: 42%;
+    transition: .3s;
+}
+
+.celda-dashboard:hover{
+    box-shadow: 2px 6px 6px rgba(0, 0, 0, .4);
+    transform: translateY(-4px);
 }
 
 
@@ -47,7 +55,7 @@
     border: 1px solid #414147;
     border-radius: 10px;
     width: 50%;
-    height: 60%;
+    height: 101%;
 }
 
 .botones{
@@ -66,7 +74,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;    
-    gap: 4px;
     border-radius: 10px;    
 }
 
@@ -101,28 +108,37 @@
     width: 25px;
 }
 
-.boton-añadir{
-    width: 100px;
-    height: 100px;
+/*-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_Estado de la emisora CSS-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-*/
+
+.emisora-estado{
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    width: 95%;
+    height: 230px;
+    border: 1px solid #414147;
+    background-color: #16243ebe;
+    border-radius: 8px;
+}
+
+.emisora-estado-contenido{
+    margin-top: 6px;
+    height: 70%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+.emisora-estado-celda{
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;    
-    gap: 4px;
-    border-radius: 10px;    
-}
-
-.boton-input-añadir{
-    cursor: pointer;
-    padding: 12px 19px;
-    border-radius: 100px;
+    align-items: center;
+    border: 1px solid #2564db;
     background-color: #1c2e4f;
-    border: 2px solid #2564db;
-    border-style: dashed;
-    gap: 8px;
-    transition: .3s;
-}
-
-.boton-input-añadir:hover{
-    filter: brightness(1.2);
+    border-radius: 6px;
+    height: 100%;
+    width: 33%;
 }
