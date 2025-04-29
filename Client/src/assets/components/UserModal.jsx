@@ -87,7 +87,7 @@ const UserModal = ({
         </div>
         <form onSubmit={handleSubmit}>
           <div className="form-row">
-            <div className="form-group">
+            <div className="form-group" id='row-input'>
               <label htmlFor="nombre">Nombre</label>
               <input
                 type="text"
@@ -98,7 +98,7 @@ const UserModal = ({
                 onChange={handleInputChange}
               />
             </div>
-            <div className="form-group">
+            <div className="form-group" id='row-input'>
               <label htmlFor="apellido">Apellido</label>
               <input
                 type="text"

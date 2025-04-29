@@ -218,22 +218,18 @@
 }
 
 .modal-content {
-  background-color: #111827;
-  border: solid 1px var(--border);
-  border-radius: 8px;
   width: 500px;
-  max-width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
   position: relative;
 }
 
 .modal-header {
   padding: 20px;
-  border-bottom: 1px solid #1f2937;
-  
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
   background: linear-gradient(135deg, #17203d, #0d142b);
   position: relative;
+
 }
 
 .modal-header h2 {
@@ -269,7 +265,7 @@ form {
   width: 100% !important;
   border: none !important;
   flex-direction: column;
-  
+  border-radius: 0 0 8px 8px;
   background-color:#131822 !important;
   gap: 16px;
 }
@@ -280,10 +276,10 @@ form {
 }
 
 .form-group {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 400px;
 }
 
 .form-group label {
@@ -298,6 +294,9 @@ form {
   background-color: #1f2937;
   color: #fff;
   font-size: 14px;
+}
+#row-input {
+  width: 50% !important;
 }
 /* Custom styling for select dropdown arrow */
 .form-group select {
