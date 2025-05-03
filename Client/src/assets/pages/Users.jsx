@@ -5,7 +5,7 @@ import { LuUsers } from 'react-icons/lu';
 import useUsers from '../../hooks/useUsers';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import {  LuTrash2, LuPencil, LuUserRoundPlus} from "react-icons/lu";
+import { LuTrash2, LuPencil, LuUserRoundPlus } from "react-icons/lu";
 
 const Users = () => {
   const [showModal, setShowModal] = useState(false);
@@ -41,7 +41,7 @@ const Users = () => {
     setIsEditing(false);
     setCurrentUser(null);
   };
-  
+
   const handleEditUser = async (userId) => {
     try {
       const userData = await getUserById(userId);
@@ -55,7 +55,7 @@ const Users = () => {
       setError('Error al cargar datos del usuario');
     }
   };
-  
+
   const handleDeleteUser = (userId, userName) => {
     confirmAlert({
       title: 'Confirmar eliminación',
@@ -77,7 +77,7 @@ const Users = () => {
         },
         {
           label: 'Cancelar',
-          onClick: () => {}
+          onClick: () => { }
         }
       ],
       customUI: ({ onClose, title, message, buttons }) => {
@@ -86,8 +86,8 @@ const Users = () => {
             <h1>{title}</h1>
             <p>{message}</p>
             <div className="custom-confirm-buttons">
-              <button 
-                className="cancel-btn" 
+              <button
+                className="cancel-btn"
                 onClick={() => {
                   buttons[1].onClick();
                   onClose();
@@ -95,8 +95,8 @@ const Users = () => {
               >
                 {buttons[1].label}
               </button>
-              <button 
-                className="confirm-btn" 
+              <button
+                className="confirm-btn"
                 onClick={() => {
                   buttons[0].onClick();
                   onClose();
@@ -119,23 +119,23 @@ const Users = () => {
           <p>Administra los usuarios y sus permisos</p>
         </div>
         <button className="add-user-btn" onClick={handleOpenModal}>
-           <LuUserRoundPlus/> Añadir Usuario
+          <LuUserRoundPlus /> Añadir Usuario
         </button>
       </div>
 
       <div className="users-content">
         <div className="users-subtitle">
-          <h2><LuUsers/> Usuarios</h2>
+          <h2><LuUsers /> Usuarios</h2>
           <p>Gestiona los usuarios y sus roles en la emisora</p>
         </div>
-{
-  error && (
-    <p className="error-message-users">{error}</p>
-  )
-}
+        {
+          error && (
+            <p className="error-message-users">{error}</p>
+          )
+        }
         {loading ? (
           <p className="loading-message">Cargando usuarios...</p>
-        )  : (
+        ) : (
           <div className="users-table-container">
             <table className="users-table">
               <thead>
@@ -151,7 +151,16 @@ const Users = () => {
                   <tr key={user.id}>
                     <td>{user.nombre}</td>
                     <td>{user.rol}</td>
-                    <td>{user.programas}</td>
+                    <td>{
+                      user.programas.length === 0 ? (
+                        <span>Sin programas asignados</span> 
+                      ) : user.rol === 'Operador Jefe' ? (
+                        <span>Todos</span>
+                      ) : 
+                      user.programas.map((programa) => (
+                        <span key={programa.id}>{programa.name +  ' - '}</span> 
+                      ))
+                    }</td>
                     <td className="actions-cell">
                       <button className="edit-btn" onClick={() => handleEditUser(user.id)}>
                         <LuPencil size={18} />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../firebase/config';
 import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 
@@ -7,6 +7,47 @@ const usePrograms = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+
+    // Función para obtener todos los programas desde Firestore
+    const fetchPrograms = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const programsSnapshot = await getDocs(collection(db, 'programs'));
+
+            if (programsSnapshot.empty) {
+                console.log('No hay programas en la base de datos');
+                setPrograms([]);
+                return [];
+            }
+
+            const programsList = programsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                name: doc.data().name || 'Sin nombre',
+                image: doc.data().image || null,
+                operators: doc.data().operators || [],
+                producers: doc.data().producers || [],
+                soundEffects: doc.data().soundEffects || [],
+                'time-final': doc.data()['time-final'] || '',
+                'time-init': doc.data()['time-init'] || ''
+            }));
+
+            console.log('Programas cargados:', programsList);
+            setPrograms(programsList);
+            return programsList;
+        } catch (error) {
+            setError('Error al obtener programas: ' + error.message);
+            console.error('Error al obtener programas:', error);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Cargar programas al inicializar el hook
+    useEffect(() => {
+        fetchPrograms();
+    }, []);
 
     // Función para crear un nuevo programa
     const createProgram = async (formData) => {
@@ -53,41 +94,6 @@ const usePrograms = () => {
             setError('Error al guardar datos del programa en la base de datos: ' + error.message);
             setLoading(false);
             return { success: false, error: error.message };
-        }
-    };
-
-    // Función para obtener todos los programas desde Firestore
-    const fetchPrograms = async () => {
-        setLoading(true);
-        setError('');
-        try {
-            const programsSnapshot = await getDocs(collection(db, 'programs'));
-
-            if (programsSnapshot.empty) {
-                console.log('No hay programas en la base de datos');
-                setPrograms([]);
-                return [];
-            }
-
-            const programsList = programsSnapshot.docs.map(doc => ({
-                id: doc.id,
-                name: doc.data().name || 'Sin nombre',
-                image: doc.data().image || null,
-                operators: doc.data().operators || [],
-                producers: doc.data().producers || [],
-                soundEffects: doc.data().soundEffects || [],
-                'time-final': doc.data()['time-final'] || '',
-                'time-init': doc.data()['time-init'] || ''
-            }));
-
-            setPrograms(programsList);
-            return programsList;
-        } catch (error) {
-            setError('Error al obtener programas: ' + error.message);
-            console.error('Error al obtener programas:', error);
-            return [];
-        } finally {
-            setLoading(false);
         }
     };
 

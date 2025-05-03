@@ -1,26 +1,29 @@
 import { useState, useEffect } from 'react';
+import usePrograms from '../../hooks/useprograms'
 import '../pages/styles/users.css';
 
-const UserModal = ({ 
-  showModal, 
-  handleCloseModal, 
-  createUser, 
+const UserModal = ({
+  showModal,
+  handleCloseModal,
+  createUser,
   updateUser,
-  currentUser, 
+  currentUser,
   isEditing,
-  loading, 
-  error, 
-  successMessage, 
-  setError, 
-  setSuccessMessage 
+  loading,
+  error,
+  successMessage,
+  setError,
+  setSuccessMessage
 }) => {
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
     email: '',
     rol: '',
-    programas: ''
+    programas: []
   });
+
+  const { programs } = usePrograms();
 
   // Cargar datos del usuario si estamos en modo edición o resetear el formulario cuando se cierra el modal
   useEffect(() => {
@@ -30,7 +33,7 @@ const UserModal = ({
         apellido: '',
         email: '',
         rol: '',
-        programas: ''
+        programas: []
       });
       setError('');
       setSuccessMessage('');
@@ -41,24 +44,40 @@ const UserModal = ({
         apellido: currentUser.apellido || '',
         email: currentUser.email || '',
         rol: currentUser.rol || '',
-        programas: currentUser.programas || ''
+        programas: currentUser.programas || []
       });
     }
   }, [showModal, isEditing, currentUser, setError, setSuccessMessage]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+
+    // Manejo especial para la selección múltiple de programas
+    if (name === "programs") {
+      // Obtener los programas seleccionados como array de IDs
+      const selectedOptions = Array.from(e.target.selectedOptions);
+      const selectedPrograms = selectedOptions.map(option => ({
+        id: option.value,
+        name: option.text
+      }));
+
+      setFormData({
+        ...formData,
+        programas: selectedPrograms
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     let result;
-    
+
     if (isEditing && currentUser) {
       // Llamar a la función updateUser del hook
       result = await updateUser(currentUser.id, formData);
@@ -66,7 +85,7 @@ const UserModal = ({
       // Llamar a la función createUser del hook
       result = await createUser(formData);
     }
-    
+
     // Si la operación fue exitosa, cerrar el modal después de un breve retraso
     if (result.success) {
       setTimeout(() => {
@@ -135,22 +154,28 @@ const UserModal = ({
               <option value="Operador Jefe">Operador jefe</option>
             </select>
           </div>
-          <div className="form-group">
-            <label htmlFor="programas">Programas Asignados</label>
-            <select
-              id="programas"
-              name="programas"
-              value={formData.programas}
-              onChange={handleInputChange}
-            >
-              <option value="">Seleccionar programas</option>
-              <option value="Morning Show">Morning Show</option>
-              <option value="Afternoon Drive">Afternoon Drive</option>
-              <option value="Evening Show">Evening Show</option>
-              <option value="All Programs">All Programs</option>
-            </select>
-          </div>
-          
+          {formData.rol !== 'Operador Jefe' &&
+            (
+              <div className="form-group">
+                <label htmlFor="program-select">Programas:</label>
+                <select
+                  id="program-select"
+                  name="programs"
+                  value={formData.programas.map((program) => program.id)}
+                  onChange={handleInputChange}
+                  multiple={true}
+                  required
+                >
+                  {programs.map((program) => (
+                    <option key={program.id} value={program.id}>
+                      {program.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )
+          }
+
           {successMessage && <p className="success-message" style={{ color: '#10b981', marginBottom: '10px' }}>{successMessage}</p>}
           <div className="form-actions">
             <button type="submit" className="create-user-btn" disabled={loading}>

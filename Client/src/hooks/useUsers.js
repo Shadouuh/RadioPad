@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { db } from '../firebase/config';
 import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 
@@ -16,7 +16,7 @@ const useUsers = () => {
     setSuccessMessage('');
      
     // Validar que todos los campos estén completos
-    if (!formData.nombre || !formData.apellido || !formData.email || !formData.rol || !formData.programas) {
+    if (!formData.nombre || !formData.apellido || !formData.email || !formData.rol || formData.programas.length === 0 ) {
       setError('Por favor, completa todos los campos');
       setLoading(false);
       return { success: false };
@@ -28,7 +28,6 @@ const useUsers = () => {
     try {
       // Generar un ID único para el usuario
       const userDocRef = doc(collection(db, 'users'));
-      const uid = userDocRef.id;
       
       // Preparar el objeto de usuario
       const userData = {
@@ -36,7 +35,7 @@ const useUsers = () => {
         efectos: [],
         email: formData.email,
         password: tempPassword, // Guardar la contraseña directamente en Firestore
-        programas: formData.programas.includes(',') ? formData.programas.split(',').map(prog => prog.trim()) : [formData.programas], // Convertir a array
+        programas: formData.programas, 
         role: formData.rol,
         nombre: formData.nombre,
         apellido: formData.apellido,
@@ -87,9 +86,7 @@ const useUsers = () => {
                `${doc.data().nombre} ${doc.data().apellido}` : 
                doc.data().displayName || 'Sin nombre',
         rol: doc.data().role || 'Sin rol',
-        programas: Array.isArray(doc.data().programas) ? 
-                  doc.data().programas.join(', ') : 
-                  (doc.data().programas || 'Sin programas')
+        programas: doc.data().programas || []
       }));
       
       console.log('Usuarios obtenidos de Firestore:', usersList);
@@ -111,7 +108,7 @@ const useUsers = () => {
     setSuccessMessage('');
     
     // Validar que todos los campos estén completos
-    if (!formData.nombre || !formData.apellido || !formData.email || !formData.rol || !formData.programas) {
+    if (!formData.nombre || !formData.apellido || !formData.email || !formData.rol || formData.programas.length === 0 ) {
       setError('Por favor, completa todos los campos');
       setLoading(false);
       return { success: false };
@@ -130,7 +127,7 @@ const useUsers = () => {
       await updateDoc(userDocRef, {
         displayName: `${formData.nombre} ${formData.apellido}`,
         email: formData.email,
-        programas: formData.programas.includes(',') ? formData.programas.split(',').map(prog => prog.trim()) : [formData.programas],
+        programas: formData.programas,
         role: formData.rol,
         nombre: formData.nombre,
         apellido: formData.apellido
@@ -199,7 +196,7 @@ const useUsers = () => {
         apellido: userData.apellido || '',
         email: userData.email || '',
         rol: userData.role || '',
-        programas: Array.isArray(userData.programas) ? userData.programas.join(', ') : (userData.programas || '')
+        programas: userData.programas || [],
       };
     } catch (error) {
       console.error('Error al obtener usuario por ID:', error);
