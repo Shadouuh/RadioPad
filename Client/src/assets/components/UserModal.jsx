@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import usePrograms from '../../hooks/useprograms'
 import '../pages/styles/users.css';
+import { LuX } from 'react-icons/lu';
 
 const UserModal = ({
   showModal,
@@ -20,8 +21,19 @@ const UserModal = ({
     apellido: '',
     email: '',
     rol: '',
-    programas: []
+    programas: [],
+    roles: []
   });
+  
+  const [showProgramSelector, setShowProgramSelector] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  
+  // Lista de roles disponibles
+  const availableRoles = [
+    { id: 1, name: 'productor' },
+    { id: 2, name: 'operador' },
+    { id: 3, name: 'jefe de operadores' }
+  ];
 
   const { programs } = usePrograms();
 
@@ -33,7 +45,8 @@ const UserModal = ({
         apellido: '',
         email: '',
         rol: '',
-        programas: []
+        programas: [],
+        roles: []
       });
       setError('');
       setSuccessMessage('');
@@ -44,34 +57,88 @@ const UserModal = ({
         apellido: currentUser.apellido || '',
         email: currentUser.email || '',
         rol: currentUser.rol || '',
-        programas: currentUser.programas || []
+        programas: currentUser.programas || [],
+        roles: currentUser.roles || []
       });
     }
   }, [showModal, isEditing, currentUser, setError, setSuccessMessage]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    // Manejo especial para la selección múltiple de programas
-    if (name === "programs") {
-      // Obtener los programas seleccionados como array de IDs
-      const selectedOptions = Array.from(e.target.selectedOptions);
-      const selectedPrograms = selectedOptions.map(option => ({
-        id: option.value,
-        name: option.text
-      }));
-
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+  
+  // Función para manejar la selección de programas
+  const handleProgramSelect = (program) => {
+    // Verificar si el programa ya está seleccionado
+    const isAlreadySelected = formData.programas.some(p => p.id === program.id);
+    
+    if (isAlreadySelected) {
+      // Si ya está seleccionado, lo quitamos
       setFormData({
         ...formData,
-        programas: selectedPrograms
+        programas: formData.programas.filter(p => p.id !== program.id)
       });
     } else {
+      // Si no está seleccionado, lo añadimos
       setFormData({
         ...formData,
-        [name]: value
+        programas: [...formData.programas, { id: program.id, name: program.name }]
       });
     }
   };
+  
+  // Función para manejar la selección de roles
+  const handleRoleSelect = (role) => {
+    // Verificar si el rol ya está seleccionado
+    const isAlreadySelected = formData.roles.some(r => r.id === role.id);
+    
+    if (isAlreadySelected) {
+      // Si ya está seleccionado, lo quitamos
+      setFormData({
+        ...formData,
+        roles: formData.roles.filter(r => r.id !== role.id)
+      });
+    } else {
+      // Si no está seleccionado, lo añadimos
+      setFormData({
+        ...formData,
+        roles: [...formData.roles, { id: role.id, name: role.name }]
+      });
+    }
+  };
+  
+  // Función para abrir/cerrar el selector de programas
+  const toggleProgramSelector = () => {
+    setShowProgramSelector(!showProgramSelector);
+    if (showRoleSelector) setShowRoleSelector(false);
+  };
+  
+  // Función para abrir/cerrar el selector de roles
+  const toggleRoleSelector = () => {
+    setShowRoleSelector(!showRoleSelector);
+    if (showProgramSelector) setShowProgramSelector(false);
+  };
+  
+  // Función para cerrar los selectores cuando se hace clic fuera de ellos
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showProgramSelector && !event.target.closest('.program-selector-container')) {
+        setShowProgramSelector(false);
+      }
+      if (showRoleSelector && !event.target.closest('.role-selector-container')) {
+        setShowRoleSelector(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProgramSelector, showRoleSelector]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -140,41 +207,191 @@ const UserModal = ({
               onChange={handleInputChange}
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="rol">Rol</label>
-            <select
-              id="rol"
-              name="rol"
-              value={formData.rol}
-              onChange={handleInputChange}
-            >
-              <option value="">Seleccionar rol</option>
-              <option value="Productor">Productor</option>
-              <option value="Operador">Operador</option>
-              <option value="Operador Jefe">Operador jefe</option>
-            </select>
-          </div>
-          {formData.rol !== 'Operador Jefe' &&
-            (
-              <div className="form-group">
-                <label htmlFor="program-select">Programas:</label>
-                <select
-                  id="program-select"
-                  name="programs"
-                  value={formData.programas.map((program) => program.id)}
-                  onChange={handleInputChange}
-                  multiple={true}
-                  required
-                >
-                  {programs.map((program) => (
-                    <option key={program.id} value={program.id}>
-                      {program.name}
-                    </option>
-                  ))}
-                </select>
+          {formData.rol !== 'Operador Jefe' && (
+            <div className="form-group">
+              <label>Programas:</label>
+              <div className="program-selector-container">
+                <div className="selected-programs-container" onClick={toggleProgramSelector}>
+                  {formData.programas.length > 0 ? (
+                    <div className="selected-programs">
+                      {formData.programas.map((program) => (
+                        <div key={program.id} className="selected-program-tag">
+                          {program.name}
+                          <button 
+                            type="button" 
+                            className="remove-program-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleProgramSelect(program);
+                            }}
+                          >
+                            <LuX size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-programs-selected">Seleccionar programas</div>
+                  )}
+                </div>
+                
+                {showProgramSelector && (
+                  <div className="program-selector-modal">
+                    <div className="program-selector-content">
+                      <div className="program-selector-header">
+                        <h3>Seleccionar Programas</h3>
+                      </div>
+                      <div className="program-selector-body">
+                        <div className="program-columns">
+                          <div className="program-column">
+                            <h4>Programas elegidos</h4>
+                            <div className="program-list">
+                              {formData.programas.map((program) => (
+                                <div 
+                                  key={program.id} 
+                                  className="program-item selected"
+                                  onClick={() => handleProgramSelect(program)}
+                                >
+                                  {program.name}
+                                  <button className="remove-program-btn">
+                                    <LuX size={14} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="program-column">
+                            <h4>Programas disponibles</h4>
+                            <div className="program-list">
+                              {programs
+                                .filter(program => !formData.programas.some(p => p.id === program.id))
+                                .map((program) => (
+                                  <div 
+                                    key={program.id} 
+                                    className="program-item"
+                                    onClick={() => handleProgramSelect(program)}
+                                  >
+                                    {program.name}
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="program-selector-footer">
+                        <button 
+                          type="button" 
+                          className="cancel-selector-btn"
+                          onClick={() => setShowProgramSelector(false)}
+                        >
+                          cancelar
+                        </button>
+                        <button 
+                          type="button" 
+                          className="accept-selector-btn"
+                          onClick={() => setShowProgramSelector(false)}
+                        >
+                          aceptar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )
-          }
+            </div>
+          )}
+          
+          <div className="form-group">
+            <label>Roles:</label>
+            <div className="role-selector-container">
+              <div className="selected-roles-container" onClick={toggleRoleSelector}>
+                {formData.roles.length > 0 ? (
+                  <div className="selected-roles">
+                    {formData.roles.map((role) => (
+                      <div key={role.id} className="selected-role-tag">
+                        {role.name}
+                        <button 
+                          type="button" 
+                          className="remove-role-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRoleSelect(role);
+                          }}
+                        >
+                          <LuX size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-roles-selected">Seleccionar roles</div>
+                )}
+              </div>
+              
+              {showRoleSelector && (
+                <div className="role-selector-modal">
+                  <div className="role-selector-content">
+                    <div className="role-selector-header">
+                      <h3>Seleccionar Roles</h3>
+                    </div>
+                    <div className="role-selector-body">
+                      <div className="role-columns">
+                        <div className="role-column">
+                          <h4>Roles elegidos</h4>
+                          <div className="role-list">
+                            {formData.roles.map((role) => (
+                              <div 
+                                key={role.id} 
+                                className="role-item selected"
+                                onClick={() => handleRoleSelect(role)}
+                              >
+                                {role.name}
+                                <button className="remove-role-btn">
+                                  <LuX size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="role-column">
+                          <h4>Roles disponibles</h4>
+                          <div className="role-list">
+                            {availableRoles
+                              .filter(role => !formData.roles.some(r => r.id === role.id))
+                              .map((role) => (
+                                <div 
+                                  key={role.id} 
+                                  className="role-item"
+                                  onClick={() => handleRoleSelect(role)}
+                                >
+                                  {role.name}
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="role-selector-footer">
+                      <button 
+                        type="button" 
+                        className="cancel-selector-btn"
+                        onClick={() => setShowRoleSelector(false)}
+                      >
+                        cancelar
+                      </button>
+                      <button 
+                        type="button" 
+                        className="accept-selector-btn"
+                        onClick={() => setShowRoleSelector(false)}
+                      >
+                        aceptar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           {successMessage && <p className="success-message" style={{ color: '#10b981', marginBottom: '10px' }}>{successMessage}</p>}
           <div className="form-actions">
