@@ -1,0 +1,40 @@
+.confirm-toast {
+    padding: 15px;
+  }
+  
+  .confirm-toast p {
+    margin-bottom: 15px;
+    font-size: 16px;
+  }
+  
+  .confirm-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  
+  .confirm-buttons button {
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+  }
+  
+  .confirm-buttons .btn-danger {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .confirm-buttons .btn-danger:hover {
+    background-color: #c82333;
+  }
+  
+  .confirm-buttons .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .confirm-buttons .btn-secondary:hover {
+    background-color: #5a6268;
+  }

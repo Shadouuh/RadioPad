@@ -1,53 +1,41 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './assets/pages/Home.jsx'; 
-import CompanyPad from './assets/pages/CompanyPad.jsx'; 
-import Config from './assets/pages/Config.jsx';
-import Library from './assets/pages/Library.jsx';
-import Pads from './assets/pages/Pads.jsx';
-import Programs from './assets/pages/Programs.jsx';
-import Users from './assets/pages/Users.jsx';
-import LoginForm from './assets/pages/LoginForm.jsx'; 
-import Sidebar from './assets/components/Sidebar.jsx';
-import { AuthProvider, useAuth } from './context/AuthContext';
+// Rutas
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+// Notificaciones
+import { ToastContainer } from "react-toastify";
+// Layout
+import Layout from './Layout.jsx';
 
-// Rutas para la Autenticacion y tal -- Thiago
-const AppRoutes = () => {
-  const { isAuthenticated } = useAuth();
+// Paginas
 
+// Provedor del usuario
+import { UserProvider } from './contexts/UserContext.jsx';
+import Home from "./pages/Home/Home.jsx";
+
+function App() {
   return (
-      <div className="app-main-content">
-        <aside>
-            {isAuthenticated ? <Sidebar /> : null}
-        </aside>
-      <main>
+    <Router>
+      <UserProvider>
+        <ToastContainer
+          position="top-left"
+          autoClose={5000}
+          hideProgressBar={true}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          limit={3}
+          pauseOnFocusLoss
+          pauseOnHover />
         <Routes>
-          {/* Si no esta Autenticado lleva al Formulario de Login -- Santi */}
-          <Route path="/auth" element={!isAuthenticated ? <LoginForm /> : <Navigate to="/" />} />
-
-          {/* En caso de Estar autenticado renderiza rutas -- Santi */}
-          <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/auth" />} />
-          <Route path="/programs" element={isAuthenticated ? <Programs /> : <Navigate to="/auth" />} />
-          <Route path="/pads" element={isAuthenticated ? <Pads /> : <Navigate to="/auth" />} />
-          <Route path="/library" element={isAuthenticated ? <Library /> : <Navigate to="/auth" />} />
-          <Route path="/company-pad" element={isAuthenticated ? <CompanyPad /> : <Navigate to="/auth" />} />
-          <Route path="/users" element={isAuthenticated ? <Users /> : <Navigate to="/auth" />} />
-          <Route path="/configuration" element={isAuthenticated ? <Config /> : <Navigate to="/auth" />} />
+          {/* Rutas del Cliente */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            {/* <Route path="/auth" element={<Auth />} />
+            <Route path="*" element={<NotFound />} /> */}
+          </Route>
         </Routes>
-      </main>
-      </div>
+      </UserProvider>
+    </Router>
   );
-};
-
-// Rutas de como se va a ver (layout que no hizo santi 👎) -- Thiago
-// Gogogogo -- Atte: Santi
-const App = () => {
-  return (
-    <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </AuthProvider>
-  );
-};
+}
 
 export default App;
