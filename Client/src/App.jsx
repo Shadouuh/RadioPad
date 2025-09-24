@@ -1,38 +1,52 @@
-// Rutas
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-// Notificaciones
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-// Layout
-import Layout from './Layout.jsx';
+import { UserProvider } from './shared/contexts/UserContext.jsx';
+import { SidebarProvider, useSidebar } from './shared/contexts/SidebarContext.jsx';
+import Login from './pages/login/Login.jsx';
+import Dashboard from './pages/dashboard/Dashboard.jsx';
+import Users from './pages/users/Users.jsx';
+import Programs from './pages/programs/Programs.jsx';
+import Settings from './pages/settings/Settings.jsx';
+import Sidebar from './shared/components/Sidebar.jsx';
 
-// Paginas
+const AppContent = () => {
+  const location = useLocation();
+  const { isCollapsed } = useSidebar();
+  const isLoginPage = location.pathname === '/';
 
-// Provedor del usuario
-import { UserProvider } from './contexts/UserContext.jsx';
-import Home from "./pages/Home/Home.jsx";
+  return (
+    <div className="app-container">
+      {!isLoginPage && <Sidebar />}
+      <main className={`main-content ${!isLoginPage ? (isCollapsed ? 'with-sidebar-collapsed' : 'with-sidebar') : ''}`}>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/programs" element={<Programs />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </main>
+    </div>
+  );
+};
 
-function App() {
+const App = () => {
   return (
     <Router>
       <UserProvider>
-        <ToastContainer
-          position="top-left"
-          autoClose={5000}
-          hideProgressBar={true}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          limit={3}
-          pauseOnFocusLoss
-          pauseOnHover />
-        <Routes>
-          {/* Rutas del Cliente */}
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            {/* <Route path="/auth" element={<Auth />} />
-            <Route path="*" element={<NotFound />} /> */}
-          </Route>
-        </Routes>
+        <SidebarProvider>
+          <ToastContainer
+            position="top-left"
+            autoClose={5000}
+            hideProgressBar={true}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            limit={3}
+            pauseOnFocusLoss
+            pauseOnHover />
+          <AppContent />
+        </SidebarProvider>
       </UserProvider>
     </Router>
   );

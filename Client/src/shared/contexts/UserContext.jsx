@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from './../api/axios';
-import useNotification from './../hooks/useNotification';
+import axios from '../api/axios';
+import useNotification from '../hooks/useNotification';
 
 export const UserContext = createContext();
 
@@ -13,16 +13,24 @@ export const UserProvider = ({ children }) => {
 
   const checkSession = async () => {
     try {
-      const response = await axios.get('/auth/me');
+      // Comentado temporalmente para evitar errores de conexión
+      // const response = await axios.get('/auth/me');
       
-      if (response.data.success) {
-        setUser(response.data.user);
-      }
+      // if (response.data.success) {
+      //   setUser(response.data.user);
+      // }
+      
+      // Usuario estático por defecto
+      setUser({
+        name: 'Jefe de Operaciones',
+        role: 'Administrador',
+        email: 'admin@radiopad.com'
+      });
     } catch (err) {
       if(err?.response?.status === 401) return
       if (err?.response?.status === 403) notify(err?.response?.data?.message || 'Error al verificar sesión', 'error');
       console.error(err?.response?.data?.message || 'Error al verificar sesión:', err);
-      handleLogout();
+      // handleLogout();
     } finally {
       setLoading(false);
     }
@@ -35,7 +43,8 @@ export const UserProvider = ({ children }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/auth/logout');
+      // Comentado temporalmente para evitar errores de conexión
+      // await axios.post('/auth/logout');
     } catch (err) {
       console.error('Error al cerrar sesión:', err?.response?.data?.message || 'Error al cerrar sesión');
     } finally {
