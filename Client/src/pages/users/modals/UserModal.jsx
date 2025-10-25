@@ -1,13 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 import './UserModal.css';
+import programService from '../services/programService';
 
 const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    role: user?.role || 'Usuario'
+    role: user?.role || 'Usuario',
+    selectedPrograms: user?.programs?.map(prog => prog.id) || []
   });
+  
+  const [availablePrograms, setAvailablePrograms] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadPrograms();
+    }
+  }, [isOpen]);
+  
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        role: user.role || 'Usuario',
+        selectedPrograms: user.programs?.map(prog => prog.id) || []
+      });
+    } else {
+      setFormData({
+        name: '',
+        email: '',
+        role: 'Usuario',
+        selectedPrograms: []
+      });
+    }
+  }, [user, isOpen]);
+
+  const loadPrograms = async () => {
+    try {
+      setLoading(true);
+      const programs = await programService.getAll();
+      setAvailablePrograms(programs);
+    } catch (error) {
+      console.error('Error al cargar programas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -15,6 +56,28 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
       ...prev,
       [name]: value
     }));
+  };
+  
+  const handleProgramChange = (e) => {
+    const programId = e.target.value;
+    
+    setFormData(prev => {
+      const selectedPrograms = [...prev.selectedPrograms];
+      
+      if (e.target.checked) {
+        selectedPrograms.push(programId);
+      } else {
+        const index = selectedPrograms.indexOf(programId);
+        if (index !== -1) {
+          selectedPrograms.splice(index, 1);
+        }
+      }
+      
+      return {
+        ...prev,
+        selectedPrograms
+      };
+    });
   };
 
   const handleSubmit = (e) => {
@@ -80,6 +143,36 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
                 <option value="Operador">Operador</option>
                 <option value="Jefe de Operaciones">Jefe de Operaciones</option>
               </select>
+            </div>
+            
+            <div className="form-group">
+              <label>Programas Asignados</label>
+              <div className="programs-selection">
+                {loading ? (
+                  <p>Cargando programas...</p>
+                ) : (
+                  availablePrograms.length > 0 ? (
+                    <div className="programs-list">
+                      {availablePrograms.map(program => (
+                        <div key={program.id} className="program-item">
+                          <input
+                            type="checkbox"
+                            id={`program-${program.id}`}
+                            value={program.id}
+                            checked={formData.selectedPrograms.includes(program.id)}
+                            onChange={handleProgramChange}
+                          />
+                          <label htmlFor={`program-${program.id}`}>
+                            {program.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No hay programas disponibles</p>
+                  )
+                )}
+              </div>
             </div>
             
             <button type="submit" className="submit-btn">

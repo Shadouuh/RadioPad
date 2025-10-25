@@ -1,0 +1,29 @@
+### Variables globales
+@baseUrl = http://localhost:3000/api
+@contentType = application/json
+
+### Asignar un programa a un usuario
+POST {{baseUrl}}/user-programs/assign
+Content-Type: {{contentType}}
+
+{
+  "userId": 1,
+  "programId": 1
+}
+
+### Eliminar la asignación de un programa a un usuario
+DELETE {{baseUrl}}/user-programs/remove
+Content-Type: {{contentType}}
+
+{
+  "userId": 1,
+  "programId": 1
+}
+
+### Obtener todos los programas de un usuario
+GET {{baseUrl}}/user-programs/user/1/programs
+Content-Type: {{contentType}}
+
+### Obtener todos los usuarios asignados a un programa
+GET {{baseUrl}}/user-programs/program/1/users
+Content-Type: {{contentType}}

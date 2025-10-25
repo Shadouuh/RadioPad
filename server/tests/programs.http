@@ -1,0 +1,36 @@
+### Variables globales
+@baseUrl = http://localhost:3000/api
+@contentType = application/json
+
+### Obtener todos los programas
+GET {{baseUrl}}/programs
+Content-Type: {{contentType}}
+
+### Obtener un programa por ID
+GET {{baseUrl}}/programs/1
+Content-Type: {{contentType}}
+
+### Crear un nuevo programa
+POST {{baseUrl}}/programs
+Content-Type: {{contentType}}
+
+{
+  "name": "Noticiero Matutino",
+  "description": "Programa informativo con las noticias más relevantes del día",
+  "schedule": "Lunes a Viernes, 7:00 - 9:00",
+  "status": "ACTIVE"
+}
+
+### Actualizar un programa existente
+PUT {{baseUrl}}/programs/1
+Content-Type: {{contentType}}
+
+{
+  "name": "Noticiero Matutino Actualizado",
+  "description": "Programa informativo con las noticias más relevantes del día y entrevistas exclusivas",
+  "schedule": "Lunes a Viernes, 7:00 - 10:00"
+}
+
+### Eliminar un programa
+DELETE {{baseUrl}}/programs/1
+Content-Type: {{contentType}}

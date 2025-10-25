@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+/////////////////////////////////////////////////
+// CONFIGURACIÓN GENERAL
+/////////////////////////////////////////////////
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/////////////////////////////////////////////////
+// ENUMERACIONES
+/////////////////////////////////////////////////
+
+// Enumeración para roles de usuario
+enum Role {
+  jefe_operador
+  operador
+  usuario
+}
+
+// Enumeración para estados de programa
+enum Status {
+  true
+  false
+}
+
+/////////////////////////////////////////////////
+// MODELOS DE USUARIOS
+/////////////////////////////////////////////////
+
+// Modelo de Usuario
+model User {
+  id        String       @id @default(uuid())
+  name      String
+  email     String       @unique
+  role      Role       
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  
+  // Relaciones
+  programs  UserProgram[]
+
+  @@map("users")
+}
+
+/////////////////////////////////////////////////
+// MODELOS DE PROGRAMAS
+/////////////////////////////////////////////////
+
+// Modelo de Programa
+model Program {
+  id          String       @id @default(uuid())
+  name        String
+  description String?      @db.Text
+  status      Boolean      @default(true)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  
+  // Relaciones
+  users       UserProgram[]
+
+  @@map("programs")
+}
+
+/////////////////////////////////////////////////
+// MODELOS DE RELACIONES
+/////////////////////////////////////////////////
+
+// Modelo de relación entre Usuario y Programa
+model UserProgram {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  programId String   @map("program_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // Relaciones
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, programId])
+  @@index([userId])
+  @@index([programId])
+  @@map("user_programs")
+}

@@ -1,0 +1,35 @@
+### Variables globales
+@baseUrl = http://localhost:3000/api
+@contentType = application/json
+
+### Obtener todos los usuarios
+GET {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+### Obtener un usuario por ID
+GET {{baseUrl}}/users/1
+Content-Type: {{contentType}}
+
+### Crear un nuevo usuario
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "name": "Juan Pérez",
+  "email": "juan@example.com",
+  "password": "password123",
+  "role": "USER"
+}
+
+### Actualizar un usuario existente
+PUT {{baseUrl}}/users/1
+Content-Type: {{contentType}}
+
+{
+  "name": "Juan Pérez Actualizado",
+  "email": "juan.updated@example.com"
+}
+
+### Eliminar un usuario
+DELETE {{baseUrl}}/users/1
+Content-Type: {{contentType}}

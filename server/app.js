@@ -1,52 +1,62 @@
-// Importaciones de rutas
-import authRoutes from './routes/auth.js';
-
-// Importaciones de dependencias 
 import express from 'express';
 import cors from 'cors';
-import logger from './middlewares/logger.js';
-import loadEnv from './utils/loadEnv.js';
-import cookieParser from 'cookie-parser';
-import loadStaticFiles from './utils/loadStaticsFiles.js'
-// import { requireAuth, requireAdmin } from './middlewares/authMiddleware.js';
+import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+import userRoutes from './routes/userRoutes.js';
+import programRoutes from './routes/programRoutes.js';
+import userProgramRoutes from './routes/userProgramRoutes.js';
 
-// Middlewares
+dotenv.config();
+
+// Inicializar aplicación Express
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '10mb' }));
-app.use(cookieParser());
+// Inicializar Prisma Client
+const prisma = new PrismaClient();
 
-// Cargar variables de entorno
-loadEnv();
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Validar entorno (Desarrollo o Produccion)
-const isProduction = process.env.NODE_ENV === 'production';
-if (!isProduction) {
-    console.log('Modo de desarrollo')
-
-    app.use(logger);
-    app.use(cors({
-        origin: 'http://localhost:5173',
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-        credentials: true,
-    }));
-} else {
-    console.log('Modo de produccion')
-}
-
-// Rutas
-app.use('/api/auth', authRoutes);
-
-
-// Testeo de api
-app.get('/api/ping', async (req, res) => {
-    res.send('Pong')
+// Middleware para hacer disponible prisma en las rutas
+app.use((req, res, next) => {
+  req.prisma = prisma;
+  next();
 });
 
-// Servir archivos estaticos de la build de Vite
-if (isProduction) loadStaticFiles(app);
+// Rutas básicas
+app.get('/', (req, res) => {
+  res.json({ message: 'Bienvenido a la API de RadioPad' });
+});
 
-// Prender servidor de solicitudes http 
-const port = process.env.PORT || 5001;
-app.listen(port, () => console.log(`Server escuchando en el puerto ${port}`));
+// Usar rutas
+app.use('/api/users', userRoutes);
+app.use('/api/programs', programRoutes);
+app.use('/api/user-programs', userProgramRoutes);
+
+// Middleware para manejo de errores
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Ha ocurrido un error en el servidor',
+    error: process.env.NODE_ENV === 'development' ? err.message : {}
+  });
+});
+
+// Iniciar servidor
+const server = app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
+
+// Manejo de cierre de la aplicación
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  server.close(() => {
+    console.log('Servidor cerrado');
+    process.exit(0);
+  });
+});
+
+export default app;
