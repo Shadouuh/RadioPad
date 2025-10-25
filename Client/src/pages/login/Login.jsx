@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { FiWifi, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import './styles/style.css';
+import { UserContext } from '../../shared/contexts/UserContext.jsx';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,33 +10,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { handleLogin } = useContext(UserContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validar usuarios de prueba
-    const validUsers = [
-      'admin@radiopad.com',
-      'operator@radiopad.com', 
-      'user@radiopad.com'
-    ];
-
     try {
-      // Simular delay de autenticación
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      if (validUsers.includes(email) && password === 'password') {
-        // Login exitoso
-        console.log('Login exitoso:', { email, password });
-        navigate('/dashboard');
-      } else {
-        // Credenciales inválidas
-        alert('Credenciales inválidas. Usa uno de los usuarios de prueba con la contraseña "password"');
-      }
+      await handleLogin({ email, password });
+      // La navegación se maneja dentro del contexto
     } catch (error) {
+      // El contexto ya maneja notificaciones; este catch es por seguridad
       console.error('Error en login:', error);
-      alert('Error al iniciar sesión');
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +134,7 @@ const Login = () => {
             ))}
           </div>
           <div className="login-forgot-password">
-            <button className="login-forgot-password-link">
+            <button className="login-forgot-password-link" onClick={() => navigate('/')}>
               ¿Olvidaste tu contraseña?
             </button>
           </div>

@@ -13,38 +13,38 @@ export const UserProvider = ({ children }) => {
 
   const checkSession = async () => {
     try {
-      // Comentado temporalmente para evitar errores de conexión
-      // const response = await axios.get('/auth/me');
-      
-      // if (response.data.success) {
-      //   setUser(response.data.user);
-      // }
-      
-      // Usuario estático por defecto
-      setUser({
-        name: 'Jefe de Operaciones',
-        role: 'Administrador',
-        email: 'admin@radiopad.com'
-      });
+      const response = await axios.get('/auth/me');
+      if (response.data?.success) {
+        setUser(response.data.user);
+      }
     } catch (err) {
-      if(err?.response?.status === 401) return
+      if (err?.response?.status === 401) return;
       if (err?.response?.status === 403) notify(err?.response?.data?.message || 'Error al verificar sesión', 'error');
       console.error(err?.response?.data?.message || 'Error al verificar sesión:', err);
-      // handleLogout();
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogin = (user) => {
-    setUser(user);
-    navigate('/');
+  const handleLogin = async ({ email, password }) => {
+    try {
+      const response = await axios.post('/auth/login', { email, password });
+      if (response.data?.success) {
+        setUser(response.data.user);
+        notify('Sesión iniciada correctamente', 'success');
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Error al iniciar sesión';
+      notify(message, 'error');
+      console.error(message, err);
+    }
   };
 
   const handleLogout = async () => {
     try {
-      // Comentado temporalmente para evitar errores de conexión
-      // await axios.post('/auth/logout');
+      await axios.post('/auth/logout');
+      notify('Sesión cerrada', 'info');
     } catch (err) {
       console.error('Error al cerrar sesión:', err?.response?.data?.message || 'Error al cerrar sesión');
     } finally {
