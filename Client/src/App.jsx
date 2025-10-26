@@ -7,6 +7,7 @@ import Dashboard from './pages/dashboard/Dashboard.jsx';
 import Users from './pages/users/Users.jsx';
 import Programs from './pages/programs/Programs.jsx';
 import Settings from './pages/settings/Settings.jsx';
+import InstitutionalSounds from './pages/sounds/InstitutionalSounds.jsx';
 import Sidebar from './shared/components/Sidebar.jsx';
 
 const AppContent = () => {
@@ -24,6 +25,7 @@ const AppContent = () => {
           <Route path="/users" element={<Users />} />
           <Route path="/programs" element={<Programs />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/sounds/institutional" element={<InstitutionalSounds />} />
         </Routes>
       </main>
     </div>

@@ -7,7 +7,8 @@ import {
   FiMenu,
   FiRadio,
   FiX,
-  FiBarChart
+  FiBarChart,
+  FiMusic
 } from 'react-icons/fi';
 import { useSidebar } from '../contexts/SidebarContext';
 import UserModal from './UserModal.jsx';
@@ -70,6 +71,15 @@ const Sidebar = () => {
         >
           <FiBarChart className="nav-icon" />
           {!isCollapsed && <span className="nav-text">Programas</span>}
+        </NavLink>
+        
+        <NavLink 
+          to="/sounds/institutional" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          data-tooltip="Sonidos"
+        >
+          <FiMusic className="nav-icon" />
+          {!isCollapsed && <span className="nav-text">Sonidos</span>}
         </NavLink>
         
         <NavLink 
