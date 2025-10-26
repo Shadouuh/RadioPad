@@ -5,7 +5,7 @@ import loadEnv from '../utils/loadEnv.js';
 loadEnv();
 
 const pool = mysql.createPool({
-  uri: process.env.DB_URL,
+  uri: process.env.DB_URL_PRUEBA,
   waitForConnections: true,
   connectionLimit: 10, // Podés subirlo un poco si Railway lo permite
   queueLimit: 0

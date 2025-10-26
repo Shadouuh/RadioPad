@@ -1,4 +1,5 @@
 import handleError from '../utils/handleError.js';
+import soundService from '../services/SoundService.js';
 
 //Controlador para la gestión de sonidos
 class SoundController {
@@ -6,9 +7,9 @@ class SoundController {
     this.cloudinaryService = cloudinaryService;
   }
 
+  // Subir un sonido a Cloudinary y guardarlo en la base de datos
   uploadSound = async (req, res) => {
     try {
-
       if (!req.file) {
         return res.status(400).json({
           error: true,
@@ -16,13 +17,31 @@ class SoundController {
         });
       }
 
-      const result = await this.cloudinaryService.uploadAudio(req.file);
+      // Subir a Cloudinary
+      const cloudinaryResult = await this.cloudinaryService.uploadAudio(req.file);
+      
+      // Guardar en la base de datos
+      const soundData = {
+        sound_name: req.body.sound_name || req.file.originalname,
+        description: req.body.description || '',
+        file_path: cloudinaryResult.url, // Cambiado de secure_url a url para coincidir con el formato de CloudinaryService
+        duration_seconds: cloudinaryResult.duration || 0,
+        file_size: req.file.size,
+        is_institutional: req.body.is_institutional === 'true',
+        category_id: req.body.category_id || null,
+        created_by: req.user?.id || null
+      };
+      
+      const savedSound = await soundService.createSound(soundData);
 
       // Responder con la información del archivo subido
       return res.status(201).json({
         error: false,
         message: 'Audio subido correctamente',
-        data: result
+        data: {
+          ...cloudinaryResult,
+          ...savedSound
+        }
       });
 
     } catch (error) {
@@ -34,26 +53,35 @@ class SoundController {
     }
   }
 
-//Elimina un archivo de audio de Cloudinary
+  // Eliminar un sonido de Cloudinary y de la base de datos
   deleteSound = async (req, res) => {
     try {
-      const { publicId } = req.params;
+      const { soundId } = req.params;
 
-      if (!publicId) {
+      if (!soundId) {
         return res.status(400).json({
           error: true,
-          message: 'Se requiere el ID público del audio'
+          message: 'Se requiere el ID del sonido'
         });
       }
+      
+      // Obtener el sonido para conseguir su public_id en Cloudinary
+      const sound = await soundService.getSoundById(soundId);
+      
+      // Extraer el public_id del file_path o usar el soundId como fallback
+      const urlParts = sound.file_path.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      const publicId = fileName.split('.')[0]; // Asumiendo que el publicId es el nombre del archivo sin extensión
+      
+      // Eliminar de Cloudinary
+      const cloudinaryResult = await this.cloudinaryService.deleteAudio(publicId);
 
-      const result = await this.cloudinaryService.deleteAudio(publicId);
-
-      if (result.result !== 'ok') {
-        return res.status(404).json({
-          error: true,
-          message: 'No se pudo eliminar el audio o no existe'
-        });
+      if (cloudinaryResult.result !== 'ok') {
+        console.warn('No se pudo eliminar el audio de Cloudinary, pero se eliminará de la base de datos');
       }
+      
+      // Eliminar de la base de datos
+      await soundService.deleteSound(soundId);
 
       return res.status(200).json({
         error: false,
@@ -68,25 +96,61 @@ class SoundController {
     }
   }
 
-  //Obtener Sonido
+  // Obtener información de un sonido específico
   getSoundInfo = async (req, res) => {
     try {
-      const { publicId } = req.params;
+      const { soundId } = req.params;
 
-      if (!publicId) {
+      if (!soundId) {
         return res.status(400).json({
           error: true,
-          message: 'Se requiere el ID público del audio'
+          message: 'Se requiere el ID del sonido'
         });
       }
 
-      const result = await this.cloudinaryService.getAudioInfo(publicId);
+      const sound = await soundService.getSoundById(soundId);
 
       return res.status(200).json({
         error: false,
-        data: result
+        data: sound
       });
       
+    } catch (error) {
+      const errorResponse = handleError(error);
+      return res.status(errorResponse.statusCode).json({
+        error: true,
+        message: errorResponse.message
+      });
+    }
+  }
+  
+  // Obtener todos los sonidos
+  getAllSounds = async (req, res) => {
+    try {
+      const sounds = await soundService.getAllSounds();
+      
+      return res.status(200).json({
+        error: false,
+        data: sounds
+      });
+    } catch (error) {
+      const errorResponse = handleError(error);
+      return res.status(errorResponse.statusCode).json({
+        error: true,
+        message: errorResponse.message
+      });
+    }
+  }
+  
+  // Obtener sonidos institucionales
+  getInstitutionalSounds = async (req, res) => {
+    try {
+      const sounds = await soundService.getInstitutionalSounds();
+      
+      return res.status(200).json({
+        error: false,
+        data: sounds
+      });
     } catch (error) {
       const errorResponse = handleError(error);
       return res.status(errorResponse.statusCode).json({

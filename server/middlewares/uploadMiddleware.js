@@ -42,7 +42,7 @@ const uploadAudio = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB máximo
   }
-}).single('audio');
+}).single('file');
 
 // Middleware para manejar errores de multer
 export const handleUpload = (req, res, next) => {
