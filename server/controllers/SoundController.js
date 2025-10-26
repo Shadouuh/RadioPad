@@ -24,7 +24,7 @@ class SoundController {
       const soundData = {
         sound_name: req.body.sound_name || req.file.originalname,
         description: req.body.description || '',
-        file_path: cloudinaryResult.url, // Cambiado de secure_url a url para coincidir con el formato de CloudinaryService
+        file_path: cloudinaryResult.url, 
         duration_seconds: cloudinaryResult.duration || 0,
         file_size: req.file.size,
         is_institutional: req.body.is_institutional === 'true',
@@ -65,13 +65,13 @@ class SoundController {
         });
       }
       
-      // Obtener el sonido para conseguir su public_id en Cloudinary
+      
       const sound = await soundService.getSoundById(soundId);
       
       // Extraer el public_id del file_path o usar el soundId como fallback
       const urlParts = sound.file_path.split('/');
       const fileName = urlParts[urlParts.length - 1];
-      const publicId = fileName.split('.')[0]; // Asumiendo que el publicId es el nombre del archivo sin extensión
+      const publicId = fileName.split('.')[0]; 
       
       // Eliminar de Cloudinary
       const cloudinaryResult = await this.cloudinaryService.deleteAudio(publicId);

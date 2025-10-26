@@ -10,7 +10,6 @@ const cloudinaryService = CloudinaryService;
 const soundController = new SoundController(cloudinaryService);
 
 // Rutas para gestión de sonidos
-// Subir un nuevo sonido (Cloudinary + BD)
 router.post('/upload', 
   // requireAuth,  // Comentado temporalmente para pruebas
   handleUpload, 
