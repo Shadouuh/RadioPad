@@ -1,6 +1,4 @@
 import pool from '../db/conex.js';
-import handleError from '../utils/handleError.js';
-
 // Servicio para gestionar operaciones con sonidos en la base de datos
 class SoundService {
   
@@ -30,7 +28,7 @@ class SoundService {
         ...soundData
       };
     } catch (error) {
-      throw handleError(error, 'DB_ERROR', 500, 'Error al crear el sonido en la base de datos');
+      throw {status: 500, message: 'Error al crear el sonido en la base de datos'};
     }
   }
   
@@ -40,7 +38,7 @@ class SoundService {
       const [sounds] = await pool.query('SELECT * FROM sound_effects');
       return sounds;
     } catch (error) {
-      throw handleError(error, 'DB_ERROR', 500, 'Error al obtener los sonidos');
+      throw {status: 500, message: 'Error al obtener los sonidos'};
     }
   }
   
@@ -50,15 +48,15 @@ class SoundService {
       const [sounds] = await pool.query('SELECT * FROM sound_effects WHERE sound_id = ?', [soundId]);
       
       if (sounds.length === 0) {
-        throw handleError(new Error('Sonido no encontrado'), 'NOT_FOUND', 404, 'El sonido solicitado no existe');
+        throw {status: 404, message: 'El sonido solicitado no existe'};
       }
       
       return sounds[0];
     } catch (error) {
-      if (error.code === 'NOT_FOUND') {
+      if (error.status) {
         throw error;
       }
-      throw handleError(error, 'DB_ERROR', 500, 'Error al obtener el sonido');
+      throw {status: 500, message: 'Error al obtener el sonido'};
     }
   }
   
@@ -68,15 +66,15 @@ class SoundService {
       const [result] = await pool.query('DELETE FROM sound_effects WHERE sound_id = ?', [soundId]);
       
       if (result.affectedRows === 0) {
-        throw handleError(new Error('Sonido no encontrado'), 'NOT_FOUND', 404, 'El sonido que intenta eliminar no existe');
+        throw {status: 404, message: 'El sonido que intenta eliminar no existe'};
       }
       
       return { deleted: true, sound_id: soundId };
     } catch (error) {
-      if (error.code === 'NOT_FOUND') {
+      if (error.status) {
         throw error;
       }
-      throw handleError(error, 'DB_ERROR', 500, 'Error al eliminar el sonido');
+      throw {status: 500, message: 'Error al eliminar el sonido'};
     }
   }
   
@@ -86,7 +84,7 @@ class SoundService {
       const [sounds] = await pool.query('SELECT * FROM sound_effects WHERE is_institutional = TRUE');
       return sounds;
     } catch (error) {
-      throw handleError(error, 'DB_ERROR', 500, 'Error al obtener los sonidos institucionales');
+      throw {status: 500, message: 'Error al obtener los sonidos institucionales'};
     }
   }
 }

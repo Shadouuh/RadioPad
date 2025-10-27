@@ -1,5 +1,4 @@
 import { v2 as cloudinary } from 'cloudinary';
-import handleError from '../utils/handleError.js';
 
 //COnfiguracion
 cloudinary.config({
@@ -14,7 +13,7 @@ class CloudinaryService {
 
   async uploadAudio(file, folder = 'sounds') {
     try {
-      if (!file) throw new Error('No se proporcionó ningún archivo');
+      if (!file) throw {status: 400, message: 'No se proporcionó ningún archivo'};
       
       // Subir el archivo a Cloudinary
       const result = await cloudinary.uploader.upload(file.path, {
@@ -33,14 +32,15 @@ class CloudinaryService {
       };
 
     } catch (error) {
-      throw handleError(error, 'Error al subir el audio a Cloudinary');
+      if (error.status) throw error;
+      throw {status: 500, message: 'Error al subir el audio a Cloudinary'};
     }
   }
 
   //Eliminar Sonido
   async deleteAudio(publicId) {
     try {
-      if (!publicId) throw new Error('No se proporcionó el ID público del archivo');
+      if (!publicId) throw {status: 400, message: 'No se proporcionó el ID público del archivo'};
       
       const result = await cloudinary.uploader.destroy(publicId, {
         resource_type: 'video'
@@ -48,14 +48,15 @@ class CloudinaryService {
       
       return result;
     } catch (error) {
-      throw handleError(error, 'Error al eliminar el audio de Cloudinary');
+      if (error.status) throw error;
+      throw {status: 500, message: 'Error al eliminar el audio de Cloudinary'};
     }
   }
 
  //Obtener audio
   async getAudioInfo(publicId) {
     try {
-      if (!publicId) throw new Error('No se proporcionó el ID público del archivo');
+      if (!publicId) throw {status: 400, message: 'No se proporcionó el ID público del archivo'};
       
       const result = await cloudinary.api.resource(publicId, {
         resource_type: 'video' 
@@ -63,7 +64,8 @@ class CloudinaryService {
       
       return result;
     } catch (error) {
-      throw handleError(error, 'Error al obtener información del audio');
+      if (error.status) throw error;
+      throw {status: 500, message: 'Error al obtener información del audio'};
     }
   }
 }
