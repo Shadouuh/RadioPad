@@ -1,6 +1,8 @@
 // Importaciones de rutas
 import authRoutes from './routes/auth.js';
 import soundRoutes from './routes/sound.js';
+import programRoutes from './routes/program.js';
+import userRoutes from './routes/user.js';
 
 // Importaciones de dependencias 
 import express from 'express';
@@ -39,6 +41,8 @@ if (!isProduction) {
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/sounds', soundRoutes);
+app.use('/api/programs', programRoutes);
+app.use('/api/users', userRoutes);
 
 // Testeo de api
 app.get('/api/ping', async (req, res) => {

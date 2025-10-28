@@ -1,61 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaPlay, FaPause, FaTimes, FaHeadphones } from 'react-icons/fa';
 import { MdMusicNote } from 'react-icons/md';
 import ProgramModal from './modals/ProgramModal.jsx';
 import SoundModal from './modals/SoundModal.jsx';
 import './styles/programs.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
+import ProgramService from '../../shared/services/ProgramService.js';
+import useNotification from '../../shared/hooks/useNotification';
 
 const Programs = () => {
   const { isCollapsed } = useSidebar();
-  const [programs, setPrograms] = useState([
-    {
-      id: 1,
-      name: 'FX Institucionales',
-      description: 'Efectos de sonido institucionales predefinidos',
-      status: 'Active',
-      effects: 4,
-      sounds: [
-        { id: 1, name: 'ID Estación', duration: '10s', category: 'Institucional' },
-        { id: 2, name: 'Hora Oficial', duration: '5s', category: 'Institucional' },
-        { id: 3, name: 'Identificación Legal', duration: '8s', category: 'Institucional' },
-        { id: 4, name: 'Cortina Noticias', duration: '12s', category: 'Institucional' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Programa Matutino',
-      description: 'Efectos y música para el programa matutino',
-      status: 'Active',
-      effects: 4,
-      sounds: [
-        { id: 5, name: 'Intro Matutino', duration: '15s', category: 'Música' },
-        { id: 6, name: 'Transición', duration: '3s', category: 'Efectos' },
-        { id: 7, name: 'Jingle Comercial', duration: '8s', category: 'Jingles' },
-        { id: 8, name: 'Outro', duration: '10s', category: 'Música' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Noticiero Vespertino',
-      description: 'Sonidos para el noticiero de la tarde',
-      status: 'Inactive',
-      effects: 4,
-      sounds: [
-        { id: 9, name: 'Breaking News', duration: '6s', category: 'Efectos' },
-        { id: 10, name: 'Cortina Deportes', duration: '7s', category: 'Música' },
-        { id: 11, name: 'Clima Intro', duration: '4s', category: 'Efectos' },
-        { id: 12, name: 'Cierre Noticiero', duration: '12s', category: 'Música' }
-      ]
-    }
-  ]);
+  const notify = useNotification();
 
+  const [programs, setPrograms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [isSoundModalOpen, setIsSoundModalOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
   const [playingSound, setPlayingSound] = useState(null);
   const [playProgress, setPlayProgress] = useState({});
+  const [programSounds, setProgramSounds] = useState({});
+  const [loadingSounds, setLoadingSounds] = useState(false);
+  const [selectedSound, setSelectedSound] = useState(null);
+
+  // Cargar programas al montar el componente
+  useEffect(() => {
+    loadPrograms();
+  }, []);
+
+  // Cargar sonidos cuando se selecciona un programa
+  useEffect(() => {
+    if (selectedProgram && selectedProgram.id) {
+      loadProgramSounds(selectedProgram.id);
+    }
+  }, [selectedProgram]);
+
+  const loadPrograms = async () => {
+    try {
+      setLoading(true);
+      const response = await ProgramService.getAllPrograms();
+      if (response.success) {
+        setPrograms(response.data);
+      } else {
+        notify('Error al cargar programas', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading programs:', error);
+      notify(error?.response?.data?.message || 'Error al cargar programas', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProgramSounds = async (programId) => {
+    try {
+      setLoadingSounds(true);
+      const response = await ProgramService.getProgramSounds(programId);
+      if (response.success) {
+        setProgramSounds(prev => ({
+          ...prev,
+          [programId]: response.data
+        }));
+      } else {
+        notify('Error al cargar sonidos del programa', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading program sounds:', error);
+      notify(error?.response?.data?.message || 'Error al cargar sonidos del programa', 'error');
+    } finally {
+      setLoadingSounds(false);
+    }
+  };
 
   const handleCreateProgram = () => {
     setEditingProgram(null);
@@ -67,31 +83,45 @@ const Programs = () => {
     setIsProgramModalOpen(true);
   };
 
-  const handleSaveProgram = (programData) => {
-    if (editingProgram) {
-      // Editar programa existente
-      setPrograms(prev => prev.map(p => 
-        p.id === editingProgram.id 
-          ? { ...p, ...programData }
-          : p
-      ));
-    } else {
-      // Crear nuevo programa
-      const newProgram = {
-        id: Date.now(),
-        ...programData,
-        effects: 0,
-        sounds: []
-      };
-      setPrograms(prev => [...prev, newProgram]);
+  const handleSaveProgram = async (programData) => {
+    try {
+      let response;
+      if (editingProgram) {
+        response = await ProgramService.updateProgram(editingProgram.id, programData);
+      } else {
+        response = await ProgramService.createProgram(programData);
+      }
+
+      if (response.success) {
+        notify(editingProgram ? 'Programa actualizado exitosamente' : 'Programa creado exitosamente', 'success');
+        setIsProgramModalOpen(false);
+        setEditingProgram(null);
+        loadPrograms(); // Recargar la lista
+      } else {
+        notify('Error al guardar programa', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving program:', error);
+      notify(error?.response?.data?.message || 'Error al guardar programa', 'error');
     }
   };
 
-  const handleDeleteProgram = (programId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este programa?')) {
-      setPrograms(prev => prev.filter(p => p.id !== programId));
-      if (selectedProgram && selectedProgram.id === programId) {
-        setSelectedProgram(null);
+  const toggleProgramStatus = async (status, programId) => {
+    if (window.confirm(status === 'active' ? '¿Estás seguro de que deseas desactivar este programa?' : '¿Estás seguro de que deseas activar este programa?')) {
+      try {
+        const response = await ProgramService.toggleProgramStatus(programId);
+        if (response.success) {
+          notify(status === 'active' ? 'Programa desactivado exitosamente' : 'Programa activado exitosamente', 'success');
+          loadPrograms(); // Recargar la lista
+          if (selectedProgram && selectedProgram.id === programId) {
+            setSelectedProgram(null);
+          }
+        } else {
+          notify(status === 'active' ? 'Error al desactivar programa' : 'Error al activar programa', 'error');
+        }
+      } catch (error) {
+        console.error('Error toggling program status:', error);
+        notify(error?.response?.data?.message || status === 'active' ? 'Error al desactivar programa' : 'Error al activar programa', 'error');
       }
     }
   };
@@ -104,53 +134,45 @@ const Programs = () => {
     setIsSoundModalOpen(true);
   };
 
-  const handleSaveSound = (soundData) => {
-    if (selectedProgram) {
-      const newSound = {
-        id: Date.now(),
-        name: soundData.name,
-        duration: soundData.duration || 'N/A',
-        category: soundData.category,
-        description: soundData.description,
-        file: soundData.file
-      };
+  const handleSaveSound = async (soundData) => {
+    try {
+      let response;
+      if (soundData.id) {
+        // Actualizar sonido existente
+        response = await ProgramService.updateProgramSound( soundData.id, soundData);
+      } else {
+        // Crear nuevo sonido
+        response = await ProgramService.createProgramSound(selectedProgram.id, soundData);
+      }
 
-      setPrograms(prev => prev.map(p => 
-        p.id === selectedProgram.id 
-          ? { 
-              ...p, 
-              sounds: [...p.sounds, newSound],
-              effects: p.sounds.length + 1
-            }
-          : p
-      ));
-
-      // Actualizar el programa seleccionado
-      setSelectedProgram(prev => ({
-        ...prev,
-        sounds: [...prev.sounds, newSound],
-        effects: prev.sounds.length + 1
-      }));
+      if (response.success) {
+        notify(soundData.id ? 'Sonido actualizado exitosamente' : 'Sonido agregado exitosamente', 'success');
+        setIsSoundModalOpen(false);
+        loadProgramSounds(selectedProgram.id); // Recargar sonidos del programa
+      } else {
+        notify('Error al guardar sonido', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving sound:', error);
+      notify(error?.response?.data?.message || 'Error al guardar sonido', 'error');
     }
   };
 
-  const handleDeleteSound = (soundId) => {
-    if (selectedProgram && window.confirm('¿Estás seguro de que quieres eliminar este sonido?')) {
-      setPrograms(prev => prev.map(p => 
-        p.id === selectedProgram.id 
-          ? { 
-              ...p, 
-              sounds: p.sounds.filter(s => s.id !== soundId),
-              effects: p.sounds.length - 1
-            }
-          : p
-      ));
-
-      setSelectedProgram(prev => ({
-        ...prev,
-        sounds: prev.sounds.filter(s => s.id !== soundId),
-        effects: prev.sounds.length - 1
-      }));
+  const handleDeleteSound = async (soundId) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este sonido?')) {
+      try {
+        const response = await ProgramService.deleteProgramSound(soundId);
+        if (response.success) {
+          notify('Sonido eliminado exitosamente', 'success');
+          loadProgramSounds(selectedProgram.id); // Recargar sonidos del programa
+          programs[selectedProgram.id].effects--;
+        } else {
+          notify('Error al eliminar sonido', 'error');
+        }
+      } catch (error) {
+        console.error('Error deleting sound:', error);
+        notify(error?.response?.data?.message || 'Error al eliminar sonido', 'error');
+      }
     }
   };
 
@@ -181,6 +203,15 @@ const Programs = () => {
     console.log('Reproduciendo sonido:', sound.name);
   };
 
+  const handleEditSound = (sound) => {
+    setSelectedSound(sound);
+    setIsSoundModalOpen(true);
+  };
+
+  const handlePlaySound = (sound) => {
+    playSound(sound);
+  };
+
   return (
     <div className={`programs-container ${isCollapsed ? 'with-sidebar-collapsed' : ''}`}>
       <div className="programs-header">
@@ -202,41 +233,51 @@ const Programs = () => {
           </div>
           
           <div className="programs-list">
-            {programs.map(program => (
-              <div 
-                key={program.id} 
-                className={`program-item ${selectedProgram?.id === program.id ? 'selected' : ''}`}
-                onClick={() => handleSelectProgram(program)}
-              >
-                <div className="program-info">
-                  <h4>{program.name}</h4>
-                  <p>{program.effects} efectos</p>
-                </div>
-                <div className="program-actions">
-                  <span className={`status-badge ${program.status.toLowerCase()}`}>
-                    {program.status === 'Active' ? 'Activo' : 'Inactivo'}
-                  </span>
-                  <button 
-                    className="edit-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditProgram(program);
-                    }}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button 
-                    className="delete-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteProgram(program.id);
-                    }}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
+            {loading ? (
+              <div className="loading-state">
+                <p>Cargando programas...</p>
               </div>
-            ))}
+            ) : programs && programs.length === 0 ? (
+              <div className="empty-state">
+                <p>No hay programas registrados</p>
+              </div>
+            ) : (
+              programs && programs.map(program => (
+                <div 
+                  key={program.id} 
+                  className={`program-item ${selectedProgram?.id === program.id ? 'selected' : ''}`}
+                  onClick={() => handleSelectProgram(program)}
+                >
+                  <div className="program-info">
+                    <h4>{program.name}</h4>
+                    <p>{program.effects} Efecto/s</p>
+                  </div>
+                  <div className="program-actions">
+                    <span className={`status-badge ${program.status?.toLowerCase()}`}>
+                      {program.status === 'Active' ? 'Activo' : 'Inactivo'}
+                    </span>
+                    <button 
+                      className="edit-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditProgram(program);
+                      }}
+                    >
+                      <FaEdit />
+                    </button>
+                    <button 
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleProgramStatus(program.status.toLowerCase(), program.id);
+                      }}
+                    >
+                      🥟
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -255,43 +296,61 @@ const Programs = () => {
               </div>
 
               <div className="effects-grid">
-                {selectedProgram.sounds.map(sound => (
-                  <div key={sound.id} className="sound-card">
-                    <div className="sound-header">
-                      <div className="play-button-container">
-                        <button 
-                          className={`play-btn ${playingSound === sound.id ? 'playing' : ''}`}
-                          onClick={() => playSound(sound)}
-                        >
-                          {playingSound === sound.id ? <FaPause /> : <FaPlay />}
-                        </button>
-                        {playingSound === sound.id && (
-                          <div className="progress-bar">
-                            <div 
-                              className="progress-fill" 
-                              style={{ width: `${playProgress[sound.id] || 0}%` }}
-                            ></div>
-                          </div>
-                        )}
-                      </div>
-                      <div className="sound-info">
-                        <h4>{sound.name}</h4>
-                        <span className="sound-duration">{sound.duration}</span>
-                      </div>
-                      <button 
-                        className="delete-sound-btn"
-                        onClick={() => handleDeleteSound(sound.id)}
-                      >
-                        <FaTimes />
-                      </button>
-                    </div>
-                    <div className="sound-footer">
-                      <span className={`category-badge ${sound.category.toLowerCase()}`}>
-                        {sound.category}
-                      </span>
-                    </div>
+                {loadingSounds ? (
+                  <div className="loading-sounds">
+                    <p>Cargando sonidos...</p>
                   </div>
-                ))}
+                ) : !programSounds[selectedProgram.id] || programSounds[selectedProgram.id].length === 0 ? (
+                  <div className="no-sounds">
+                    <p>No hay sonidos en este programa</p>
+                  </div>
+                ) : (
+                  programSounds[selectedProgram.id].map(sound => (
+                    <div key={sound.id} className="sound-card">
+                      <div className="sound-header">
+                        <div className="sound-info">
+                          <h4>{sound.name}</h4>
+                          <span className="sound-duration">{sound.duration || 'N/A'}</span>
+                        </div>
+                        <div className="sound-actions">
+                          <button 
+                            className="btn-icon play"
+                            onClick={() => handlePlaySound(sound)}
+                            title="Reproducir"
+                          >
+                            {playingSound === sound.id ? <FaPause /> : <FaPlay />}
+                          </button>
+                          <button 
+                            className="btn-icon edit"
+                            onClick={() => handleEditSound(sound)}
+                            title="Editar"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button 
+                            className="btn-icon delete"
+                            onClick={() => handleDeleteSound(sound.id)}
+                            title="Eliminar"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="sound-category">{sound.category}</p>
+                      {sound.description && (
+                        <p className="sound-description">{sound.description}</p>
+                      )}
+                      {playingSound === sound.id && (
+                        <div className="sound-progress">
+                          <div 
+                            className="progress-bar" 
+                            style={{ width: `${playProgress[sound.id] || 0}%` }}
+                          ></div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
                 
                 {/* Botón para agregar nuevo sonido */}
                 <div className="sound-card add-sound-card" onClick={handleAddSound}>
@@ -322,8 +381,12 @@ const Programs = () => {
 
       <SoundModal
         isOpen={isSoundModalOpen}
-        onClose={() => setIsSoundModalOpen(false)}
+        onClose={() => {
+          setIsSoundModalOpen(false);
+          setSelectedSound(null);
+        }}
         onSave={handleSaveSound}
+        sound={selectedSound}
       />
     </div>
   );

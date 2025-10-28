@@ -1,35 +1,23 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FiLogOut, FiUser, FiChevronDown } from 'react-icons/fi';
+import React from 'react';
+import { FiLogOut } from 'react-icons/fi';
 import './UserModal.css';
+import { UserContext } from '../contexts/UserContext';
+import { useContext } from 'react';
 
 const UserModal = ({ isOpen, onClose, position }) => {
-  const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState('Jefe de Operaciones');
-  const [showUserOptions, setShowUserOptions] = useState(false);
-
-  const userRoles = [
-    { name: 'Jefe de Operaciones', role: 'Administrador' },
-    { name: 'Operador', role: 'Operador' },
-    { name: 'Usuario Común y Corriente', role: 'Usuario' }
-  ];
+  const { user, handleLogout: logout } = useContext(UserContext);
 
   const handleLogout = () => {
     onClose();
-    navigate('/login');
+    logout()
   };
 
-  const handleUserSwitch = (userName) => {
-    setCurrentUser(userName);
-    setShowUserOptions(false);
-  };
-
-  const getCurrentUserRole = () => {
-    const user = userRoles.find(u => u.name === currentUser);
-    return user ? user.role : 'Usuario';
+  const getUserRole = () => {
+    return user?.role || 'Rol'
   };
 
   const getUserInitials = (name) => {
+    if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
@@ -47,47 +35,15 @@ const UserModal = ({ isOpen, onClose, position }) => {
       >
         <div className="user-modal-header">
           <div className="user-modal-avatar">
-            <span>{getUserInitials(currentUser)}</span>
+            <span>{getUserInitials(user?.name)}</span>
           </div>
           <div className="user-modal-info">
-            <h3>{currentUser}</h3>
-            <p>{getCurrentUserRole()}</p>
+            <h3>{user?.name || 'Cargando...'}</h3>
+            <p>{getUserRole()}</p>
           </div>
         </div>
 
         <div className="user-modal-content">
-          {/* Cambiar Usuario */}
-          <div className="user-modal-section">
-            <button 
-              className="user-modal-option"
-              onClick={() => setShowUserOptions(!showUserOptions)}
-            >
-              <FiUser className="option-icon" />
-              <span>Cambiar Usuario</span>
-              <FiChevronDown className={`chevron ${showUserOptions ? 'rotated' : ''}`} />
-            </button>
-            
-            {showUserOptions && (
-              <div className="user-options-dropdown">
-                {userRoles.map((userRole, index) => (
-                  <button
-                    key={index}
-                    className={`user-option ${currentUser === userRole.name ? 'active' : ''}`}
-                    onClick={() => handleUserSwitch(userRole.name)}
-                  >
-                    <div className="user-option-avatar">
-                      <span>{getUserInitials(userRole.name)}</span>
-                    </div>
-                    <div className="user-option-info">
-                      <span className="user-option-name">{userRole.name}</span>
-                      <span className="user-option-role">{userRole.role}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Logout */}
           <div className="user-modal-section">
             <button className="user-modal-option logout" onClick={handleLogout}>

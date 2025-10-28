@@ -16,10 +16,15 @@ export const UserProvider = ({ children }) => {
       const response = await axios.get('/auth/me');
       if (response.data?.success) {
         setUser(response.data.user);
+      } else  {
+        handleLogout();
       }
     } catch (err) {
-      if (err?.response?.status === 401) return;
-      if (err?.response?.status === 403) notify(err?.response?.data?.message || 'Error al verificar sesión', 'error');
+      if (err?.response?.status === 401) return handleLogout();
+      if (err?.response?.status === 403) {
+        notify(err?.response?.data?.message || 'Error al verificar sesión', 'error');
+        handleLogout();
+      }
       console.error(err?.response?.data?.message || 'Error al verificar sesión:', err);
     } finally {
       setLoading(false);
@@ -44,7 +49,6 @@ export const UserProvider = ({ children }) => {
   const handleLogout = async () => {
     try {
       await axios.post('/auth/logout');
-      notify('Sesión cerrada', 'info');
     } catch (err) {
       console.error('Error al cerrar sesión:', err?.response?.data?.message || 'Error al cerrar sesión');
     } finally {

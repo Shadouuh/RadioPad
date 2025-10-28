@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaTimes, FaMusic } from 'react-icons/fa';
 import './SoundModal.css';
 
-const SoundModal = ({ isOpen, onClose, onSave }) => {
+const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -12,6 +12,26 @@ const SoundModal = ({ isOpen, onClose, onSave }) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (sound) {
+      setFormData({
+        name: sound.name || '',
+        description: sound.description || '',
+        duration: sound.duration || '',
+        category: sound.category || 'Institucional'
+      });
+      setSelectedFile(null); // Para edición, no necesitamos archivo nuevo
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        duration: '',
+        category: 'Institucional'
+      });
+      setSelectedFile(null);
+    }
+  }, [sound, isOpen]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,15 +91,17 @@ const SoundModal = ({ isOpen, onClose, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!selectedFile) {
+    
+    // Para edición, no requerimos archivo nuevo
+    if (!sound && !selectedFile) {
       alert('Por favor, selecciona un archivo de audio.');
       return;
     }
     
     const soundData = {
       ...formData,
-      file: selectedFile,
-      id: Date.now().toString()
+      ...(sound && { id: sound.id }), // Incluir ID si estamos editando
+      ...(selectedFile && { file: selectedFile }) // Solo incluir archivo si hay uno nuevo
     };
     
     onSave(soundData);
@@ -109,7 +131,7 @@ const SoundModal = ({ isOpen, onClose, onSave }) => {
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content sound-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Cargar Nuevo Sonido</h2>
+          <h2>{sound ? 'Editar Sonido' : 'Cargar Nuevo Sonido'}</h2>
           <button className="close-button" onClick={handleClose}>
             <FaTimes />
           </button>
@@ -117,59 +139,61 @@ const SoundModal = ({ isOpen, onClose, onSave }) => {
         
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
-            {/* File Upload Area */}
-            <div className="form-group">
-              <label>Archivo de Audio</label>
-              <div 
-                className={`file-upload-area ${dragActive ? 'drag-active' : ''} ${selectedFile ? 'file-selected' : ''}`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                />
-                
-                {selectedFile ? (
-                  <div className="file-selected-info">
-                    <div className="file-icon"><FaMusic /></div>
-                    <div className="file-details">
-                      <p className="file-name">{selectedFile.name}</p>
-                      <p className="file-size">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+            {/* File Upload Area - Solo mostrar para nuevos sonidos */}
+            {!sound && (
+              <div className="form-group">
+                <label>Archivo de Audio</label>
+                <div 
+                  className={`file-upload-area ${dragActive ? 'drag-active' : ''} ${selectedFile ? 'file-selected' : ''}`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleFileSelect}
+                    style={{ display: 'none' }}
+                  />
+                  
+                  {selectedFile ? (
+                    <div className="file-selected-info">
+                      <div className="file-icon"><FaMusic /></div>
+                      <div className="file-details">
+                        <p className="file-name">{selectedFile.name}</p>
+                        <p className="file-size">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                      <button 
+                        type="button" 
+                        className="remove-file-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedFile(null);
+                        }}
+                      >
+                        <FaTimes />
+                      </button>
                     </div>
-                    <button 
-                      type="button" 
-                      className="remove-file-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedFile(null);
-                      }}
-                    >
-                      <FaTimes />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="file-upload-placeholder">
-                    <div className="upload-icon">📁</div>
-                    <p className="upload-text">
-                      Arrastra y suelta tu archivo de audio aquí
-                    </p>
-                    <p className="upload-subtext">
-                      o haz clic para seleccionar
-                    </p>
-                    <p className="upload-formats">
-                      Formatos soportados: MP3, WAV, OGG, M4A
-                    </p>
-                  </div>
-                )}
+                  ) : (
+                    <div className="file-upload-placeholder">
+                      <div className="upload-icon">📁</div>
+                      <p className="upload-text">
+                        Arrastra y suelta tu archivo de audio aquí
+                      </p>
+                      <p className="upload-subtext">
+                        o haz clic para seleccionar
+                      </p>
+                      <p className="upload-formats">
+                        Formatos soportados: MP3, WAV, OGG, M4A
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="form-group">
               <label htmlFor="name">Nombre del Sonido</label>
@@ -231,7 +255,7 @@ const SoundModal = ({ isOpen, onClose, onSave }) => {
                 Cancelar
               </button>
               <button type="submit" className="submit-button">
-                Cargar Sonido
+                {sound ? 'Actualizar Sonido' : 'Cargar Sonido'}
               </button>
             </div>
           </form>

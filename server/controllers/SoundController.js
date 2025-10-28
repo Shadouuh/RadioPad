@@ -159,6 +159,158 @@ class SoundController {
       });
     }
   }
+
+  // ===== MÉTODOS PARA SONIDOS DE PROGRAMAS =====
+
+  // Crear un sonido asociado a un programa
+  createProgramSound = async (req, res) => {
+    try {
+      const { programId } = req.params;
+      const { name, description, duration, category, file_url } = req.body;
+
+      if (!programId || !name || !category) {
+        return res.status(400).json({
+          success: false,
+          message: 'El ID del programa, nombre y categoría son requeridos'
+        });
+      }
+
+      const soundData = {
+        name,
+        description: description || '',
+        duration: duration || 'N/A',
+        category,
+        file_url: file_url || '',
+        program_id: parseInt(programId)
+      };
+
+      const sound = await soundService.createProgramSound(soundData);
+
+      return res.status(201).json({
+        success: true,
+        message: 'Sonido creado exitosamente',
+        data: sound
+      });
+
+    } catch (error) {
+      return handleError(res, error);
+    }
+  }
+
+  // Obtener sonidos de un programa específico
+  getProgramSounds = async (req, res) => {
+    try {
+      const { programId } = req.params;
+
+      if (!programId || isNaN(programId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID de programa inválido'
+        });
+      }
+
+      const sounds = await soundService.getSoundsByProgram(parseInt(programId));
+
+      return res.status(200).json({
+        success: true,
+        message: 'Sonidos obtenidos exitosamente',
+        data: sounds
+      });
+
+    } catch (error) {
+      return handleError(res, error);
+    }
+  }
+
+  // Obtener un sonido de programa por ID
+  getProgramSoundById = async (req, res) => {
+    try {
+      const { soundId } = req.params;
+
+      if (!soundId || isNaN(soundId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID de sonido inválido'
+        });
+      }
+
+      const sound = await soundService.getProgramSoundById(parseInt(soundId));
+
+      return res.status(200).json({
+        success: true,
+        message: 'Sonido obtenido exitosamente',
+        data: sound
+      });
+
+    } catch (error) {
+      return handleError(res, error);
+    }
+  }
+
+  // Actualizar un sonido de programa
+  updateProgramSound = async (req, res) => {
+    try {
+      const { soundId } = req.params;
+      const { name, description, duration, category, file_url } = req.body;
+
+      if (!soundId || isNaN(soundId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID de sonido inválido'
+        });
+      }
+
+      if (!name || !category) {
+        return res.status(400).json({
+          success: false,
+          message: 'El nombre y la categoría son requeridos'
+        });
+      }
+
+      const soundData = {
+        name,
+        description: description || '',
+        duration: duration || 'N/A',
+        category,
+        file_url: file_url || ''
+      };
+
+      const sound = await soundService.updateProgramSound(parseInt(soundId), soundData);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Sonido actualizado exitosamente',
+        data: sound
+      });
+
+    } catch (error) {
+      return handleError(res, error);
+    }
+  }
+
+  // Eliminar un sonido de programa
+  deleteProgramSound = async (req, res) => {
+    try {
+      const { soundId } = req.params;
+
+      if (!soundId || isNaN(soundId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID de sonido inválido'
+        });
+      }
+
+      const result = await soundService.deleteProgramSound(parseInt(soundId));
+
+      return res.status(200).json({
+        success: true,
+        message: 'Sonido eliminado exitosamente'
+      });
+
+    } catch (error) {
+      return handleError(res, error);
+    }
+  }
 }
 
 export default SoundController;

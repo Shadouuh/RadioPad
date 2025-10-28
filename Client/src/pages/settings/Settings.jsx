@@ -1,17 +1,29 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FaUser, FaLock, FaCog, FaShieldAlt, FaEye, FaEyeSlash, FaVolumeUp, FaBell, FaMoon, FaCheck } from 'react-icons/fa';
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
 import './styles/settings.css';
+import { UserContext } from '../../shared/contexts/UserContext.jsx';
 
 const Settings = () => {
   const { isCollapsed } = useSidebar();
+  const { user, loading } = useContext(UserContext);
   
   // Estados para el perfil de usuario
   const [userProfile, setUserProfile] = useState({
-    name: 'Jefe de Operaciones',
-    email: 'admin@radiopad.com',
-    role: 'Administrador'
+    name: user?.name || '',
+    email: user?.email || '',
+    role: user?.role || ''
   });
+
+  useEffect(() => {
+    if (user) {
+      setUserProfile({
+        name: user.name || '',
+        email: user.email || '',
+        role: user.role || ''
+      });
+    }
+  }, [user, loading]);
 
   // Estados para cambio de contraseña
   const [passwordData, setPasswordData] = useState({
@@ -121,7 +133,7 @@ const Settings = () => {
                   name="name"
                   value={userProfile.name}
                   onChange={handleProfileChange}
-                  placeholder="Jefe de Operaciones"
+                  placeholder="Jefe de Operadores"
                 />
               </div>
               <div className="form-group">
@@ -140,7 +152,6 @@ const Settings = () => {
                 <div className="role-badge">
                   <span className="role-indicator"></span>
                   {userProfile.role}
-                  <small>(Puedes cambiar tu rol desde el menú de usuario)</small>
                 </div>
               </div>
             </div>

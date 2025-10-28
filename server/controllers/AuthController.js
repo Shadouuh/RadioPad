@@ -16,18 +16,17 @@ class AuthController {
             const user = await this.authService.registerUser({ name, email, password });
 
             const token = generateToken({
-                id_login: user.id_login,
+                user_id: user.user_id,
                 name: user.name,
                 email: user.email,
-                active: user.active,
-                is_admin: user.is_admin,
+                role: user.role,
             });
 
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: true, // usar HTTPS en producción
                 sameSite: 'Strict',
-                maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week8
+                maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
             });
 
             res.status(201).json({
@@ -47,14 +46,13 @@ class AuthController {
                 throw { status: 400, message: 'Faltan datos para el login' };
             }
 
-            const result = await this.userService.loginUser({ email, password });
+            const result = await this.authService.loginUser({ email, password });
 
             const token = generateToken({
-                id_login: result.id_login,
+                user_id: result.user_id,
                 name: result.name,
                 email: result.email,
-                active: result.active,
-                is_admin: result.is_admin,
+                role: result.role,
             });
 
             res.cookie('token', token, {

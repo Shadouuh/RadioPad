@@ -5,10 +5,6 @@ class AuthService {
         this.conex = conex
     }
 
-    normalizeEmail = (email) => {
-        return email.toLowerCase().trim();
-    };
-
     hashPassword = async (password) => {
         const saltRounds = 10;
         return await bcrypt.hash(password, saltRounds);
@@ -20,22 +16,21 @@ class AuthService {
 
     registerUser = async (userData) => {
         try {
-            const { name, email, password } = userData;
-            const normalizedEmail = this.normalizeEmail(email);
+            const { name, email, password, role } = userData;
+            const normalizedEmail = email.toLowerCase().trim();
 
             const hashedPassword = await this.hashPassword(password);
 
             const [result] = await this.conex.query(
-                'INSERT INTO login (name, email, pass) VALUES (?, ?, ?)',
-                [name, normalizedEmail, hashedPassword]
+                'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+                [name, normalizedEmail, hashedPassword, role]
             );
 
             return {
-                id_login: result.insertId,
+                user_id: result.insertId,
                 name: name,
                 email: normalizedEmail,
-                active: true,
-                is_admin: false,
+                role: role,
             }
 
         } catch (error) {
@@ -50,25 +45,25 @@ class AuthService {
     loginUser = async (credentials) => {
         try {
             const { email, password } = credentials;
-            const normalizedEmail = this.normalizeEmail(email);
+            const normalizedEmail = email.toLowerCase().trim();
 
-            const [login] = await this.conex.query(
-                'SELECT * FROM login WHERE email = ? AND active = 1',
+            const [users] = await this.conex.query(
+                'SELECT * FROM users WHERE email = ? AND active = 1',
                 [normalizedEmail]
             );
 
-            if (login.length === 0) {
+            if (users.length === 0) {
                 throw { status: 401, message: 'Credenciales incorrectas o cuenta desactivada' };
             }
 
-            const user = login[0];
+            const user = users[0];
 
             // Verificar si la cuenta está bloqueada
             if (user.lock_until && new Date() < new Date(user.lock_until)) {
                 throw { status: 423, message: 'Cuenta bloqueada temporalmente. Intenta más tarde.' };
             }
 
-            const isPasswordValid = await this.comparePassword(password, user.pass);
+            const isPasswordValid = await this.comparePassword(password, user.password);
 
             if (!isPasswordValid) {
                 // Incrementar intentos fallidos
@@ -80,25 +75,24 @@ class AuthService {
                 }
 
                 await this.conex.query(
-                    'UPDATE login SET failed_attempts = ?, lock_until = ? WHERE id_login = ?',
-                    [newFailedAttempts, lockedUntil, user.id_login]
+                    'UPDATE users SET failed_attempts = ?, lock_until = ? WHERE user_id = ?',
+                    [newFailedAttempts, lockedUntil, user.user_id]
                 );
 
                 throw { status: 401, message: 'Credenciales incorrectas' };
             }
 
-            // Resetear intentos fallidos en login exitoso
+            // Resetear intentos fallidos en users exitoso
             await this.conex.query(
-                'UPDATE login SET failed_attempts = 0, lock_until = NULL WHERE id_login = ?',
-                [user.id_login]
+                'UPDATE users SET failed_attempts = 0, lock_until = NULL WHERE user_id = ?',
+                [user.user_id]
             );
 
             return {
-                id_login: user.id_login,
+                user_id: user.user_id,
                 name: user.name,
                 email: user.email,
-                active: user.active,
-                is_admin: user.is_admin,
+                role: user.role,
             }
         } catch (error) {
             if (error.status) throw error;

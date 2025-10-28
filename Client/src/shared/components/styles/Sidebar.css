@@ -269,7 +269,7 @@
 }
 
 .sidebar.collapsed .sidebar-user:hover::after {
-  content: "Jefe de Operaciones";
+  content: "Jefe de Operadores";
   position: absolute;
   left: 100%;
   top: 50%;

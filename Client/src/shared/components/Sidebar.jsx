@@ -13,12 +13,15 @@ import {
 import { useSidebar } from '../contexts/SidebarContext';
 import UserModal from './UserModal.jsx';
 import './styles/Sidebar.css';
+import { UserContext } from '../contexts/UserContext.jsx';
+import { useContext } from 'react';
 
 const Sidebar = () => {
   const { isCollapsed, toggleSidebar } = useSidebar();
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [modalPosition, setModalPosition] = useState({ bottom: '20px', left: '20px' });
   const userSectionRef = useRef(null);
+  const { user } = useContext(UserContext);
 
   const handleUserClick = () => {
     if (userSectionRef.current) {
@@ -37,7 +40,7 @@ const Sidebar = () => {
 
   // Generar iniciales del usuario (estático)
   const getUserInitials = () => {
-    return 'JO';
+    return user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'JO';
   };
 
   return (
@@ -76,10 +79,10 @@ const Sidebar = () => {
         <NavLink 
           to="/sounds/institutional" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          data-tooltip="Sonidos"
+          data-tooltip="Sonidos institucionales"
         >
           <FiMusic className="nav-icon" />
-          {!isCollapsed && <span className="nav-text">Sonidos</span>}
+          {!isCollapsed && <span className="nav-text">Sonidos institucionales</span>}
         </NavLink>
         
         <NavLink 
@@ -112,8 +115,8 @@ const Sidebar = () => {
         </div>
         {!isCollapsed && (
           <div className="sidebar-user-info">
-            <span className="sidebar-user-name">Jefe de Operaciones</span>
-            <span className="sidebar-user-role">Administrador</span>
+            <span className="sidebar-user-name">{user?.name || 'Usuario'}</span>
+            <span className="sidebar-user-role">{user?.role || 'Rol'}</span>
           </div>
         )}
       </div>

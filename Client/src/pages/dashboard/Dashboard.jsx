@@ -83,10 +83,10 @@ const Dashboard = () => {
       <div className="dashboard-header">
         <div className="dashboard-title-section">
           <h1 className="dashboard-title">Dashboard</h1>
-          <p className="dashboard-subtitle">Bienvenido de vuelta, Jefe de Operaciones</p>
+          <p className="dashboard-subtitle">Bienvenido de vuelta, Jefe de Operadores</p>
         </div>
         <div className="dashboard-user-badge">
-          Jefe de Operaciones
+          Jefe de Operadores
         </div>
       </div>
 

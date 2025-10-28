@@ -6,7 +6,7 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    role: user?.role || 'Usuario'
+    role: user?.role || 'Productor'
   });
 
   const handleInputChange = (e) => {
@@ -19,7 +19,11 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+
+    // Si es edición y no se proporciona contraseña, no la incluimos
+    const dataToSend = { ...formData };
+
+    onSave(dataToSend);
     onClose();
   };
 
@@ -34,12 +38,12 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
             <FiX />
           </button>
         </div>
-        
+
         <div className="modal-body">
           <p className="modal-description">
             Completa los datos para {user ? 'editar el' : 'crear un nuevo'} usuario en el sistema.
           </p>
-          
+
           <form onSubmit={handleSubmit} className="user-form">
             <div className="form-group">
               <label htmlFor="name">Nombre</label>
@@ -53,7 +57,7 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="email">Email</label>
               <input
@@ -66,7 +70,7 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="role">Rol</label>
               <select
@@ -76,12 +80,18 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
                 onChange={handleInputChange}
                 required
               >
-                <option value="Usuario">Usuario</option>
+                <option value="Productor">Productor</option>
                 <option value="Operador">Operador</option>
-                <option value="Jefe de Operaciones">Jefe de Operaciones</option>
+                <option value="Jefe de Operadores">Jefe de Operadores</option>
               </select>
             </div>
-            
+
+            <div className="form-group">
+              <small className="form-help">
+                La constraseña por defecto es "1234"
+              </small>
+            </div>
+
             <button type="submit" className="submit-btn">
               {user ? 'Actualizar Usuario' : 'Crear Usuario'}
             </button>

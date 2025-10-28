@@ -1,41 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiUser, FiEdit, FiTrash2, FiPlus } from 'react-icons/fi';
 import UserModal from './modals/UserModal';
 import './styles/users.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext';
+import UserService from '../../shared/services/UserService';
+import useNotification from '../../shared/hooks/useNotification';
 
 const Users = () => {
   const { isCollapsed } = useSidebar();
+  const notify = useNotification();
 
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: 'Jefe de Operaciones',
-      email: 'admin@radiopad.com',
-      role: 'Jefe de Operaciones'
-    },
-    {
-      id: 2,
-      name: 'Operador Principal',
-      email: 'operator@radiopad.com',
-      role: 'Operador'
-    },
-    {
-      id: 3,
-      name: 'Usuario Demo',
-      email: 'user@radiopad.com',
-      role: 'Usuario'
-    },
-    {
-      id: 4,
-      name: 'Operador Nocturno',
-      email: 'night@radiopad.com',
-      role: 'Operador'
-    }
-  ]);
-
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+
+  // Cargar usuarios al montar el componente
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await UserService.getAllUsers();
+      if (response.success) {
+        setUsers(response.data);
+      } else {
+        notify('Error al cargar usuarios', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading users:', error);
+      notify(error?.response?.data?.message || 'Error al cargar usuarios', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateUser = () => {
     setSelectedUser(null);
@@ -47,31 +47,55 @@ const Users = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = (userId) => {
-    setUsers(users.filter(user => user.id !== userId));
+  const toggleUser = async (userId, isActive) => {
+    if (window.confirm(isActive ? '¿Estás seguro de que deseas activar este usuario?' : '¿Estás seguro de que deseas desactivar este usuario?')) {
+      try {
+        const response = await UserService.toggleUser(userId);
+        if (response.success) {
+          notify(isActive ? 'Usuario activado correctamente' : 'Usuario desactivado correctamente', 'success');
+          loadUsers(); // Recargar la lista
+        } else {
+          notify(isActive ? 'Error al activar usuario' : 'Error al desactivar usuario', 'error');
+        }
+      } catch (error) {
+        console.error('Error desactivating user:', error);
+        notify(error?.response?.data?.message || isActive ? 'Error al activar usuario' : 'Error al desactivar usuario', 'error');
+      }
+    }
   };
 
-  const handleSaveUser = (userData) => {
-    if (selectedUser) {
-      // Editar usuario existente
-      setUsers(users.map(user => 
-        user.id === selectedUser.id 
-          ? { ...user, ...userData }
-          : user
-      ));
-    } else {
-      // Crear nuevo usuario
-      const newUser = {
-        id: Math.max(...users.map(u => u.id)) + 1,
-        ...userData
-      };
-      setUsers([...users, newUser]);
+  const handleSaveUser = async (userData) => {
+    try {
+      let response;
+      if (selectedUser) {
+        // Editar usuario existente
+        response = await UserService.updateUser(selectedUser.id, userData);
+        if (response.success) {
+          notify('Usuario actualizado correctamente', 'success');
+        }
+      } else {
+        // Crear nuevo usuario
+        response = await UserService.createUser(userData);
+        if (response.success) {
+          notify('Usuario creado correctamente', 'success');
+        }
+      }
+      
+      if (response.success) {
+        loadUsers(); // Recargar la lista
+        setIsModalOpen(false);
+      } else {
+        notify('Error al guardar usuario', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving user:', error);
+      notify(error?.response?.data?.message || 'Error al guardar usuario', 'error');
     }
   };
 
   const getRoleColor = (role) => {
     switch (role) {
-      case 'Jefe de Operaciones':
+      case 'Jefe de Operadores':
         return 'role-admin';
       case 'Operador':
         return 'role-operator';
@@ -103,41 +127,54 @@ const Users = () => {
           </div>
 
           <div className="users-list">
-            {users.map(user => (
-              <div key={user.id} className="user-card">
-                <div className="user-info">
-                  <div className="user-avatar">
-                    <FiUser />
-                  </div>
-                  <div className="user-details">
-                    <h3>{user.name}</h3>
-                    <p className="user-email">{user.email}</p>
-                  </div>
-                </div>
-                
-                <div className="user-actions">
-                  <span className={`user-role ${getRoleColor(user.role)}`}>
-                    {user.role}
-                  </span>
-                  <div className="action-buttons">
-                    <button 
-                      className="edit-btn"
-                      onClick={() => handleEditUser(user)}
-                      title="Editar usuario"
-                    >
-                      <FiEdit />
-                    </button>
-                    <button 
-                      className="delete-btn"
-                      onClick={() => handleDeleteUser(user.id)}
-                      title="Eliminar usuario"
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </div>
-                </div>
+            {loading ? (
+              <div className="loading-message">
+                <p>Cargando usuarios...</p>
               </div>
-            ))}
+            ) : users && users.length === 0 ? (
+              <div className="empty-message">
+                <p>No hay usuarios registrados</p>
+              </div>
+            ) : (
+              users && users.map(user => (
+                <div key={user.id} className="user-card">
+                  <div className="user-info">
+                    <div className="user-avatar">
+                      <FiUser />
+                    </div>
+                    <div className="user-details">
+                      <h3>{user.name}</h3>
+                      <p className="user-email">{user.email}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="user-actions">
+                    <span className={`user-role ${getRoleColor(user.role)}`}>
+                      {user.role}
+                    </span>
+                    <span className={`user-role ${getRoleColor(user.role)}`}>
+                      {user.active ? 'Activo' : 'Inactivo'}
+                    </span>
+                    <div className="action-buttons">
+                      <button 
+                        className="edit-btn"
+                        onClick={() => handleEditUser(user)}
+                        title="Editar usuario"
+                      >
+                        <FiEdit />
+                      </button>
+                      <button 
+                        className="delete-btn"
+                        onClick={() => toggleUser(user.id, user.active)}
+                        title={user.active ? 'Desactivar usuario' : 'Activar usuario'}
+                      >
+                        🥟
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

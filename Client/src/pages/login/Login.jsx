@@ -29,13 +29,13 @@ const Login = () => {
 
   const handleTestUserClick = (userEmail) => {
     setEmail(userEmail);
-    setPassword('password');
+    setPassword('1234');
   };
 
   const testUsers = [
-    { email: 'admin@radiopad.com', role: 'Jefe de Operaciones' },
+    { email: 'admin@radiopad.com', role: 'Jefe de Operadores' },
     { email: 'operator@radiopad.com', role: 'Operador' },
-    { email: 'user@radiopad.com', role: 'Usuario' }
+    { email: 'productor@radiopad.com', role: 'Productor' }
   ];
 
   return (

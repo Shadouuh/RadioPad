@@ -41,4 +41,36 @@ router.delete('/:soundId',
   soundController.deleteSound
 );
 
+// ===== RUTAS PARA SONIDOS DE PROGRAMAS =====
+
+// Crear un sonido asociado a un programa
+router.post('/program/:programId', 
+  requireAuth,
+  soundController.createProgramSound
+);
+
+// Obtener sonidos de un programa específico
+router.get('/program/:programId', 
+  requireAuth,
+  soundController.getProgramSounds
+);
+
+// Obtener un sonido de programa por ID
+router.get('/program-sound/:soundId', 
+  requireAuth,
+  soundController.getProgramSoundById
+);
+
+// Actualizar un sonido de programa
+router.put('/program-sound/:soundId', 
+  requireAuth,
+  soundController.updateProgramSound
+);
+
+// Eliminar un sonido de programa
+router.delete('/program-sound/:soundId', 
+  requireAuth,
+  soundController.deleteProgramSound
+);
+
 export default router;
