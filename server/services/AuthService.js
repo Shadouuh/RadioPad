@@ -16,14 +16,14 @@ class AuthService {
 
     registerUser = async (userData) => {
         try {
-            const { name, email, password, role } = userData;
+            const { name, email, password, role, program_id } = userData;
             const normalizedEmail = email.toLowerCase().trim();
 
             const hashedPassword = await this.hashPassword(password);
 
             const [result] = await this.conex.query(
-                'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-                [name, normalizedEmail, hashedPassword, role]
+                'INSERT INTO users (name, email, password, role, program_id) VALUES (?, ?, ?, ?, ?)',
+                [name, normalizedEmail, hashedPassword, role, program_id || null]
             );
 
             return {
@@ -31,6 +31,7 @@ class AuthService {
                 name: name,
                 email: normalizedEmail,
                 role: role,
+                program_id: program_id || null
             }
 
         } catch (error) {
@@ -46,7 +47,7 @@ class AuthService {
         try {
             const { email, password } = credentials;
             const normalizedEmail = email.toLowerCase().trim();
-
+                const buenaContra = await bcrypt.hash('hashedpassword123', 10);
             const [users] = await this.conex.query(
                 'SELECT * FROM users WHERE email = ? AND active = 1',
                 [normalizedEmail]
@@ -55,6 +56,7 @@ class AuthService {
             if (users.length === 0) {
                 throw { status: 401, message: 'Credenciales incorrectas o cuenta desactivada' };
             }
+            console.log(buenaContra);
 
             const user = users[0];
 
@@ -71,7 +73,7 @@ class AuthService {
                 let lockedUntil = null;
 
                 if (newFailedAttempts >= 5) {
-                    lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+                    lockedUntil = new Date(Date.now() + 1 * 60 * 1000); // 1 minuto
                 }
 
                 await this.conex.query(

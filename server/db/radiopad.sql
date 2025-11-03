@@ -205,6 +205,7 @@ CREATE TABLE `users` (
   `failed_attempts` int(11) DEFAULT 0,
   `active` tinyint(1) DEFAULT 1,
   `role` enum('Productor','Operador','Jefe de Operadores') DEFAULT 'Productor',
+  `program_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -369,6 +370,12 @@ ALTER TABLE `sound_collections`
 ALTER TABLE `sound_effects`
   ADD CONSTRAINT `sound_effects_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `sound_categories` (`category_id`) ON DELETE SET NULL,
   ADD CONSTRAINT `sound_effects_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -42,13 +42,13 @@ class UserController {
     // Crear nuevo usuario
     createUser = async (req, res) => {
         try {
-            const { name, email, role } = req.body;
+            const { name, email, role, program_id } = req.body;
 
             if (!name || !email) {
                 throw { status: 400, message: 'Nombre y email son requeridos' };
             }
 
-            const user = await this.userService.createUser({ name, email, role });
+            const user = await this.userService.createUser({ name, email, role, program_id });
             res.status(201).json({
                 success: true,
                 message: 'Usuario creado correctamente',
@@ -63,7 +63,7 @@ class UserController {
     updateUser = async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, email, role } = req.body;
+            const { name, email, role, program_id } = req.body;
 
             if (!id || isNaN(id)) {
                 throw { status: 400, message: 'ID de usuario inválido' };
@@ -73,7 +73,7 @@ class UserController {
                 throw { status: 400, message: 'Nombre y email son requeridos' };
             }
 
-            const user = await this.userService.updateUser(parseInt(id), { name, email, role });
+            const user = await this.userService.updateUser(parseInt(id), { name, email, role, program_id });
             res.status(200).json({
                 success: true,
                 message: 'Usuario actualizado correctamente',

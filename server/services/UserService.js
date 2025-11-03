@@ -10,7 +10,7 @@ class UserService {
     getAllUsers = async () => {
         try {
             const [users] = await this.conex.query(
-                'SELECT user_id as id, name, email, role, active, created_at FROM users ORDER BY created_at DESC'
+                'SELECT user_id as id, name, email, role, active, program_id, created_at FROM users ORDER BY created_at DESC'
             );
             return users;
         } catch (error) {
@@ -22,7 +22,7 @@ class UserService {
     getUserById = async (userId) => {
         try {
             const [users] = await this.conex.query(
-                'SELECT user_id as id, name, email, role, active, created_at FROM users WHERE user_id = ?',
+                'SELECT user_id as id, name, email, role, active, program_id, created_at FROM users WHERE user_id = ?',
                 [userId]
             );
 
@@ -40,7 +40,7 @@ class UserService {
     // Crear nuevo usuario
     createUser = async (userData) => {
         try {
-            const { name, email, role = 'Productor' } = userData;
+            const { name, email, role = 'Productor', program_id } = userData;
 
             if (!name || !email) {
                 throw { status: 400, message: 'Nombre y email son requeridos' };
@@ -54,13 +54,20 @@ class UserService {
 
             const normalizedEmail = email.toLowerCase().trim();
 
-            const result = await this.AuthService.registerUser({ name, email: normalizedEmail, password: '1234', role });
+            const result = await this.AuthService.registerUser({ 
+                name, 
+                email: normalizedEmail, 
+                password: '1234', 
+                role, 
+                program_id: program_id || null 
+            });
             
             return {
-                id: result.insertId,
+                id: result.user_id,
                 name,
                 email: normalizedEmail,
                 role,
+                program_id: program_id || null
             };
         } catch (error) {
             if (error.status) throw error;
@@ -74,7 +81,7 @@ class UserService {
     // Actualizar usuario
     updateUser = async (userId, userData) => {
         try {
-            const { name, email, role } = userData;
+            const { name, email, role, program_id } = userData;
 
             if (!name || !email) {
                 throw { status: 400, message: 'Nombre y email son requeridos' };
@@ -89,8 +96,8 @@ class UserService {
             const normalizedEmail = email.toLowerCase().trim();
 
             const [result] = await this.conex.query(
-                'UPDATE users SET name = ?, email = ?, role = ? WHERE user_id = ?',
-                [name, normalizedEmail, role, userId]
+                'UPDATE users SET name = ?, email = ?, role = ?, program_id = ? WHERE user_id = ?',
+                [name, normalizedEmail, role, program_id || null, userId]
             );
 
             if (result.affectedRows === 0) {
@@ -101,7 +108,8 @@ class UserService {
                 id: userId,
                 name,
                 email: normalizedEmail,
-                role
+                role,
+                program_id: program_id || null
             };
         } catch (error) {
             if (error.status) throw error;
@@ -170,7 +178,7 @@ class UserService {
             }
 
             const [users] = await this.conex.query(
-                'SELECT user_id as id, name, email, role, active, created_at FROM users WHERE role = ? AND active = 1 ORDER BY created_at DESC',
+                'SELECT user_id as id, name, email, role, active, program_id, created_at FROM users WHERE role = ? AND active = 1 ORDER BY created_at DESC',
                 [role]
             );
 

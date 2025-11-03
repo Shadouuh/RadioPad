@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { FiX } from 'react-icons/fi';
 import './UserModal.css';
 
-const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
+const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    role: user?.role || 'Productor'
+    role: user?.role || 'Productor',
+    program_id: user?.program_id || ''
   });
 
   const handleInputChange = (e) => {
@@ -83,6 +84,23 @@ const UserModal = ({ isOpen, onClose, user = null, onSave }) => {
                 <option value="Productor">Productor</option>
                 <option value="Operador">Operador</option>
                 <option value="Jefe de Operadores">Jefe de Operadores</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="program_id">Programa Asignado</label>
+              <select
+                id="program_id"
+                name="program_id"
+                value={formData.program_id}
+                onChange={handleInputChange}
+              >
+                <option value="">Sin programa asignado</option>
+                {programs.map(program => (
+                  <option key={program.id} value={program.id}>
+                    {program.name}
+                  </option>
+                ))}
               </select>
             </div>
 

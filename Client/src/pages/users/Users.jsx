@@ -4,6 +4,7 @@ import UserModal from './modals/UserModal';
 import './styles/users.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext';
 import UserService from '../../shared/services/UserService';
+import ProgramService from '../../shared/services/ProgramService';
 import useNotification from '../../shared/hooks/useNotification';
 
 const Users = () => {
@@ -11,13 +12,15 @@ const Users = () => {
   const notify = useNotification();
 
   const [users, setUsers] = useState([]);
+  const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // Cargar usuarios al montar el componente
+  // Cargar usuarios y programas al montar el componente
   useEffect(() => {
     loadUsers();
+    loadPrograms();
   }, []);
 
   const loadUsers = async () => {
@@ -34,6 +37,20 @@ const Users = () => {
       notify(error?.response?.data?.message || 'Error al cargar usuarios', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPrograms = async () => {
+    try {
+      const response = await ProgramService.getAllPrograms();
+      if (response.success) {
+        setPrograms(response.data);
+      } else {
+        notify('Error al cargar programas', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading programs:', error);
+      notify(error?.response?.data?.message || 'Error al cargar programas', 'error');
     }
   };
 
@@ -106,6 +123,12 @@ const Users = () => {
     }
   };
 
+  const getProgramName = (programId) => {
+    if (!programId) return 'Sin programa asignado';
+    const program = programs.find(p => p.id === programId);
+    return program ? program.name : 'Programa no encontrado';
+  };
+
   return (
     <div className={`users-container ${isCollapsed ? ' with-sidebar-collapsed' : ''}`}>
       <div className="users-header">
@@ -145,6 +168,7 @@ const Users = () => {
                     <div className="user-details">
                       <h3>{user.name}</h3>
                       <p className="user-email">{user.email}</p>
+                      <p className="user-program">{getProgramName(user.program_id)}</p>
                     </div>
                   </div>
                   
@@ -183,6 +207,7 @@ const Users = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         user={selectedUser}
+        programs={programs}
         onSave={handleSaveUser}
       />
     </div>
