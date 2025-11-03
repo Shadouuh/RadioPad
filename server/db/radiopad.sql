@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 28-10-2025 a las 00:57:24
+-- Tiempo de generación: 03-11-2025 a las 22:28:36
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -42,6 +42,27 @@ INSERT INTO `collections_sounds` (`collection_sound_id`, `collection_id`, `sound
 (1, 1, 1, '2025-10-27 23:09:04'),
 (3, 2, 3, '2025-10-27 23:09:04'),
 (4, 3, 2, '2025-10-27 23:09:04');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `config`
+--
+
+CREATE TABLE `config` (
+  `id` int(11) NOT NULL,
+  `effects_sounds` tinyint(1) DEFAULT 1,
+  `notify` tinyint(1) DEFAULT 1,
+  `dark_mode` tinyint(1) DEFAULT 0,
+  `user_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `config`
+--
+
+INSERT INTO `config` (`id`, `effects_sounds`, `notify`, `dark_mode`, `user_id`) VALUES
+(1, 1, 1, 0, 2);
 
 -- --------------------------------------------------------
 
@@ -214,8 +235,9 @@ CREATE TABLE `users` (
 -- Volcado de datos para la tabla `users`
 --
 
-INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `lock_until`, `failed_attempts`, `active`, `role`, `created_at`, `updated_at`) VALUES
-(1, 'Productor Test', 'productor@example.com', 'hashedpassword123', NULL, 0, 1, 'Productor', '2025-10-27 23:09:04', '2025-10-27 23:09:04');
+INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `lock_until`, `failed_attempts`, `active`, `role`, `program_id`, `created_at`, `updated_at`) VALUES
+(1, 'Productor Test', 'productor@example.com', 'hashedpassword123', NULL, 0, 1, 'Productor', NULL, '2025-10-27 23:09:04', '2025-10-27 23:09:04'),
+(2, 'Admin', 'admin@radiopad.com', '$2b$10$2dk2jSsPZLJlW8bgDPK9TeZDM1GZaQTEQENyYEOSqLy4pEcUoaqiC', NULL, 0, 1, 'Jefe de Operadores', NULL, '2025-11-03 21:15:00', '2025-11-03 21:15:00');
 
 --
 -- Índices para tablas volcadas
@@ -229,6 +251,13 @@ ALTER TABLE `collections_sounds`
   ADD UNIQUE KEY `unique_collection_sound` (`collection_id`,`sound_id`),
   ADD KEY `idx_collections_sounds_collection` (`collection_id`),
   ADD KEY `idx_collections_sounds_sound` (`sound_id`);
+
+--
+-- Indices de la tabla `config`
+--
+ALTER TABLE `config`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indices de la tabla `programs`
@@ -280,7 +309,8 @@ ALTER TABLE `sound_effects`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `users_ibfk_1` (`program_id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -291,6 +321,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `collections_sounds`
   MODIFY `collection_sound_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `config`
+--
+ALTER TABLE `config`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `programs`
@@ -332,7 +368,7 @@ ALTER TABLE `sound_effects`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
@@ -344,6 +380,12 @@ ALTER TABLE `users`
 ALTER TABLE `collections_sounds`
   ADD CONSTRAINT `collections_sounds_ibfk_1` FOREIGN KEY (`collection_id`) REFERENCES `sound_collections` (`collection_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `collections_sounds_ibfk_2` FOREIGN KEY (`sound_id`) REFERENCES `sound_effects` (`sound_id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `config`
+--
+ALTER TABLE `config`
+  ADD CONSTRAINT `config_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `programs_sounds`

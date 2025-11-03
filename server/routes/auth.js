@@ -15,4 +15,8 @@ router.post('/login', authController.login);
 router.post('/logout', authController.logout);
 router.get('/me', requireAuth, authController.me);
 
+// Configuracion 
+router.post('/update-preferences', requireAuth, authController.updatePreferences);
+router.put('/change-password', requireAuth, authController.changePassword);
+
 export default router;

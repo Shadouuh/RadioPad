@@ -3,6 +3,7 @@ import { FaUser, FaLock, FaCog, FaShieldAlt, FaEye, FaEyeSlash, FaVolumeUp, FaBe
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
 import './styles/settings.css';
 import { UserContext } from '../../shared/contexts/UserContext.jsx';
+import axios from '../../shared/api/axios.js';
 
 const Settings = () => {
   const { isCollapsed } = useSidebar();
@@ -22,6 +23,11 @@ const Settings = () => {
         email: user.email || '',
         role: user.role || ''
       });
+      setPreferences({
+        soundEffects:  user.config?.effects_sounds == 1 ? true : false,
+        notify: user.config?.notify == 1 ? true : false,
+        darkMode: user.config?.dark_mode == 1 ? true : false,
+      });
     }
   }, [user, loading]);
 
@@ -40,7 +46,7 @@ const Settings = () => {
   // Estados para preferencias
   const [preferences, setPreferences] = useState({
     soundEffects: true,
-    notifications: true,
+    notify: true,
     darkMode: false
   });
 
@@ -76,24 +82,61 @@ const Settings = () => {
     }));
   };
 
-  const handlePreferenceToggle = (preference) => {
-    setPreferences(prev => ({
-      ...prev,
-      [preference]: !prev[preference]
-    }));
+  const handlePreferenceToggle = async (preference) => {
+    if (preference === 'darkMode') {
+
+
+      // Logica del front --------------------
+
+
+      alert('Cambiar a modo oscuro no está implementado');
+    }
+
+    try {
+      const response = await axios.post('/auth/update-preferences', {
+        [preference]: true
+      });
+
+      if (response.data?.success) {
+        setPreferences(prev => ({
+          ...prev,
+          [preference]: !prev[preference]
+        }));
+      } else {
+        alert('Error al actualizar preferencias');
+      }
+    } catch (err) {
+      alert('Error al actualizar preferencias');
+      console.error(err?.response?.data?.message || 'Error al actualizar preferencias:', err);
+    }
   };
 
-  const handleUpdatePassword = () => {
+  const handleUpdatePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert('Las contraseñas no coinciden');
       return;
     }
-    if (passwordData.newPassword.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres');
-      return;
+
+    try {
+      const response = await axios.put('/auth/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      if (response.data?.success) {
+        alert('Contraseña actualizada correctamente');
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        alert('Error al actualizar contraseña');
+      }
+    } catch (err) {
+      alert('Error al actualizar contraseña');
+      console.error(err?.response?.data?.message || 'Error al actualizar contraseña:', err);
     }
-    // Aquí iría la lógica para actualizar la contraseña
-    alert('Contraseña actualizada correctamente');
+    
     setPasswordData({
       currentPassword: '',
       newPassword: '',
@@ -271,8 +314,8 @@ const Settings = () => {
                 <label className="toggle-switch">
                   <input
                     type="checkbox"
-                    checked={preferences.notifications}
-                    onChange={() => handlePreferenceToggle('notifications')}
+                    checked={preferences.notify}
+                    onChange={() => handlePreferenceToggle('notify')}
                   />
                   <span className="toggle-slider"></span>
                 </label>

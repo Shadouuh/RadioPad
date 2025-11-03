@@ -15,12 +15,7 @@ class AuthController {
 
             const user = await this.authService.registerUser({ name, email, password });
 
-            const token = generateToken({
-                user_id: user.user_id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            });
+            const token = generateToken(user);
 
             res.cookie('token', token, {
                 httpOnly: true,
@@ -48,12 +43,7 @@ class AuthController {
 
             const result = await this.authService.loginUser({ email, password });
 
-            const token = generateToken({
-                user_id: result.user_id,
-                name: result.name,
-                email: result.email,
-                role: result.role,
-            });
+            const token = generateToken(result);
 
             res.cookie('token', token, {
                 httpOnly: true,
@@ -65,7 +55,7 @@ class AuthController {
             res.status(200).json({
                 success: true,
                 message: 'Se inició sesión correctamente',
-                user: result 
+                user: result
             });
         } catch (err) {
             return handleError(res, err);
@@ -86,6 +76,54 @@ class AuthController {
             message: 'Usuario autenticado',
             user: req.user
         });
+    };
+
+    // Configuracion 
+    updatePreferences = async (req, res) => {
+        const { soundEffects, notify, darkMode } = req.body;
+        try {
+            // Usamos el ID correcto del usuario desde req.user
+            const updatedPrefs = await this.authService.updatePreferences({ 
+                userId: req.user.user_id, 
+                soundEffects, 
+                notify, 
+                darkMode 
+            });
+
+            // Actualizamos las preferencias en el objeto de usuario
+            req.user.config = {
+                effects_sounds: updatedPrefs.effects_sounds,
+                notify: updatedPrefs.notify,
+                dark_mode: updatedPrefs.dark_mode
+            };
+
+            res.status(200).json({
+                success: true,
+                message: 'Preferencias actualizadas correctamente',
+                preferences: updatedPrefs
+            });
+        } catch (err) {
+            return handleError(res, err);
+        }
+    };
+
+    changePassword = async (req, res) => {
+        const { currentPassword, newPassword } = req.body;
+        try {
+            if (!currentPassword || !newPassword) {
+                throw { status: 400, message: 'Faltan datos para cambiar la contraseña' };
+            }
+
+            const user = await this.authService.changePassword({ userId: req.user.id, currentPassword, newPassword });
+
+            res.status(200).json({
+                success: true,
+                message: 'Contraseña cambiada correctamente',
+                user: { ...user, pass: '[Hidden]' }
+            });
+        } catch (err) {
+            return handleError(res, err);
+        }
     };
 }
 

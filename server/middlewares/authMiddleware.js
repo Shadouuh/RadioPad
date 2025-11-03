@@ -25,7 +25,7 @@ export async function requireAuth(req, res, next) {
 
 // Middleware para verificar que el usuario es admin
 export function requireAdmin(req, res, next) {
-  if (!req.user || !req.user.role == 'Productor') {
+  if (!req.user || req.user.role == 'Productor') {
     return res.status(403).json({
       success: false,
       message: 'Acceso denegado: se requieren permisos de administrador'
