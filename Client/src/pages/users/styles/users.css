@@ -277,3 +277,9 @@
     font-size: 0.9rem;
   }
 }
+
+@media (max-width: 465px) {
+  .users-container{
+    margin-left: 20px;
+  }
+}

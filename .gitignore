@@ -23,3 +23,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+Client/package-lock.json
+package-lock.json
+

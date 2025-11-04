@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaPlay, FaPause, FaTimes, FaHeadphones } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaPlay, FaPause, FaTimes, FaHeadphones, FaAd, FaPowerOff } from 'react-icons/fa';
 import { MdMusicNote } from 'react-icons/md';
 import ProgramModal from './modals/ProgramModal.jsx';
 import SoundModal from './modals/SoundModal.jsx';
@@ -272,7 +272,7 @@ const Programs = () => {
                         toggleProgramStatus(program.status.toLowerCase(), program.id);
                       }}
                     >
-                      🥟
+                      <FaPowerOff />
                     </button>
                   </div>
                 </div>

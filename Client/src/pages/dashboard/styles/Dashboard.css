@@ -125,3 +125,9 @@
     font-size: 0.875rem;
   }
 }
+
+@media (max-width: 465px) {
+  .dashboard {
+    margin-left: 20px;
+  }
+}

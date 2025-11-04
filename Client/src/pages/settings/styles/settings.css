@@ -427,3 +427,9 @@ input:checked + .toggle-slider:before {
     padding: 16px 16px 12px 16px;
   }
 }
+
+@media (max-width: 465px) {
+  .settings-container {
+    margin-left: 20px;
+  }
+}
