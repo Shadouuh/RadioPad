@@ -2,8 +2,9 @@ import React from 'react';
 import { FiWifi } from 'react-icons/fi';
 import './styles/SystemStatusCard.css';
 
-const SystemStatusCard = ({ title, subtitle, statusItems = [] }) => {
+const SystemStatusCard = ({ title, subtitle, statusItems = [], loading = true }) => {
   const getStatusColor = (status) => {
+    console.log(status);
     switch (status.toLowerCase()) {
       case 'operativo':
         return '#10b981';
@@ -40,38 +41,43 @@ const SystemStatusCard = ({ title, subtitle, statusItems = [] }) => {
           <p className="system-status-subtitle">{subtitle}</p>
         )}
       </div>
-      
-      <div className="system-status-content">
-        {statusItems.length > 0 ? (
-          <div className="status-list">
-            {statusItems.map((item, index) => (
-              <div key={index} className="status-item">
-                <div className="status-item-info">
-                  <span className="status-item-label">{item.label}</span>
-                  <span 
-                    className="status-item-badge"
-                    style={{ 
-                      color: getStatusColor(item.status),
-                      backgroundColor: getStatusBgColor(item.status)
-                    }}
-                  >
-                    {item.status}
-                  </span>
-                </div>
-                {item.usage && (
-                  <div className="status-item-usage">
-                    <span className="status-usage-text">{item.usage}</span>
+
+
+      {!loading && (
+        <div className="system-status-content">
+          {statusItems.length > 0 ? (
+            <div className="status-list">
+              {statusItems.map((item, index) => (
+                <div key={index} className="status-item">
+                  <div className="status-item-info">
+                    <span className="status-item-label">{item.label}</span>
+                    <span
+                      className="status-item-badge"
+                      style={{
+                        color: getStatusColor(item.status),
+                        backgroundColor: getStatusBgColor(item.status)
+                      }}
+                    >
+                      {item.status}
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="status-empty">
-            <p>No hay información del sistema disponible</p>
-          </div>
-        )}
-      </div>
+                  {item.usage && (
+                    <div className="status-item-usage">
+                      <span className="status-usage-text">{item.usage}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="status-empty">
+              <p>No hay información del sistema disponible</p>
+            </div>
+          )}
+        </div>
+      )}
+
+
     </div>
   );
 };

@@ -3,6 +3,7 @@ import authRoutes from './routes/auth.js';
 import soundRoutes from './routes/sound.js';
 import programRoutes from './routes/program.js';
 import userRoutes from './routes/user.js';
+import dashboardRoutes from './routes/dashboard.js';
 
 // Importaciones de dependencias 
 import express from 'express';
@@ -11,6 +12,7 @@ import logger from './middlewares/logger.js';
 import loadEnv from './utils/loadEnv.js';
 import cookieParser from 'cookie-parser';
 import loadStaticFiles from './utils/loadStaticsFiles.js'
+import pool from './db/conex.js';
 // import { requireAuth, requireAdmin } from './middlewares/authMiddleware.js';
 
 // Middlewares
@@ -43,10 +45,36 @@ app.use('/api/auth', authRoutes);
 app.use('/api/sounds', soundRoutes);
 app.use('/api/programs', programRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
 
 // Testeo de api
 app.get('/api/ping', async (req, res) => {
     res.send('Pong')
+});
+
+app.get('/api/test', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT 1 + 1 AS solution');
+
+        if(rows[0].solution != 2) {
+            throw new Error('La db no funciona');
+        }
+    } catch (error) {
+        console.error('Error al conectar con la base de datos:', error);
+        res.send({
+            success: false,
+            message: 'Error al conectar con la base de datos',
+            connection: false
+        });
+        return;
+    }
+
+    res.send({
+        success: true,
+        message: 'API funcionando correctamente',
+        connection: true
+    })
 });
 
 // Servir archivos estaticos de la build de Vite
