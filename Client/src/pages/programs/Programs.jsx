@@ -20,7 +20,8 @@ const ProgramsWithAudio = () => {
       id: sound.id,
       name: sound.name,
       description: sound.category || 'Efecto de sonido',
-      file_path: sound.url || sound.file_path || sound.audio_url,
+      // Incluir file_url (sonidos de programa) además de otras posibles claves
+      file_path: sound.file_url || sound.url || sound.file_path || sound.audio_url,
       duration: sound.duration
     });
   };
@@ -160,7 +161,31 @@ const ProgramsContent = ({ onPlaySound }) => {
         response = await ProgramService.updateProgramSound( soundData.id, soundData);
       } else {
         // Crear nuevo sonido
-        response = await ProgramService.createProgramSound(selectedProgram.id, soundData);
+        if (soundData.file) {
+          const formData = new FormData();
+          formData.append('file', soundData.file);
+          formData.append('sound_name', soundData.name || soundData.file?.name || 'audio');
+          formData.append('description', soundData.description || '');
+          formData.append('is_institutional', soundData.category === 'Institucional' ? 'true' : 'false');
+
+          const uploadRes = await ProgramService.uploadSound(formData);
+
+          const uploaded = uploadRes?.data || uploadRes;
+          const url = uploaded?.url || uploaded?.secure_url || uploaded?.file_path;
+          const durationAuto = uploaded?.duration || uploaded?.duration_seconds;
+
+          const payload = {
+            name: soundData.name,
+            description: soundData.description || '',
+            duration: durationAuto ?? soundData.duration ?? '',
+            category: soundData.category,
+            file_url: url || ''
+          };
+
+          response = await ProgramService.createProgramSound(selectedProgram.id, payload);
+        } else {
+          response = await ProgramService.createProgramSound(selectedProgram.id, soundData);
+        }
       }
 
       if (response.success) {
