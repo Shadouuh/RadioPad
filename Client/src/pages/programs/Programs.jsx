@@ -7,8 +7,28 @@ import './styles/programs.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
 import ProgramService from '../../shared/services/ProgramService.js';
 import useNotification from '../../shared/hooks/useNotification';
+import { MultiAudioPlayerProvider, useMultiAudioPlayer } from '../../shared/contexts/MultiAudioPlayerContext.jsx';
+import MultiAudioPlayer from '../../shared/components/MultiAudioPlayer.jsx';
 
-const Programs = () => {
+// Componente interno que usa el hook del MultiAudioPlayer
+const ProgramsWithAudio = () => {
+  const { createPlayer } = useMultiAudioPlayer();
+  
+  const handlePlaySound = (sound) => {
+    // Crear un nuevo reproductor para este sonido
+    createPlayer({
+      id: sound.id,
+      name: sound.name,
+      description: sound.category || 'Efecto de sonido',
+      file_path: sound.url || sound.file_path || sound.audio_url,
+      duration: sound.duration
+    });
+  };
+
+  return <ProgramsContent onPlaySound={handlePlaySound} />;
+};
+
+const ProgramsContent = ({ onPlaySound }) => {
   const { isCollapsed } = useSidebar();
   const notify = useNotification();
 
@@ -18,8 +38,6 @@ const Programs = () => {
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [isSoundModalOpen, setIsSoundModalOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
-  const [playingSound, setPlayingSound] = useState(null);
-  const [playProgress, setPlayProgress] = useState({});
   const [programSounds, setProgramSounds] = useState({});
   const [loadingSounds, setLoadingSounds] = useState(false);
   const [selectedSound, setSelectedSound] = useState(null);
@@ -176,40 +194,13 @@ const Programs = () => {
     }
   };
 
-  const playSound = (sound) => {
-    if (playingSound === sound.id) {
-      // Pausar sonido
-      setPlayingSound(null);
-      setPlayProgress(prev => ({ ...prev, [sound.id]: 0 }));
-    } else {
-      // Reproducir sonido
-      setPlayingSound(sound.id);
-      
-      // Simular progreso de reproducción
-      const duration = parseInt(sound.duration) || 10;
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 1;
-        setPlayProgress(prev => ({ ...prev, [sound.id]: (progress / duration) * 100 }));
-        
-        if (progress >= duration) {
-          clearInterval(interval);
-          setPlayingSound(null);
-          setPlayProgress(prev => ({ ...prev, [sound.id]: 0 }));
-        }
-      }, 1000);
-    }
-    
-    console.log('Reproduciendo sonido:', sound.name);
-  };
-
   const handleEditSound = (sound) => {
     setSelectedSound(sound);
     setIsSoundModalOpen(true);
   };
 
   const handlePlaySound = (sound) => {
-    playSound(sound);
+    onPlaySound(sound);
   };
 
   return (
@@ -318,7 +309,7 @@ const Programs = () => {
                             onClick={() => handlePlaySound(sound)}
                             title="Reproducir"
                           >
-                            {playingSound === sound.id ? <FaPause /> : <FaPlay />}
+                            <FaPlay />
                           </button>
                           <button 
                             className="btn-icon edit"
@@ -339,14 +330,6 @@ const Programs = () => {
                       <p className="sound-category">{sound.category}</p>
                       {sound.description && (
                         <p className="sound-description">{sound.description}</p>
-                      )}
-                      {playingSound === sound.id && (
-                        <div className="sound-progress">
-                          <div 
-                            className="progress-bar" 
-                            style={{ width: `${playProgress[sound.id] || 0}%` }}
-                          ></div>
-                        </div>
                       )}
                     </div>
                   ))
@@ -388,7 +371,19 @@ const Programs = () => {
         onSave={handleSaveSound}
         sound={selectedSound}
       />
+
+      {/* MultiAudioPlayer para reproducir múltiples sonidos */}
+      <MultiAudioPlayer />
     </div>
+  );
+};
+
+// Componente principal que envuelve con el Provider
+const Programs = () => {
+  return (
+    <MultiAudioPlayerProvider>
+      <ProgramsWithAudio />
+    </MultiAudioPlayerProvider>
   );
 };
 

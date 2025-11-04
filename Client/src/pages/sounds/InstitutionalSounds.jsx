@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SoundService from '../../shared/services/SoundService';
+import { useAudioPlayer } from '../../shared/contexts/AudioPlayerContext';
 import { FiPlay, FiTrash2, FiInfo } from 'react-icons/fi';
 import './styles/InstitutionalSounds.css';
 
@@ -10,8 +11,10 @@ const InstitutionalSounds = () => {
   const [sounds, setSounds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentAudio, setCurrentAudio] = useState(null);
   const [selectedSound, setSelectedSound] = useState(null);
+  
+  // Hook del reproductor global
+  const { playSound, currentSound, isPlaying } = useAudioPlayer();
 
   // Cargar sonidos institucionales al montar el componente
   useEffect(() => {
@@ -32,15 +35,9 @@ const InstitutionalSounds = () => {
     fetchSounds();
   }, []);
 
-  // Reproducir un sonido
-  const playSound = (sound) => {
-    if (currentAudio) {
-      currentAudio.pause();
-    }
-    
-    const audio = new Audio(sound.file_path);
-    setCurrentAudio(audio);
-    audio.play();
+  // Función para reproducir un sonido usando el reproductor global
+  const handlePlaySound = (sound) => {
+    playSound(sound);
   };
 
   // Mostrar detalles de un sonido
@@ -100,9 +97,17 @@ const InstitutionalSounds = () => {
                   
                   <div className="sound-card-actions">
                     <button 
-                      className="action-button play-button"
-                      onClick={() => playSound(sound)}
-                      title="Reproducir"
+                      className={`action-button play-button ${
+                        currentSound && currentSound.sound_id === sound.sound_id && isPlaying 
+                          ? 'playing' 
+                          : ''
+                      }`}
+                      onClick={() => handlePlaySound(sound)}
+                      title={
+                        currentSound && currentSound.sound_id === sound.sound_id && isPlaying
+                          ? 'Reproduciendo...'
+                          : 'Reproducir'
+                      }
                     >
                       <FiPlay />
                     </button>
@@ -146,10 +151,23 @@ const InstitutionalSounds = () => {
             
             <div className="sound-details-actions">
               <button 
-                className="primary-button"
-                onClick={() => playSound(selectedSound)}
+                className={`primary-button ${
+                  currentSound && currentSound.sound_id === selectedSound.sound_id && isPlaying 
+                    ? 'playing' 
+                    : ''
+                }`}
+                onClick={() => handlePlaySound(selectedSound)}
+                title={
+                  currentSound && currentSound.sound_id === selectedSound.sound_id && isPlaying
+                    ? 'Reproduciendo...'
+                    : 'Reproducir'
+                }
               >
-                <FiPlay /> Reproducir
+                <FiPlay /> {
+                  currentSound && currentSound.sound_id === selectedSound.sound_id && isPlaying
+                    ? 'Reproduciendo...'
+                    : 'Reproducir'
+                }
               </button>
             </div>
           </div>

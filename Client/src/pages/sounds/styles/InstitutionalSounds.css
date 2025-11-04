@@ -110,6 +110,24 @@
   background-color: rgba(76, 175, 80, 0.1);
 }
 
+.play-button.playing {
+  background-color: #4caf50;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
 .info-button {
   color: #2196f3;
 }
@@ -192,6 +210,27 @@
 
 .primary-button:hover {
   background-color: #43a047;
+}
+
+.primary-button.playing {
+  background-color: #ff9800;
+  animation: pulse-orange 2s infinite;
+}
+
+.primary-button.playing:hover {
+  background-color: #f57c00;
+}
+
+@keyframes pulse-orange {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+  }
 }
 
 /* Estados de carga y error */
