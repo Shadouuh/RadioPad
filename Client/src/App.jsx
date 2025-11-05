@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from "react-route
 import { ToastContainer } from "react-toastify";
 import { UserProvider } from './shared/contexts/UserContext.jsx';
 import { SidebarProvider, useSidebar } from './shared/contexts/SidebarContext.jsx';
-import { AudioPlayerProvider } from './shared/contexts/AudioPlayerContext.jsx';
+import { MultiAudioPlayerProvider } from './shared/contexts/MultiAudioPlayerContext.jsx';
 import Login from './pages/login/Login.jsx';
 import Dashboard from './pages/dashboard/Dashboard.jsx';
 import Users from './pages/users/Users.jsx';
@@ -10,7 +10,7 @@ import Programs from './pages/programs/Programs.jsx';
 import Settings from './pages/settings/Settings.jsx';
 import InstitutionalSounds from './pages/sounds/InstitutionalSounds.jsx';
 import Sidebar from './shared/components/Sidebar.jsx';
-import GlobalAudioPlayer from './shared/components/GlobalAudioPlayer.jsx';
+import MultiAudioPlayer from './shared/components/MultiAudioPlayer.jsx';
 
 const AppContent = () => {
   const location = useLocation();
@@ -30,7 +30,7 @@ const AppContent = () => {
           <Route path="/sounds/institutional" element={<InstitutionalSounds />} />
         </Routes>
       </main>
-      {!isLoginPage && <GlobalAudioPlayer />}
+      {!isLoginPage && <MultiAudioPlayer />}
     </div>
   );
 };
@@ -40,7 +40,7 @@ const App = () => {
     <Router>
       <UserProvider>
         <SidebarProvider>
-          <AudioPlayerProvider>
+          <MultiAudioPlayerProvider>
             <ToastContainer
               position="top-left"
               autoClose={5000}
@@ -52,7 +52,7 @@ const App = () => {
               pauseOnFocusLoss
               pauseOnHover />
             <AppContent />
-          </AudioPlayerProvider>
+          </MultiAudioPlayerProvider>
         </SidebarProvider>
       </UserProvider>
     </Router>

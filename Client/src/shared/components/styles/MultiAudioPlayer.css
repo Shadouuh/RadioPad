@@ -30,24 +30,44 @@
 }
 
 /* Ajustar posición para múltiples reproductores */
-.multi-audio-player:nth-child(1) {
+.player-position-0 {
   bottom: 0px;
 }
 
-.multi-audio-player:nth-child(2) {
+.player-position-1 {
   bottom: 90px;
 }
 
-.multi-audio-player:nth-child(3) {
+.player-position-2 {
   bottom: 180px;
 }
 
-.multi-audio-player:nth-child(4) {
+.player-position-3 {
   bottom: 270px;
 }
 
-.multi-audio-player:nth-child(5) {
+.player-position-4 {
   bottom: 360px;
+}
+
+.player-position-5 {
+  bottom: 450px;
+}
+
+.player-position-6 {
+  bottom: 540px;
+}
+
+.player-position-7 {
+  bottom: 630px;
+}
+
+.player-position-8 {
+  bottom: 720px;
+}
+
+.player-position-9 {
+  bottom: 810px;
 }
 
 /* Información del sonido */

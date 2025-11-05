@@ -11,7 +11,7 @@ import {
 } from 'react-icons/fi';
 import './styles/MultiAudioPlayer.css';
 
-const SinglePlayer = ({ playerId, player }) => {
+const SinglePlayer = ({ playerId, player, index }) => {
   const {
     pausePlayer,
     resumePlayer,
@@ -97,9 +97,10 @@ const SinglePlayer = ({ playerId, player }) => {
 
   return (
     <div 
-      className="multi-audio-player"
+      className={`multi-audio-player player-position-${index}`}
       style={{ 
         left: `${sidebarWidth}px`,
+        bottom: `${player.bottomOffset || 0}px`,
         zIndex: player.zIndex
       }}
     >
@@ -219,9 +220,10 @@ const MultiAudioPlayer = () => {
         <SinglePlayer 
           key={playerId} 
           playerId={playerId} 
+          index={index}
           player={{
             ...player,
-            // Ajustar la posición vertical basada en el índice
+            // Ajustar la posición vertical basada en el índice desde la parte inferior
             bottomOffset: index * 90 // 90px de altura por reproductor
           }}
         />

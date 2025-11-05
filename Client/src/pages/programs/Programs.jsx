@@ -5,32 +5,13 @@ import ProgramModal from './modals/ProgramModal.jsx';
 import SoundModal from './modals/SoundModal.jsx';
 import './styles/programs.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
+import { useMultiAudioPlayer } from '../../shared/contexts/MultiAudioPlayerContext.jsx';
 import ProgramService from '../../shared/services/ProgramService.js';
 import useNotification from '../../shared/hooks/useNotification';
-import { MultiAudioPlayerProvider, useMultiAudioPlayer } from '../../shared/contexts/MultiAudioPlayerContext.jsx';
-import MultiAudioPlayer from '../../shared/components/MultiAudioPlayer.jsx';
 
-// Componente interno que usa el hook del MultiAudioPlayer
-const ProgramsWithAudio = () => {
-  const { createPlayer } = useMultiAudioPlayer();
-  
-  const handlePlaySound = (sound) => {
-    // Crear un nuevo reproductor para este sonido
-    createPlayer({
-      id: sound.id,
-      name: sound.name,
-      description: sound.category || 'Efecto de sonido',
-      // Incluir file_url (sonidos de programa) además de otras posibles claves
-      file_path: sound.file_url || sound.url || sound.file_path || sound.audio_url,
-      duration: sound.duration
-    });
-  };
-
-  return <ProgramsContent onPlaySound={handlePlaySound} />;
-};
-
-const ProgramsContent = ({ onPlaySound }) => {
+const ProgramsContent = () => {
   const { isCollapsed } = useSidebar();
+  const { playSound, players } = useMultiAudioPlayer();
   const notify = useNotification();
 
   const [programs, setPrograms] = useState([]);
@@ -224,8 +205,25 @@ const ProgramsContent = ({ onPlaySound }) => {
     setIsSoundModalOpen(true);
   };
 
+  // Función para reproducir un sonido usando el reproductor global
   const handlePlaySound = (sound) => {
-    onPlaySound(sound);
+    // Preparar el objeto de sonido para el reproductor global
+    const soundData = {
+      sound_id: sound.id,
+      sound_name: sound.name,
+      description: sound.description || sound.category || 'Efecto de sonido',
+      file_path: sound.file_url || sound.url || sound.file_path || sound.audio_url,
+      duration_seconds: sound.duration
+    };
+    
+    playSound(soundData);
+  };
+
+  // Función auxiliar para verificar si un sonido está siendo reproducido
+  const isSoundPlaying = (soundId) => {
+    return Array.from(players.values()).some(player => 
+      player.currentSound && player.currentSound.sound_id === soundId && player.isPlaying
+    );
   };
 
   return (
@@ -330,9 +328,15 @@ const ProgramsContent = ({ onPlaySound }) => {
                         </div>
                         <div className="sound-actions">
                           <button 
-                            className="btn-icon play"
+                            className={`btn-icon play ${
+                              isSoundPlaying(sound.id) ? 'playing' : ''
+                            }`}
                             onClick={() => handlePlaySound(sound)}
-                            title="Reproducir"
+                            title={
+                              isSoundPlaying(sound.id)
+                                ? 'Reproduciendo...'
+                                : 'Reproducir'
+                            }
                           >
                             <FaPlay />
                           </button>
@@ -397,19 +401,13 @@ const ProgramsContent = ({ onPlaySound }) => {
         sound={selectedSound}
       />
 
-      {/* MultiAudioPlayer para reproducir múltiples sonidos */}
-      <MultiAudioPlayer />
     </div>
   );
 };
 
-// Componente principal que envuelve con el Provider
+// Componente principal
 const Programs = () => {
-  return (
-    <MultiAudioPlayerProvider>
-      <ProgramsWithAudio />
-    </MultiAudioPlayerProvider>
-  );
+  return <ProgramsContent />;
 };
 
 export default Programs;
