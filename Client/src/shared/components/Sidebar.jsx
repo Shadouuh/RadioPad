@@ -85,14 +85,16 @@ const Sidebar = () => {
           {!isCollapsed && <span className="nav-text">Sonidos institucionales</span>}
         </NavLink>
         
-        <NavLink 
-          to="/users" 
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          data-tooltip="Usuarios"
-        >
-          <FiUsers className="nav-icon" />
-          {!isCollapsed && <span className="nav-text">Usuarios</span>}
-        </NavLink>
+        {user?.role !== 'Productor' && (
+          <NavLink 
+            to="/users" 
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            data-tooltip="Usuarios"
+          >
+            <FiUsers className="nav-icon" />
+            {!isCollapsed && <span className="nav-text">Usuarios</span>}
+          </NavLink>
+        )}
         
         <NavLink 
           to="/settings" 

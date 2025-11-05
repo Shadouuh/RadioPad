@@ -181,6 +181,14 @@
   transform: translateY(0);
 }
 
+.form-help {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
 /* Responsive Design */
 @media (max-width: 640px) {
   .modal-content {

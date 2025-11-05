@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import SoundService from '../../shared/services/SoundService';
 import { useMultiAudioPlayer } from '../../shared/contexts/MultiAudioPlayerContext.jsx';
-import { FiPlay, FiTrash2, FiInfo } from 'react-icons/fi';
+import { UserContext } from '../../shared/contexts/UserContext.jsx';
+import { FiPlay, FiTrash2, FiInfo, FiUpload } from 'react-icons/fi';
+import { FaMusic as FaMusicNote } from 'react-icons/fa';
 import './styles/InstitutionalSounds.css';
 
 /**
@@ -13,8 +15,22 @@ const InstitutionalSounds = () => {
   const [error, setError] = useState(null);
   const [selectedSound, setSelectedSound] = useState(null);
   
-  // Hook del reproductor global
+  // Hooks de contexto
   const { playSound, players } = useMultiAudioPlayer();
+  const { user } = useContext(UserContext);
+
+  // Funciones de permisos
+  const hasFullAccess = () => {
+    return user?.role === 'Jefe de Operadores';
+  };
+
+  const canEditInstitutionalSound = () => {
+    return hasFullAccess();
+  };
+
+  const canPlayInstitutionalSound = () => {
+    return true; // Todos pueden reproducir sonidos institucionales
+  };
 
   // Cargar sonidos institucionales al montar el componente
   useEffect(() => {
@@ -52,8 +68,22 @@ const InstitutionalSounds = () => {
     setSelectedSound(sound);
   };
 
+  // Función para subir nuevo sonido institucional
+  const handleUploadSound = () => {
+    if (!canEditInstitutionalSound()) {
+      alert('No tienes permisos para subir sonidos institucionales');
+      return;
+    }
+    // Aquí iría la lógica para abrir un modal de subida
+    alert('Función de subida de sonidos institucionales - En desarrollo');
+  };
+
   // Eliminar un sonido
   const deleteSound = async (soundId) => {
+    if (!canEditInstitutionalSound()) {
+      alert('No tienes permisos para eliminar sonidos institucionales');
+      return;
+    }
     if (window.confirm('¿Estás seguro de que deseas eliminar este sonido?')) {
       try {
         await SoundService.deleteSound(soundId);
@@ -71,7 +101,17 @@ const InstitutionalSounds = () => {
 
   return (
     <div className="institutional-sounds-container">
-      <h1 className="page-title">Sonidos Institucionales</h1>
+      <div className="page-header">
+        <div>
+          <h1><FaMusicNote /> Sonidos Institucionales</h1>
+          <p>Efectos de sonido disponibles para todos los programas</p>
+        </div>
+        {canEditInstitutionalSound() && (
+          <button className="upload-sound-btn" onClick={handleUploadSound}>
+            <FiUpload /> Subir Sonido
+          </button>
+        )}
+      </div>
       
       {loading ? (
         <div className="loading-container">
@@ -125,13 +165,15 @@ const InstitutionalSounds = () => {
                       <FiInfo />
                     </button>
                     
-                    <button 
-                      className="action-button delete-button"
-                      onClick={() => deleteSound(sound.sound_id)}
-                      title="Eliminar"
-                    >
-                      <FiTrash2 />
-                    </button>
+                    {canEditInstitutionalSound() && (
+                      <button 
+                        className="action-button delete-button"
+                        onClick={() => deleteSound(sound.sound_id)}
+                        title="Eliminar"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

@@ -28,47 +28,79 @@ const ProgramsContent = () => {
 
   // Funciones de control de acceso basado en roles
   const hasFullAccess = () => {
-    return user?.role === 'Jefe de Operadores';
+    const result = user?.role === 'Jefe de Operadores';
+    console.log('=== DEBUG PERMISOS ===');
+    console.log('Usuario actual:', user);
+    console.log('Rol actual:', user?.role);
+    console.log('hasFullAccess():', result);
+    return result;
   };
 
   const canEditProgram = (program) => {
-    if (hasFullAccess()) return true;
+    const result = hasFullAccess();
+    console.log('canEditProgram() - hasFullAccess:', result);
+    if (result) return true;
     if (user?.role === 'Operador') {
-      return user?.program_id === program.id;
+      const programMatch = user?.program_id === program.id;
+      console.log('canEditProgram() - Operador program match:', programMatch);
+      return programMatch;
     }
+    console.log('canEditProgram() - Sin permisos');
     return false;
   };
 
   const canEditSound = (sound) => {
-    if (hasFullAccess()) return true;
+    const result = hasFullAccess();
+    console.log('canEditSound() - hasFullAccess:', result);
+    if (result) return true;
     if (user?.role === 'Operador' && selectedProgram) {
-      return user?.program_id === selectedProgram.id;
+      const programMatch = user?.program_id === selectedProgram.id;
+      console.log('canEditSound() - Operador program match:', programMatch);
+      return programMatch;
     }
+    console.log('canEditSound() - Sin permisos');
     return false;
   };
 
   const canPlaySound = (sound) => {
-    if (hasFullAccess()) return true;
-    if (user?.role === 'Operador') return true; // Operador puede reproducir todos los sonidos
-    if (user?.role === 'Productor' && selectedProgram) {
-      return user?.program_id === selectedProgram.id;
+    const result = hasFullAccess();
+    console.log('canPlaySound() - hasFullAccess:', result);
+    if (result) return true;
+    if (user?.role === 'Operador') {
+      console.log('canPlaySound() - Operador puede reproducir');
+      return true; // Operador puede reproducir todos los sonidos
     }
+    if (user?.role === 'Productor' && selectedProgram) {
+      const programMatch = user?.program_id === selectedProgram.id;
+      console.log('canPlaySound() - Productor program match:', programMatch);
+      return programMatch;
+    }
+    console.log('canPlaySound() - Sin permisos');
     return false;
   };
 
   const canCreateProgram = () => {
-    return hasFullAccess();
+    const result = hasFullAccess();
+    console.log('canCreateProgram():', result);
+    return result;
   };
 
   const canToggleProgramStatus = () => {
-    return hasFullAccess();
+    const result = hasFullAccess();
+    console.log('canToggleProgramStatus():', result);
+    return result;
   };
 
   const canAddSound = () => {
-    if (hasFullAccess()) return true;
+    const result = hasFullAccess();
+    console.log('canAddSound() - hasFullAccess:', result);
+    if (result) return true;
     if (user?.role === 'Operador' && selectedProgram) {
-      return user?.program_id === selectedProgram.id;
+      const programMatch = user?.program_id === selectedProgram.id;
+      console.log('canAddSound() - Operador program match:', programMatch);
+      return programMatch;
     }
+    console.log('canAddSound() - Sin permisos');
     return false;
   };
 

@@ -10,12 +10,53 @@
   transition: margin-left 0.3s ease;
 }
 
-.page-title {
-  font-size: 1.8rem;
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
-  color: #333;
+  padding-bottom: 1rem;
   border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 0.5rem;
+}
+
+.page-header h1 {
+  font-size: 1.8rem;
+  color: #333;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-header p {
+  margin: 0.5rem 0 0 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.upload-sound-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.upload-sound-btn:hover {
+  background-color: #43a047;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.upload-sound-btn:active {
+  transform: scale(0.95);
 }
 
 /* Grid de sonidos */
