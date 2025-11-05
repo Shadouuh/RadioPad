@@ -12,6 +12,7 @@ const programController = new ProgramController(programService);
 // Rutas para programas
 router.post('/', requireAuth, programController.createProgram);
 router.get('/', requireAuth, programController.getAllPrograms);
+router.get('/user/my-programs', requireAuth, programController.getUserPrograms);
 router.get('/:id', requireAuth, programController.getProgramById);
 router.put('/:id', requireAuth, programController.updateProgram);
 router.delete('/:id', requireAuth, programController.deleteProgram);

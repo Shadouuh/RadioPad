@@ -43,7 +43,13 @@ class AuthController {
 
             const result = await this.authService.loginUser({ email, password });
 
+            console.log('=== DEBUG LOGIN ===');
+            console.log('Datos del usuario para token:', result);
+            console.log('program_id en resultado:', result.program_id);
+            
             const token = generateToken(result);
+            
+            console.log('Token generado exitosamente');
 
             res.cookie('token', token, {
                 httpOnly: true,
@@ -71,6 +77,11 @@ class AuthController {
     };
 
     me = (req, res) => {
+        console.log('=== DEBUG /auth/me endpoint ===');
+        console.log('req.user:', req.user);
+        console.log('req.user.role:', req.user?.role);
+        console.log('req.user.program_id:', req.user?.program_id);
+        
         res.status(200).json({
             success: true,
             message: 'Usuario autenticado',

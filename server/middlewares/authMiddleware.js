@@ -12,6 +12,11 @@ export async function requireAuth(req, res, next) {
 
   try {
     const decoded = verifyToken(token);
+    
+    console.log('=== DEBUG AUTH MIDDLEWARE ===');
+    console.log('Token decodificado:', decoded);
+    console.log('program_id en token:', decoded.program_id);
+    console.log('role en token:', decoded.role);
 
     req.user = decoded; // disponible en el controlador
     next();

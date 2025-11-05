@@ -13,6 +13,21 @@ class ProgramService {
     }
   }
 
+  // Obtener programas del usuario autenticado
+  static async getUserPrograms() {
+    try {
+      console.log('=== DEBUG FRONTEND getUserPrograms ===');
+      const response = await axios.get('/programs/user/my-programs');
+      console.log('Respuesta del servidor:', response.data);
+      console.log('Datos de programas:', response.data.data);
+      console.log('Cantidad de programas:', response.data.data?.length || 0);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener programas del usuario:', error);
+      throw error;
+    }
+  }
+
   // Obtener un programa por ID
   static async getProgramById(id) {
     try {

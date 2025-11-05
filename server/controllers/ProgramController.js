@@ -47,6 +47,62 @@ class ProgramController {
         }
     };
 
+    // Obtener programas del usuario autenticado
+    getUserPrograms = async (req, res) => {
+        try {
+            const userRole = req.user.role;
+            const userProgramId = req.user.program_id;
+            const userId = req.user.user_id;
+
+            console.log('=== DEBUG getUserPrograms ===');
+            console.log('req.user:', req.user);
+            console.log('userRole:', userRole);
+            console.log('userProgramId:', userProgramId);
+            console.log('userId:', userId);
+
+            let programs;
+
+            // Si el usuario tiene program_id null, puede ver todos los programas
+            if (userProgramId === null || userProgramId === undefined) {
+                console.log(`Usuario ${userRole} con program_id null - obteniendo todos los programas`);
+                programs = await this.programService.getAllPrograms();
+                console.log('Programas obtenidos:', programs.length);
+            } else if (userRole === 'Jefe de Operadores') {
+                console.log('Accediendo como Jefe de Operadores - obteniendo todos los programas');
+                console.log('Nota: El Jefe de Operadores verá todos los programas sin importar su program_id');
+                programs = await this.programService.getAllPrograms();
+                console.log('Programas obtenidos:', programs.length);
+            } else if (userRole === 'Operador' || userRole === 'Productor') {
+                console.log('Accediendo como Operador/Productor - filtrando por programa asignado');
+                // Operador y Productor solo ven su programa asignado
+                if (userProgramId) {
+                    programs = await this.programService.getProgramsByIds([userProgramId]);
+                    console.log('Programas obtenidos:', programs.length);
+                } else {
+                    programs = []; // No tiene programa asignado
+                    console.log('Sin programa asignado');
+                }
+            } else {
+                console.log('Rol no válido:', userRole);
+                // Rol no válido, no mostrar nada
+                programs = [];
+            }
+            
+            // Asegurarnos de que siempre devolvamos un array, incluso si es vacío
+            programs = programs || [];
+            console.log('Final - Total de programas a devolver:', programs.length);
+
+            res.status(200).json({
+                success: true,
+                message: 'Programas del usuario obtenidos exitosamente',
+                data: programs
+            });
+
+        } catch (err) {
+            return handleError(res, err);
+        }
+    };
+
     // Obtener un programa por ID
     getProgramById = async (req, res) => {
         try {

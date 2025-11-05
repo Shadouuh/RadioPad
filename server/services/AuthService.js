@@ -109,6 +109,7 @@ class AuthService {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                program_id: user.program_id,
                 config: {
                     config_id: config[0].config_id,
                     effects_sounds: config[0].effects_sounds,

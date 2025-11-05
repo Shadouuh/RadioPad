@@ -33,6 +33,7 @@ class ProgramService {
     // Obtener todos los programas
     getAllPrograms = async () => {
         try {
+            console.log('=== DEBUG getAllPrograms SQL ===');
             const [programs] = await this.conex.query(`
                 SELECT 
                     p.id,
@@ -47,11 +48,56 @@ class ProgramService {
                 GROUP BY p.id, p.name, p.description, p.status, p.created_at, p.updated_at
                 ORDER BY p.created_at DESC
             `);
+            
+            console.log('Programas encontrados:', programs.length);
+            console.log('Primeros programas:', programs.slice(0, 3));
 
             return programs;
 
         } catch (error) {
+            console.error('Error en getAllPrograms:', error);
             throw { status: 500, message: 'Error al obtener los programas', cause: error };
+        }
+    };
+
+    // Obtener programas por IDs
+    getProgramsByIds = async (programIds) => {
+        try {
+            console.log('=== DEBUG getProgramsByIds ===');
+            console.log('programIds recibidos:', programIds);
+            
+            if (!programIds || programIds.length === 0) {
+                console.log('No hay programIds, devolviendo array vacío');
+                return [];
+            }
+
+            const placeholders = programIds.map(() => '?').join(',');
+            console.log('Placeholders:', placeholders);
+            
+            const [programs] = await this.conex.query(`
+                SELECT 
+                    p.id,
+                    p.name,
+                    p.description,
+                    p.status,
+                    p.created_at,
+                    p.updated_at,
+                    COUNT(s.id) as effects
+                FROM programs p
+                LEFT JOIN sounds s ON p.id = s.program_id
+                WHERE p.id IN (${placeholders})
+                GROUP BY p.id, p.name, p.description, p.status, p.created_at, p.updated_at
+                ORDER BY p.created_at DESC
+            `, programIds);
+            
+            console.log('Programas encontrados por IDs:', programs.length);
+            console.log('Programas:', programs);
+
+            return programs;
+
+        } catch (error) {
+            console.error('Error en getProgramsByIds:', error);
+            throw { status: 500, message: 'Error al obtener los programas por IDs', cause: error };
         }
     };
 
