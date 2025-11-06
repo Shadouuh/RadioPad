@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { FiUser, FiEdit, FiTrash2, FiPlus } from 'react-icons/fi';
-import UserModal from './modals/UserModal';
+import { FiUser, FiEdit, FiTrash2, FiPlus, FaPowerOff } from 'react-icons/fi';
+import UserModal from './modals/UserModal'; 
 import './styles/users.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext';
 import { UserContext } from '../../shared/contexts/UserContext';
@@ -330,7 +330,7 @@ const Users = () => {
                           onClick={() => toggleUser(user.id, user.active)}
                           title={user.active ? 'Desactivar usuario' : 'Activar usuario'}
                         >
-                          🥟
+                          <FaPowerOff />
                         </button>
                       )}
                     </div>

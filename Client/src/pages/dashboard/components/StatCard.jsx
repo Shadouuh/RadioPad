@@ -1,5 +1,6 @@
 import React from 'react';
 import './styles/StatCard.css';
+import { IoReloadCircle } from 'react-icons/io5';
 
 const StatCard = ({ title, value, subtitle, icon: Icon, iconColor = '#6b7280', loading = true }) => {
   return (
@@ -17,7 +18,7 @@ const StatCard = ({ title, value, subtitle, icon: Icon, iconColor = '#6b7280', l
 
       {loading && (
         <div className="stat-card-loading">
-          cargando... 🥟
+          cargando... <IoReloadCircle />
         </div>
       )}
 
