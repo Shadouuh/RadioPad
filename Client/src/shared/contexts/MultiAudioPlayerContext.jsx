@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useCallback } from 'react';
+import { UserContext } from './UserContext';
 
 const MultiAudioPlayerContext = createContext();
 
@@ -13,6 +14,9 @@ export const useMultiAudioPlayer = () => {
 export const MultiAudioPlayerProvider = ({ children }) => {
   const [players, setPlayers] = useState(new Map());
   const audioRefs = useRef(new Map());
+  const { user }= useContext(UserContext);
+
+  // user.config?.effects_sounds (boolean)
 
   // Función para generar un ID único para cada reproductor
   const generatePlayerId = useCallback(() => {
@@ -34,7 +38,7 @@ export const MultiAudioPlayerProvider = ({ children }) => {
       currentSound: sound,
       currentTime: 0,
       duration: 0,
-      volume: 1,
+      volume: user?.config?.effects_sounds || 1,
       isMuted: false,
       loading: true,
       zIndex: 999 + players.size // Cada nuevo reproductor aparece encima
@@ -95,7 +99,7 @@ export const MultiAudioPlayerProvider = ({ children }) => {
 
     // Configurar y reproducir el audio
     audio.src = sound.file_path;
-    audio.volume = initialState.volume;
+    audio.volume = user?.config?.effects_sounds || initialState.volume;
 
     audio.play()
       .then(() => {

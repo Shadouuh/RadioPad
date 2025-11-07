@@ -37,7 +37,8 @@ export const UserProvider = ({ children }) => {
       if (response.data?.success) {
         setUser(response.data.user);
         notify('Sesión iniciada correctamente', 'success');
-        navigate('/dashboard');
+        if(user?.role === 'Jefe de Operadores') navigate('/dashboard');
+        else navigate('/programs');
       }
     } catch (err) {
       const message = err?.response?.data?.message || 'Error al iniciar sesión';

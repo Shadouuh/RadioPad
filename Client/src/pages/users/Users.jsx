@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { FiUser, FiEdit, FiTrash2, FiPlus, FaPowerOff } from 'react-icons/fi';
+import { FiUser, FiEdit, FiTrash2, FiPlus } from 'react-icons/fi';
 import UserModal from './modals/UserModal'; 
 import './styles/users.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext';
@@ -7,6 +7,7 @@ import { UserContext } from '../../shared/contexts/UserContext';
 import UserService from '../../shared/services/UserService';
 import ProgramService from '../../shared/services/ProgramService';
 import useNotification from '../../shared/hooks/useNotification';
+import usePermisos from '../../shared/hooks/usePermisos';
 
 const Users = () => {
   const { isCollapsed } = useSidebar();
@@ -18,71 +19,15 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-
-  // Funciones de control de acceso basado en roles
-  const hasFullAccess = () => {
-    const result = user?.role === 'Jefe de Operadores';
-    console.log('=== DEBUG PERMISOS USUARIOS ===');
-    console.log('Usuario actual:', user);
-    console.log('Rol actual:', user?.role);
-    console.log('hasFullAccess():', result);
-    return result;
-  };
-
-  const canCreateUser = () => {
-    const result = hasFullAccess() || user?.role === 'Operador';
-    console.log('canCreateUser():', result);
-    return result;
-  };
-
-  const canEditUser = (targetUser) => {
-    const result = hasFullAccess();
-    console.log('canEditUser() - hasFullAccess:', result);
-    if (result) return true;
-    
-    // Los operadores solo pueden editar usuarios de su propio programa
-    if (user?.role === 'Operador') {
-      const sameProgram = user?.program_id === targetUser?.program_id;
-      console.log('canEditUser() - Operador same program:', sameProgram);
-      return sameProgram;
-    }
-    
-    console.log('canEditUser() - Sin permisos');
-    return false;
-  };
-
-  const canToggleUserStatus = () => {
-    const result = hasFullAccess();
-    console.log('canToggleUserStatus():', result);
-    return result;
-  };
-
-  const getAvailableRoles = () => {
-    if (hasFullAccess()) {
-      return ['Jefe de Operadores', 'Operador', 'Productor'];
-    } else if (user?.role === 'Operador') {
-      return ['Productor']; // Solo puede crear productores
-    }
-    return [];
-  };
-
-  const getAvailablePrograms = () => {
-    if (hasFullAccess()) {
-      return programs; // Puede asignar a cualquier programa
-    } else if (user?.role === 'Operador') {
-      // Solo puede asignar al programa del operador
-      return programs.filter(p => p.id === user?.program_id);
-    }
-    return [];
-  };
-
+  const { hasFullAccess } = usePermisos();
+  
   // Cargar usuarios y programas al montar el componente
   useEffect(() => {
-    if (user && (hasFullAccess() || user?.role === 'Operador')) {
+    if (hasFullAccess()) {
       loadUsers();
       loadPrograms();
     }
-  }, [user]);
+  }, []);
 
   const loadUsers = async () => {
     try {
@@ -116,7 +61,7 @@ const Users = () => {
   };
 
   const handleCreateUser = () => {
-    if (!canCreateUser()) {
+    if (!hasFullAccess()) {
       notify('No tienes permisos para crear usuarios', 'error');
       return;
     }
@@ -125,7 +70,7 @@ const Users = () => {
   };
 
   const handleEditUser = (user) => {
-    if (!canEditUser(user)) {
+    if (!hasFullAccess()) {
       notify('No tienes permisos para editar este usuario', 'error');
       return;
     }
@@ -134,7 +79,7 @@ const Users = () => {
   };
 
   const toggleUser = async (userId, isActive) => {
-    if (!canToggleUserStatus()) {
+    if (!hasFullAccess()) {
       notify('No tienes permisos para cambiar el estado de usuarios', 'error');
       return;
     }
@@ -159,21 +104,15 @@ const Users = () => {
       // Verificar permisos antes de guardar
       if (selectedUser) {
         // Editar usuario existente
-        if (!canEditUser(selectedUser)) {
+        if (!hasFullAccess()) {
           notify('No tienes permisos para editar este usuario', 'error');
           return;
         }
       } else {
         // Crear nuevo usuario
-        if (!canCreateUser()) {
+        if (!hasFullAccess()) {
           notify('No tienes permisos para crear usuarios', 'error');
           return;
-        }
-        
-        // Si es operador, forzar que el nuevo usuario sea Productor y esté asignado a su programa
-        if (user?.role === 'Operador') {
-          userData.role = 'Productor';
-          userData.program_id = user?.program_id;
         }
       }
       
@@ -269,7 +208,7 @@ const Users = () => {
           <h1>Gestión de Usuarios</h1>
           <p>Administra los usuarios del sistema</p>
         </div>
-        {canCreateUser() && (
+        {hasFullAccess() && (
           <button className="new-user-btn" onClick={handleCreateUser}>
             <FiPlus />
             Nuevo Usuario
@@ -315,7 +254,7 @@ const Users = () => {
                       {user.active ? 'Activo' : 'Inactivo'}
                     </span>
                     <div className="action-buttons">
-                      {canEditUser(user) && (
+                      {hasFullAccess() && (
                         <button 
                           className="edit-btn"
                           onClick={() => handleEditUser(user)}
@@ -324,13 +263,13 @@ const Users = () => {
                           <FiEdit />
                         </button>
                       )}
-                      {canToggleUserStatus() && (
+                      {hasFullAccess() && (
                         <button 
                           className="delete-btn"
                           onClick={() => toggleUser(user.id, user.active)}
                           title={user.active ? 'Desactivar usuario' : 'Activar usuario'}
                         >
-                          <FaPowerOff />
+                          🥟
                         </button>
                       )}
                     </div>
@@ -346,8 +285,7 @@ const Users = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         user={selectedUser}
-        programs={getAvailablePrograms()}
-        availableRoles={getAvailableRoles()}
+        programs={programs}
         currentUser={user}
         onSave={handleSaveUser}
       />

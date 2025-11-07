@@ -8,12 +8,19 @@ import axios from '../../shared/api/axios.js';
 const Settings = () => {
   const { isCollapsed } = useSidebar();
   const { user, loading } = useContext(UserContext);
-  
+
   // Estados para el perfil de usuario
   const [userProfile, setUserProfile] = useState({
     name: user?.name || '',
     email: user?.email || '',
     role: user?.role || ''
+  });
+
+  // Estados para preferencias
+  const [preferences, setPreferences] = useState({
+    soundEffects: true,
+    notify: true,
+    darkMode: false
   });
 
   useEffect(() => {
@@ -24,7 +31,7 @@ const Settings = () => {
         role: user.role || ''
       });
       setPreferences({
-        soundEffects:  user.config?.effects_sounds == 1 ? true : false,
+        soundEffects: user.config?.effects_sounds == 1 ? true : false,
         notify: user.config?.notify == 1 ? true : false,
         darkMode: user.config?.dark_mode == 1 ? true : false,
       });
@@ -43,29 +50,24 @@ const Settings = () => {
     confirm: false
   });
 
-  // Estados para preferencias
-  const [preferences, setPreferences] = useState({
-    soundEffects: true,
-    notify: true,
-    darkMode: false
-  });
-
   // Permisos del usuario
-  const permissions = [
+  const permissions = user?.role === 'Jefe de Operadores' ? [
     'Gestión completa de usuarios',
-    'Creación y edición de programas',
+    'Administracion de programas',
+    'Gestion de FXs institucionales',
     'Acceso a todos los FX',
-    'Configuración del sistema',
+    'Configuración personalizada',
     'Reportes y estadísticas'
+  ] : user?.role === 'Operador' ? [
+    'Acceso a los programas asignados',
+    'Acceso a FXs institucionales',
+    'Gestion de FXs de los programas asignados',
+    'Configuración personalizada',
+  ] : [
+    'Acceso a los programas asignados',
+    'Acceso a FXs institucionales',
+    'Configuración personalizada',
   ];
-
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    setUserProfile(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -94,7 +96,7 @@ const Settings = () => {
 
     try {
       const response = await axios.post('/auth/update-preferences', {
-        [preference]: true
+        [preference]: preferences[preference] ? 0 : 1
       });
 
       if (response.data?.success) {
@@ -136,7 +138,7 @@ const Settings = () => {
       alert('Error al actualizar contraseña');
       console.error(err?.response?.data?.message || 'Error al actualizar contraseña:', err);
     }
-    
+
     setPasswordData({
       currentPassword: '',
       newPassword: '',
@@ -151,9 +153,6 @@ const Settings = () => {
           <h1>Configuración</h1>
           <p>Administra tu cuenta y preferencias del sistema</p>
         </div>
-        <button className="save-changes-btn">
-          Guardar Cambios
-        </button>
       </div>
 
       <div className="settings-content">
@@ -167,37 +166,23 @@ const Settings = () => {
                 <p>Información de tu cuenta</p>
               </div>
             </div>
-            <div className="card-content">
-              <div className="form-group">
-                <label htmlFor="name">Nombre</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={userProfile.name}
-                  onChange={handleProfileChange}
-                  placeholder="Jefe de Operadores"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="email">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={userProfile.email}
-                  onChange={handleProfileChange}
-                  placeholder="admin@radiopad.com"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="role">Rol Actual</label>
-                <div className="role-badge">
-                  <span className="role-indicator"></span>
-                  {userProfile.role}
+            {loading ? (
+              <h2 className="sidebar-user-loading">Cargando... 🥟</h2>
+            ) : (
+              <div className="card-content">
+                <span>Nombre</span>
+                <h3>{userProfile.name}</h3>
+                <span>Email</span>
+                <h3>{userProfile.email}</h3>
+                <div className="form-group">
+                  <label htmlFor="role">Rol Actual</label>
+                  <div className="role-badge">
+                    <span className="role-indicator"></span>
+                    {userProfile.role}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Cambiar Contraseña */}
@@ -285,59 +270,63 @@ const Settings = () => {
                 <p>Personaliza tu experiencia</p>
               </div>
             </div>
-            <div className="card-content">
-              <div className="preference-item">
-                <div className="preference-info">
-                  <FaVolumeUp className="preference-icon" />
-                  <div>
-                    <h4>Efectos de Sonido</h4>
-                    <p>Habilitar sonidos de la interfaz</p>
+            {loading ? (
+              <h2 className="sidebar-user-loading">Cargando... 🥟</h2>
+            ) : (
+              <div className="card-content">
+                <div className="preference-item">
+                  <div className="preference-info">
+                    <FaVolumeUp className="preference-icon" />
+                    <div>
+                      <h4>Efectos de Sonido</h4>
+                      <p>Habilitar sonidos de la interfaz</p>
+                    </div>
                   </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={preferences.soundEffects}
+                      onChange={() => handlePreferenceToggle('soundEffects')}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
                 </div>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={preferences.soundEffects}
-                    onChange={() => handlePreferenceToggle('soundEffects')}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-              <div className="preference-item">
-                <div className="preference-info">
-                  <FaBell className="preference-icon" />
-                  <div>
-                    <h4>Notificaciones</h4>
-                    <p>Recibir notificaciones del sistema</p>
+                <div className="preference-item">
+                  <div className="preference-info">
+                    <FaBell className="preference-icon" />
+                    <div>
+                      <h4>Notificaciones</h4>
+                      <p>Recibir notificaciones del sistema</p>
+                    </div>
                   </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={preferences.notify}
+                      onChange={() => handlePreferenceToggle('notify')}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
                 </div>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={preferences.notify}
-                    onChange={() => handlePreferenceToggle('notify')}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-              <div className="preference-item">
-                <div className="preference-info">
-                  <FaMoon className="preference-icon" />
-                  <div>
-                    <h4>Modo Oscuro</h4>
-                    <p>Cambiar tema de la interfaz</p>
+                <div className="preference-item">
+                  <div className="preference-info">
+                    <FaMoon className="preference-icon" />
+                    <div>
+                      <h4>Modo Oscuro</h4>
+                      <p>Cambiar tema de la interfaz</p>
+                    </div>
                   </div>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={preferences.darkMode}
+                      onChange={() => handlePreferenceToggle('darkMode')}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
                 </div>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={preferences.darkMode}
-                    onChange={() => handlePreferenceToggle('darkMode')}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Permisos y Accesos */}

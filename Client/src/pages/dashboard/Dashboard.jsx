@@ -44,6 +44,11 @@ const Dashboard = () => {
     checkApi();
   }, []);
 
+  useEffect(() => {
+    if (!serverStatus.success) return;
+    fetchData();
+  }, [serverStatus.success]);
+
   // Actualizar cada 10 segundos
   useEffect(() => {
     const interval = setInterval(() => {
@@ -56,6 +61,7 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
+      if (!serverStatus.success) return;
       setLoading(true);
       const data = await axios.get('/dashboard/data');
       setDashboardData(data?.data.data || {});
@@ -76,8 +82,6 @@ const Dashboard = () => {
           message: response.data?.message || 'Servidor operativo',
           connection: true
         })
-      } else {
-        notify(response.data?.message || 'El servidor esta caido', 'error');
       }
     } catch (err) {
       console.error(err?.response?.data?.message || 'El servidor esta caido:', err);

@@ -9,11 +9,13 @@ import { useMultiAudioPlayer } from '../../shared/contexts/MultiAudioPlayerConte
 import { UserContext } from '../../shared/contexts/UserContext.jsx';
 import ProgramService from '../../shared/services/ProgramService.js';
 import useNotification from '../../shared/hooks/useNotification';
+import usePermisos from '../../shared/hooks/usePermisos.js';
 
 const ProgramsContent = () => {
   const { isCollapsed } = useSidebar();
   const { playSound, players } = useMultiAudioPlayer();
   const { user, loading: userLoading } = useContext(UserContext);
+  const { hasFullAccess } = usePermisos();
   const notify = useNotification();
 
   const [programs, setPrograms] = useState([]);
@@ -26,81 +28,43 @@ const ProgramsContent = () => {
   const [loadingSounds, setLoadingSounds] = useState(false);
   const [selectedSound, setSelectedSound] = useState(null);
 
-  // Funciones de control de acceso basado en roles
-  const hasFullAccess = () => {
-    const result = user?.role === 'Jefe de Operadores';
-    console.log('=== DEBUG PERMISOS ===');
-    console.log('Usuario actual:', user);
-    console.log('Rol actual:', user?.role);
-    console.log('hasFullAccess():', result);
-    return result;
-  };
-
   const canEditProgram = (program) => {
     const result = hasFullAccess();
-    console.log('canEditProgram() - hasFullAccess:', result);
     if (result) return true;
     if (user?.role === 'Operador') {
       const programMatch = user?.program_id === program.id;
-      console.log('canEditProgram() - Operador program match:', programMatch);
       return programMatch;
     }
-    console.log('canEditProgram() - Sin permisos');
     return false;
   };
 
-  const canEditSound = (sound) => {
+  const canEditSound = () => {
     const result = hasFullAccess();
-    console.log('canEditSound() - hasFullAccess:', result);
     if (result) return true;
     if (user?.role === 'Operador' && selectedProgram) {
       const programMatch = user?.program_id === selectedProgram.id;
-      console.log('canEditSound() - Operador program match:', programMatch);
       return programMatch;
     }
-    console.log('canEditSound() - Sin permisos');
-    return false;
-  };
-
-  const canPlaySound = (sound) => {
-    const result = hasFullAccess();
-    console.log('canPlaySound() - hasFullAccess:', result);
-    if (result) return true;
-    if (user?.role === 'Operador') {
-      console.log('canPlaySound() - Operador puede reproducir');
-      return true; // Operador puede reproducir todos los sonidos
-    }
-    if (user?.role === 'Productor' && selectedProgram) {
-      const programMatch = user?.program_id === selectedProgram.id;
-      console.log('canPlaySound() - Productor program match:', programMatch);
-      return programMatch;
-    }
-    console.log('canPlaySound() - Sin permisos');
     return false;
   };
 
   const canCreateProgram = () => {
     const result = hasFullAccess();
-    console.log('canCreateProgram():', result);
     return result;
   };
 
   const canToggleProgramStatus = () => {
     const result = hasFullAccess();
-    console.log('canToggleProgramStatus():', result);
     return result;
   };
 
   const canAddSound = () => {
     const result = hasFullAccess();
-    console.log('canAddSound() - hasFullAccess:', result);
     if (result) return true;
     if (user?.role === 'Operador' && selectedProgram) {
       const programMatch = user?.program_id === selectedProgram.id;
-      console.log('canAddSound() - Operador program match:', programMatch);
       return programMatch;
     }
-    console.log('canAddSound() - Sin permisos');
     return false;
   };
 
@@ -120,14 +84,14 @@ const ProgramsContent = () => {
 
   const loadPrograms = async () => {
     try {
-      console.log('=== DEBUG FRONTEND loadPrograms ===');
       setLoading(true);
       const response = await ProgramService.getUserPrograms();
-      console.log('Respuesta recibida en loadPrograms:', response);
-      console.log('Datos de programas recibidos:', response.data);
       if (response.success) {
-        console.log('Estableciendo programas en el estado:', response.data);
-        setPrograms(response.data);
+        if(hasFullAccess()) setPrograms(response.data);
+        else {
+          console.log(user?.program_id);
+          setPrograms(response.data.filter(program => program.id == user?.program_id));
+        }
       } else {
         notify('Error al cargar programas', 'error');
       }
@@ -257,7 +221,7 @@ const ProgramsContent = () => {
       let response;
       if (soundData.id) {
         // Actualizar sonido existente
-        response = await ProgramService.updateProgramSound( soundData.id, soundData);
+        response = await ProgramService.updateProgramSound(soundData.id, soundData);
       } else {
         // Crear nuevo sonido
         if (soundData.file) {
@@ -333,10 +297,6 @@ const ProgramsContent = () => {
 
   // Función para reproducir un sonido usando el reproductor global
   const handlePlaySound = (sound) => {
-    if (!canPlaySound(sound)) {
-      notify('No tienes permisos para reproducir este sonido', 'error');
-      return;
-    }
     // Preparar el objeto de sonido para el reproductor global
     const soundData = {
       sound_id: sound.id,
@@ -345,13 +305,13 @@ const ProgramsContent = () => {
       file_path: sound.file_url || sound.url || sound.file_path || sound.audio_url,
       duration_seconds: sound.duration
     };
-    
+
     playSound(soundData);
   };
 
   // Función auxiliar para verificar si un sonido está siendo reproducido
   const isSoundPlaying = (soundId) => {
-    return Array.from(players.values()).some(player => 
+    return Array.from(players.values()).some(player =>
       player.currentSound && player.currentSound.sound_id === soundId && player.isPlaying
     );
   };
@@ -418,7 +378,7 @@ const ProgramsContent = () => {
             <h3><MdMusicNote /> Programas</h3>
             <p>Selecciona un programa para ver sus efectos</p>
           </div>
-          
+
           <div className="programs-list">
             {loading ? (
               <div className="loading-state">
@@ -427,15 +387,15 @@ const ProgramsContent = () => {
             ) : programs && programs.length === 0 ? (
               <div className="empty-state">
                 <p>
-                  {user?.role === 'Operador' || user?.role === 'Productor' 
-                    ? 'No tienes programas asignados' 
+                  {user?.role === 'Operador' || user?.role === 'Productor'
+                    ? 'No tienes programas asignados'
                     : 'No hay programas registrados'}
                 </p>
               </div>
             ) : (
               programs && programs.map(program => (
-                <div 
-                  key={program.id} 
+                <div
+                  key={program.id}
                   className={`program-item ${selectedProgram?.id === program.id ? 'selected' : ''}`}
                   onClick={() => handleSelectProgram(program)}
                 >
@@ -448,7 +408,7 @@ const ProgramsContent = () => {
                       {program.status === 'Active' ? 'Activo' : 'Inactivo'}
                     </span>
                     {canEditProgram(program) && (
-                      <button 
+                      <button
                         className="edit-btn"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -459,7 +419,7 @@ const ProgramsContent = () => {
                       </button>
                     )}
                     {canToggleProgramStatus() && (
-                      <button 
+                      <button
                         className="delete-btn"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -508,23 +468,20 @@ const ProgramsContent = () => {
                           <span className="sound-duration">{sound.duration || 'N/A'}</span>
                         </div>
                         <div className="sound-actions">
-                          {canPlaySound(sound) && (
-                            <button 
-                              className={`btn-icon play ${
-                                isSoundPlaying(sound.id) ? 'playing' : ''
+                          <button
+                            className={`btn-icon play ${isSoundPlaying(sound.id) ? 'playing' : ''
                               }`}
-                              onClick={() => handlePlaySound(sound)}
-                              title={
-                                isSoundPlaying(sound.id)
-                                  ? 'Reproduciendo...'
-                                  : 'Reproducir'
-                              }
-                            >
-                              <FaPlay />
-                            </button>
-                          )}
+                            onClick={() => handlePlaySound(sound)}
+                            title={
+                              isSoundPlaying(sound.id)
+                                ? 'Reproduciendo...'
+                                : 'Reproducir'
+                            }
+                          >
+                            <FaPlay />
+                          </button>
                           {canEditSound(sound) && (
-                            <button 
+                            <button
                               className="btn-icon edit"
                               onClick={() => handleEditSound(sound)}
                               title="Editar"
@@ -533,7 +490,7 @@ const ProgramsContent = () => {
                             </button>
                           )}
                           {canEditSound(sound) && (
-                            <button 
+                            <button
                               className="btn-icon delete"
                               onClick={() => handleDeleteSound(sound.id)}
                               title="Eliminar"
@@ -550,7 +507,7 @@ const ProgramsContent = () => {
                     </div>
                   ))
                 )}
-                
+
                 {/* Botón para agregar nuevo sonido */}
                 {canAddSound() && (
                   <div className="sound-card add-sound-card" onClick={handleAddSound}>

@@ -4,7 +4,6 @@ import './styles/SystemStatusCard.css';
 
 const SystemStatusCard = ({ title, subtitle, statusItems = [], loading = true }) => {
   const getStatusColor = (status) => {
-    console.log(status);
     switch (status.toLowerCase()) {
       case 'operativo':
         return '#10b981';

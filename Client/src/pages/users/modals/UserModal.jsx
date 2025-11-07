@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { FiX } from 'react-icons/fi';
 import './UserModal.css';
 
-const UserModal = ({ isOpen, onClose, user = null, programs = [], availableRoles = [], currentUser = null, onSave }) => {
+const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
     role: user?.role || 'Productor',
     program_id: user?.program_id || ''
   });
+
+  const availableRoles = ['Jefe de Operadores', 'Productor', 'Operador'];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -80,7 +82,6 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], availableRoles
                 value={formData.role}
                 onChange={handleInputChange}
                 required
-                disabled={!user && currentUser?.role === 'Operador'} // Deshabilitar si es operador creando nuevo usuario
               >
                 {availableRoles.map(role => (
                   <option key={role} value={role}>
@@ -88,11 +89,6 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], availableRoles
                   </option>
                 ))}
               </select>
-              {currentUser?.role === 'Operador' && !user && (
-                <small className="form-help">
-                  Los operadores solo pueden crear usuarios con rol Productor
-                </small>
-              )}
             </div>
 
             <div className="form-group">
@@ -103,7 +99,6 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], availableRoles
                 value={formData.program_id}
                 onChange={handleInputChange}
                 required
-                disabled={currentUser?.role === 'Operador'} // Deshabilitar para operadores
               >
                 <option value="">Selecciona un programa</option>
                 {programs.map(program => (
@@ -112,11 +107,6 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], availableRoles
                   </option>
                 ))}
               </select>
-              {currentUser?.role === 'Operador' && (
-                <small className="form-help">
-                  Los operadores solo pueden crear usuarios para su programa asignado
-                </small>
-              )}
             </div>
 
             <div className="form-group">

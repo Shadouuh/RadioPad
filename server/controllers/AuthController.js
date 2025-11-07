@@ -77,10 +77,6 @@ class AuthController {
     };
 
     me = (req, res) => {
-        console.log('=== DEBUG /auth/me endpoint ===');
-        console.log('req.user:', req.user);
-        console.log('req.user.role:', req.user?.role);
-        console.log('req.user.program_id:', req.user?.program_id);
         
         res.status(200).json({
             success: true,
@@ -125,12 +121,12 @@ class AuthController {
                 throw { status: 400, message: 'Faltan datos para cambiar la contraseña' };
             }
 
-            const user = await this.authService.changePassword({ userId: req.user.id, currentPassword, newPassword });
+            const result = await this.authService.changePassword({ userId: req.user.user_id, currentPassword, newPassword });
 
             res.status(200).json({
                 success: true,
-                message: 'Contraseña cambiada correctamente',
-                user: { ...user, pass: '[Hidden]' }
+                message: result.message,
+                user: { ...result }
             });
         } catch (err) {
             return handleError(res, err);
