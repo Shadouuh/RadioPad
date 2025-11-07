@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-11-2025 a las 22:28:36
+-- Tiempo de generación: 07-11-2025 a las 20:45:02
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -62,7 +62,7 @@ CREATE TABLE `config` (
 --
 
 INSERT INTO `config` (`id`, `effects_sounds`, `notify`, `dark_mode`, `user_id`) VALUES
-(1, 1, 1, 0, 2);
+(1, 0, 0, 1, 2);
 
 -- --------------------------------------------------------
 
@@ -85,7 +85,7 @@ CREATE TABLE `programs` (
 
 INSERT INTO `programs` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Programa Matutino', 'Programa de noticias y entretenimiento matutino', 'Active', '2025-10-27 23:09:04', '2025-10-27 23:51:33'),
-(4, 'Prueba', 'aaaa', 'Inactive', '2025-10-27 23:51:59', '2025-10-27 23:52:32');
+(4, 'Prueba', 'aaaa', 'Inactive', '2025-10-27 23:51:59', '2025-11-07 19:34:40');
 
 -- --------------------------------------------------------
 
@@ -207,9 +207,9 @@ CREATE TABLE `sound_effects` (
 
 INSERT INTO `sound_effects` (`sound_id`, `sound_name`, `description`, `file_path`, `duration_seconds`, `file_size`, `is_institutional`, `category_id`, `created_by`, `created_at`, `updated_at`) VALUES
 (1, 'Intro oficial', 'Introducción oficial de la radio', 'https://res.cloudinary.com/dbhly9c1j/video/upload/v1761440817/sounds/1761440815237-376919989_dg00y8.mp3', 15.5, 1024000, 1, 2, NULL, '2025-10-27 23:09:04', '2025-10-27 23:09:04'),
-(2, 'Efecto de lluvia', 'Sonido de lluvia suave', 'https://res.cloudinary.com/dbhly9c1j/video/upload/v1761440817/sounds/1761440815237-376919989_dg00y8.mp3', 60, 2048000, 0, 1, NULL, '2025-10-27 23:09:04', '2025-10-27 23:09:04'),
-(3, 'Risas', 'Efecto de risas para momentos cómicos', 'https://res.cloudinary.com/dbhly9c1j/video/upload/v1761440817/sounds/1761440815237-376919989_dg00y8.mp3', 3.2, 512000, 0, 3, NULL, '2025-10-27 23:09:04', '2025-10-27 23:09:04'),
-(4, 'Música jazz', 'Música de fondo estilo jazz', 'https://res.cloudinary.com/dbhly9c1j/video/upload/v1761440817/sounds/1761440815237-376919989_dg00y8.mp3', 120, 4096000, 0, 4, NULL, '2025-10-27 23:09:04', '2025-10-27 23:09:04');
+(2, 'Efecto de lluvia', 'Sonido de lluvia suave', 'https://res.cloudinary.com/dbhly9c1j/video/upload/v1761440817/sounds/1761440815237-376919989_dg00y8.mp3', 60, 2048000, 1, 1, NULL, '2025-10-27 23:09:04', '2025-11-07 19:42:49'),
+(3, 'Risas', 'Efecto de risas para momentos cómicos', 'https://res.cloudinary.com/dbhly9c1j/video/upload/v1761440817/sounds/1761440815237-376919989_dg00y8.mp3', 3.2, 512000, 1, 3, NULL, '2025-10-27 23:09:04', '2025-11-07 19:42:54'),
+(4, 'Música jazz', 'Música de fondo estilo jazz', 'https://res.cloudinary.com/dbhly9c1j/video/upload/v1761440817/sounds/1761440815237-376919989_dg00y8.mp3', 120, 4096000, 1, 4, NULL, '2025-10-27 23:09:04', '2025-11-07 19:42:58');
 
 -- --------------------------------------------------------
 
@@ -236,8 +236,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `lock_until`, `failed_attempts`, `active`, `role`, `program_id`, `created_at`, `updated_at`) VALUES
-(1, 'Productor Test', 'productor@example.com', 'hashedpassword123', NULL, 0, 1, 'Productor', NULL, '2025-10-27 23:09:04', '2025-10-27 23:09:04'),
-(2, 'Admin', 'admin@radiopad.com', '$2b$10$2dk2jSsPZLJlW8bgDPK9TeZDM1GZaQTEQENyYEOSqLy4pEcUoaqiC', NULL, 0, 1, 'Jefe de Operadores', NULL, '2025-11-03 21:15:00', '2025-11-03 21:15:00');
+(1, 'Productor Test', 'productor@example.com', 'hashedpassword123', NULL, 0, 0, 'Productor', NULL, '2025-10-27 23:09:04', '2025-11-07 19:14:22'),
+(2, 'Admin', 'admin@radiopad.com', '$2b$10$OIJ4a1EkkLae5qGOrJt6WefZSwwVe6nXHdbe9I9RfVpg2nQkOIp5O', NULL, 0, 1, 'Jefe de Operadores', 4, '2025-11-03 21:15:00', '2025-11-07 18:03:40');
 
 --
 -- Índices para tablas volcadas

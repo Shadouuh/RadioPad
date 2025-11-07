@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 import './UserModal.css';
 
 const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    role: user?.role || 'Productor',
-    program_id: user?.program_id || ''
+    name: '',
+    email: '',
+    role: '',
+    program_id: ''
   });
 
   const availableRoles = ['Jefe de Operadores', 'Productor', 'Operador'];
@@ -29,6 +29,26 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
     onSave(dataToSend);
     onClose();
   };
+
+  // Sincronizar el formulario cuando cambia el usuario seleccionado o se abre el modal
+  useEffect(() => {
+    if (!isOpen) return;
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        role: user.role || availableRoles[0],
+        program_id: user.program_id ?? ''
+      });
+    } else {
+      setFormData({
+        name: '',
+        email: '',
+        role: availableRoles[0],
+        program_id: ''
+      });
+    }
+  }, [user, isOpen]);
 
   if (!isOpen) return null;
 

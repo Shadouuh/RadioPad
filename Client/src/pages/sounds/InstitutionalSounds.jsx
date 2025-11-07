@@ -5,6 +5,7 @@ import { UserContext } from '../../shared/contexts/UserContext.jsx';
 import { FiPlay, FiTrash2, FiInfo, FiUpload } from 'react-icons/fi';
 import { FaMusic as FaMusicNote } from 'react-icons/fa';
 import './styles/InstitutionalSounds.css';
+import SoundModal from './SoundModal.jsx'
 
 /**
  * Componente para mostrar y gestionar los sonidos institucionales
@@ -14,6 +15,7 @@ const InstitutionalSounds = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSound, setSelectedSound] = useState(null);
+  const [soundModalOpen, setSoundModalOpen] = useState(false);
   
   // Hooks de contexto
   const { playSound, players } = useMultiAudioPlayer();
@@ -74,8 +76,9 @@ const InstitutionalSounds = () => {
       alert('No tienes permisos para subir sonidos institucionales');
       return;
     }
-    // Aquí iría la lógica para abrir un modal de subida
-    alert('Función de subida de sonidos institucionales - En desarrollo');
+    // Abrir modal de subida
+    setSelectedSound(null);
+    setSoundModalOpen(true);
   };
 
   // Eliminar un sonido
@@ -92,6 +95,31 @@ const InstitutionalSounds = () => {
         console.error('Error al eliminar el sonido:', err);
       }
     }
+  };
+
+  const handleSaveSound = (soundData) => {
+    if (!canEditInstitutionalSound()) {
+      alert('No tienes permisos para subir sonidos institucionales');
+      return;
+    }
+    
+
+    /*
+    
+    
+    // Lógica para guardar el sonido
+    if (selectedSound) {
+      // Editar sonido existente
+      await SoundService.updateSound(selectedSound.sound_id, soundData);
+    } else {
+      // Subir nuevo sonido
+      await SoundService.uploadSound(soundData);
+    }
+
+    */
+
+
+    setSoundModalOpen(false);
   };
 
   // Cerrar el modal de detalles
@@ -218,6 +246,15 @@ const InstitutionalSounds = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de subida de sonido */}
+      <SoundModal
+        isOpen={soundModalOpen}
+        onClose={() => setSoundModalOpen(false)}
+        onSave={handleSaveSound}
+        sound={selectedSound}
+      />
+
     </div>
   );
 };
