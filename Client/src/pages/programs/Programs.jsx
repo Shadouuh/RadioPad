@@ -38,12 +38,7 @@ const ProgramsContent = () => {
   };
 
   const canEditProgram = (program) => {
-    const result = hasFullAccess();
-    if (result) return true;
-    if (user?.role === 'Operador') {
-      return hasProgramAccess(program.id);
-    }
-    return false;
+    return hasFullAccess();
   };
 
   const canEditSound = () => {
@@ -91,50 +86,25 @@ const ProgramsContent = () => {
     }
   }, [selectedProgram]);
 
-  // Reproducir automáticamente un sonido representativo cuando los sonidos del programa estén disponibles tras la selección
-  useEffect(() => {
-    if (!selectedProgram || !selectedProgram.id) return;
-    const sounds = programSounds[selectedProgram.id];
-    if (Array.isArray(sounds) && sounds.length > 0) {
-      if (lastAutoPlayedProgramRef.current !== selectedProgram.id) {
-        const chosen = pickProgramIntroSound(sounds);
-        if (chosen) {
-          handlePlaySound(chosen);
-          lastAutoPlayedProgramRef.current = selectedProgram.id;
-        }
-      }
-    }
-  }, [programSounds, selectedProgram]);
-
   const loadPrograms = async () => {
     try {
       setLoading(true);
-      console.log('=== DEBUG loadPrograms ===');
-      console.log('Usuario actual:', user);
-      console.log('Has full access:', hasFullAccess());
-      console.log('User programs:', user?.programs);
       
       const response = await ProgramService.getUserPrograms();
-      console.log('Response from getUserPrograms:', response);
       
       if (response.success) {
-        console.log('All programs from API:', response.data);
         
         if(hasFullAccess()) {
           setPrograms(response.data);
-          console.log('Set programs (full access):', response.data);
         } else {
           // Filtrar programas a los que el usuario tiene acceso
           const userProgramIds = user?.programs?.map(p => p.id) || [];
-          console.log('User program IDs:', userProgramIds);
           
           const filteredPrograms = response.data.filter(program => {
             const hasAccess = userProgramIds.includes(program.id);
-            console.log(`Program ${program.id} (${program.name}): ${hasAccess ? 'HAS ACCESS' : 'NO ACCESS'}`);
             return hasAccess;
           });
           
-          console.log('Filtered programs:', filteredPrograms);
           setPrograms(filteredPrograms);
         }
       } else {
@@ -368,13 +338,6 @@ const ProgramsContent = () => {
   // Al seleccionar un programa, reproducir uno de sus sonidos si ya están cargados
   const handleSelectProgramWithPlay = (program) => {
     setSelectedProgram(program);
-    const sounds = programSounds[program.id];
-    if (Array.isArray(sounds) && sounds.length > 0) {
-      const chosen = pickProgramIntroSound(sounds);
-      if (chosen) {
-        handlePlaySound(chosen);
-      }
-    }
   };
 
   // Función para reproducir un sonido usando el reproductor global
@@ -497,8 +460,8 @@ const ProgramsContent = () => {
                   onClick={() => handleSelectProgramWithPlay(program)}
                 >
                   <div className="program-info">
-                    <h4>{program.name}</h4>
-                    <p>{program.effects} Efecto/s</p>
+                    <h4 className={`program-name ${selectedProgram?.id === program.id ? 'selected' : ''}`}>{program.name}</h4>
+                    <p className={`program-count ${selectedProgram?.id === program.id ? 'selected' : ''}`}>{program.effects} Efecto/s</p>
                   </div>
                   <div className="program-actions">
                     <span className={`status-badge ${program.status?.toLowerCase()}`}>

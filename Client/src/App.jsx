@@ -23,7 +23,7 @@ const AppContent = () => {
   // Mostrar pantalla de carga por 2 segundos en cada cambio de ruta
   useEffect(() => {
     setShowSplash(true);
-    const t = setTimeout(() => setShowSplash(false), 2000);
+    const t = setTimeout(() => setShowSplash(false), 750);
     return () => clearTimeout(t);
   }, [location.pathname]);
 

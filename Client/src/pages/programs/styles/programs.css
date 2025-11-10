@@ -15,6 +15,16 @@
   margin-left: 80px;
 }
 
+.program-name.selected {
+  font-weight: 700;
+  color: whitesmoke;
+}
+
+.program-count.selected {
+  font-weight: 700;
+  color: whitesmoke;
+}
+
 /* Programs Header */
 .programs-header {
   display: flex;
