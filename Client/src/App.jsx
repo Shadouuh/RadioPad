@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
 import { ToastContainer } from "react-toastify";
 import { UserProvider } from './shared/contexts/UserContext.jsx';
 import { SidebarProvider, useSidebar } from './shared/contexts/SidebarContext.jsx';
@@ -11,14 +12,24 @@ import Settings from './pages/settings/Settings.jsx';
 import InstitutionalSounds from './pages/sounds/InstitutionalSounds.jsx';
 import Sidebar from './shared/components/Sidebar.jsx';
 import MultiAudioPlayer from './shared/components/MultiAudioPlayer.jsx';
+import SplashScreen from './shared/components/SplashScreen.jsx';
 
 const AppContent = () => {
   const location = useLocation();
   const { isCollapsed } = useSidebar();
   const isLoginPage = location.pathname === '/';
+  const [showSplash, setShowSplash] = useState(true);
+
+  // Mostrar pantalla de carga por 2 segundos en cada cambio de ruta
+  useEffect(() => {
+    setShowSplash(true);
+    const t = setTimeout(() => setShowSplash(false), 2000);
+    return () => clearTimeout(t);
+  }, [location.pathname]);
 
   return (
     <div className="app-container">
+      {showSplash && <SplashScreen />}
       {!isLoginPage && <Sidebar />}
       <main className={`main-content ${!isLoginPage ? (isCollapsed ? 'with-sidebar-collapsed' : 'with-sidebar') : ''}`}>
         <Routes>
