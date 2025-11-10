@@ -264,36 +264,35 @@ const ProgramsContent = () => {
       }
 
       let response;
+
       if (soundData.id) {
-        // Actualizar sonido existente
-        response = await ProgramService.updateProgramSound(soundData.id, soundData);
-      } else {
-        // Crear nuevo sonido
-        if (soundData.file) {
-          const formData = new FormData();
-          formData.append('file', soundData.file);
-          formData.append('sound_name', soundData.name || soundData.file?.name || 'audio');
-          formData.append('description', soundData.description || '');
-          formData.append('is_institutional', soundData.category === 'Institucional' ? 'true' : 'false');
-
-          const uploadRes = await ProgramService.uploadSound(formData);
-
-          const uploaded = uploadRes?.data || uploadRes;
-          const url = uploaded?.url || uploaded?.secure_url || uploaded?.file_path;
-          const durationAuto = uploaded?.duration || uploaded?.duration_seconds;
-
-          const payload = {
-            name: soundData.name,
-            description: soundData.description || '',
-            duration: durationAuto ?? soundData.duration ?? '',
-            category: soundData.category,
-            file_url: url || ''
-          };
-
-          response = await ProgramService.createProgramSound(selectedProgram.id, payload);
-        } else {
-          response = await ProgramService.createProgramSound(selectedProgram.id, soundData);
+        // Actualizar sonido existente con FormData (incluye archivo si se adjunta)
+        const formData = new FormData();
+        formData.append('name', soundData.name || '');
+        formData.append('description', soundData.description || '');
+        formData.append('duration', soundData.duration ?? '');
+        if (soundData.category_id) {
+          formData.append('category_id', soundData.category_id);
         }
+        if (soundData.file) {
+          formData.append('file', soundData.file);
+        }
+
+        response = await ProgramService.updateProgramSound(soundData.id, formData);
+      } else {
+        // Crear nuevo sonido con FormData (incluye archivo si se adjunta)
+        const formData = new FormData();
+        formData.append('sound_name', soundData.name || soundData.file?.name || 'audio');
+        formData.append('description', soundData.description || '');
+        formData.append('duration', soundData.duration ?? '');
+        if (soundData.category_id) {
+          formData.append('category_id', soundData.category_id);
+        }
+        if (soundData.file) {
+          formData.append('file', soundData.file);
+        }
+
+        response = await ProgramService.createProgramSound(selectedProgram.id, formData);
       }
 
       if (response.success) {

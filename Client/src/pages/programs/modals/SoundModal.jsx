@@ -107,28 +107,19 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
       return;
     }
     
-    // Crear FormData para enviar al backend
-    const formDataToSend = new FormData();
-    
-    // Mapear los campos correctamente para el backend
-    formDataToSend.append('sound_name', formData.name.trim());
-    formDataToSend.append('description', formData.description.trim());
-    formDataToSend.append('category_id', formData.category === 'Institucional' ? '1' : '2'); // Mapear categoría a ID
-    
-    // Si hay archivo seleccionado, agregarlo
-    if (selectedFile) {
-      formDataToSend.append('file', selectedFile);
-    }
-    
-    // Debug: Verificar que los datos se están enviando correctamente
-    console.log('FormData contents:');
-    for (let [key, value] of formDataToSend.entries()) {
-      console.log(key, value);
-    }
-    
+    // Armar objeto de datos y delegar la construcción de FormData al padre
+    const payload = {
+      id: sound?.id,
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      duration: formData.duration || '',
+      category_id: formData.category === 'Institucional' ? '1' : '2',
+      file: selectedFile || null
+    };
+
     try {
-      // Call onSave and wait for it to complete
-      await onSave(formDataToSend);
+      // Call onSave with plain payload; parent will build FormData
+      await onSave(payload);
       
       // Only reset and close if onSave succeeds
       resetForm();

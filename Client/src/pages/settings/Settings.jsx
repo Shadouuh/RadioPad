@@ -133,7 +133,7 @@ const Settings = () => {
               </div>
             </div>
             {loading ? (
-              <h2 className="sidebar-user-loading">Cargando... 🥟</h2>
+              <h2 className="sidebar-user-loading">Cargando... </h2>
             ) : (
               <div className="card-content user-profile-highlight">
                 <div className="user-profile-top">

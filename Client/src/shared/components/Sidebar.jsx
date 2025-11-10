@@ -132,7 +132,7 @@ const Sidebar = () => {
       </nav>
 
       {userLoading ? (
-        <h2 className="sidebar-user-loading">Cargando... 🥟</h2>
+        <h2 className="sidebar-user-loading">Cargando... </h2>
       ) : (
         <>
           {/* User Profile */}

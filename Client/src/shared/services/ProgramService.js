@@ -79,7 +79,11 @@ class ProgramService {
   // Crear un sonido asociado a un programa
   static async createProgramSound(programId, soundData) {
     try {
-      const response = await axios.post(`/sounds/program/${programId}`, soundData);
+      const response = await axios.post(`/sounds/program/${programId}`, soundData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       return response.data;
     } catch (error) {
       throw error;

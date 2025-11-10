@@ -235,21 +235,31 @@ class SoundController {
   createProgramSound = async (req, res) => {
     try {
       const { programId } = req.params;
-      const { name, description, duration, category, file_url } = req.body;
+      const { sound_name, description, duration, category, category_id, file_url } = req.body;
 
-      if (!programId || !name || !category) {
+      if (!programId || !sound_name || (!category && !category_id)) {
         return res.status(400).json({
           success: false,
-          message: 'El ID del programa, nombre y categoría son requeridos'
+          message: 'El ID del programa, nombre y categoría (nombre o ID) son requeridos'
         });
       }
 
+      // Si se envió un archivo, subir a Cloudinary y tomar url/duración
+      let finalFileUrl = file_url || '';
+      let finalDuration = duration || 'N/A';
+      if (req.file) {
+        const cloudinaryResult = await this.cloudinaryService.uploadAudio(req.file);
+        finalFileUrl = cloudinaryResult.url;
+        finalDuration = cloudinaryResult.duration || finalDuration;
+      }
+
       const soundData = {
-        name,
+        name: sound_name,
         description: description || '',
-        duration: duration || 'N/A',
+        duration: finalDuration,
         category,
-        file_url: file_url || '',
+        category_id: category_id ? parseInt(category_id) : undefined,
+        file_url: finalFileUrl,
         program_id: parseInt(programId)
       };
 
@@ -320,7 +330,7 @@ class SoundController {
   updateProgramSound = async (req, res) => {
     try {
       const { soundId } = req.params;
-      const { name, description, duration, category, file_url } = req.body;
+      const { name, description, duration, category, category_id, file_url } = req.body;
 
       if (!soundId || isNaN(soundId)) {
         return res.status(400).json({
@@ -329,19 +339,39 @@ class SoundController {
         });
       }
 
-      if (!name || !category) {
+      if (!name || (!category && !category_id)) {
         return res.status(400).json({
           success: false,
-          message: 'El nombre y la categoría son requeridos'
+          message: 'El nombre y la categoría (nombre o ID) son requeridos'
         });
+      }
+
+      let finalFileUrl = file_url || '';
+      let finalDuration = duration || 'N/A';
+
+      // Si se adjuntó un archivo nuevo, subir a Cloudinary y eliminar el anterior
+      if (req.file) {
+        const cloudinaryResult = await this.cloudinaryService.uploadAudio(req.file);
+        finalFileUrl = cloudinaryResult.url;
+        finalDuration = cloudinaryResult.duration || finalDuration;
+
+        // Eliminar archivo anterior de Cloudinary si existe
+        const existing = await soundService.getProgramSoundById(parseInt(soundId));
+        if (existing && existing.file_url) {
+          const urlParts = existing.file_url.split('/');
+          const fileName = urlParts[urlParts.length - 1];
+          const publicId = fileName.split('.')[0];
+          try { await this.cloudinaryService.deleteAudio(publicId); } catch (_) {}
+        }
       }
 
       const soundData = {
         name,
         description: description || '',
-        duration: duration || 'N/A',
+        duration: finalDuration,
         category,
-        file_url: file_url || ''
+        category_id: category_id ? parseInt(category_id) : undefined,
+        file_url: finalFileUrl
       };
 
       const sound = await soundService.updateProgramSound(parseInt(soundId), soundData);

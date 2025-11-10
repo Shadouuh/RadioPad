@@ -54,6 +54,8 @@ router.delete('/:soundId',
 // Crear un sonido asociado a un programa
 router.post('/program/:programId', 
   requireAuth,
+  handleUpload,
+  cleanTempFiles,
   soundController.createProgramSound
 );
 
@@ -72,6 +74,8 @@ router.get('/program-sound/:soundId',
 // Actualizar un sonido de programa
 router.put('/program-sound/:soundId', 
   requireAuth,
+  handleUpload,
+  cleanTempFiles,
   soundController.updateProgramSound
 );
 

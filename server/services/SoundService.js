@@ -38,29 +38,45 @@ class SoundService {
       const { 
         name, 
         description, 
-        duration, 
-        category, 
+          duration, 
+        category_id,
+        category,
         file_url, 
         program_id 
       } = soundData;
+
+      // Permitir enviar directamente el nombre de la categoría o el ID
+      let categoryName = category || null;
+      if (!categoryName) {
+        const [categoryResult] = await pool.query(
+          'SELECT category_name FROM sound_categories WHERE category_id = ?', 
+          [category_id]
+        );
+        
+        if (categoryResult.length === 0) {
+          throw {status: 400, message: 'Categoría no válida'};
+        }
+        categoryName = categoryResult[0].category_name;
+      }
       
       const [result] = await pool.query(
         `INSERT INTO sounds 
         (name, description, duration, category, file_url, program_id, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-        [name, description, duration, category, file_url, program_id]
+        [name, description, duration, categoryName, file_url, program_id]
       );
       
       return {
         id: result.insertId,
-        name,
+        sound_name: name,
         description,
         duration,
-        category,
+        category: categoryName,
         file_url,
         program_id
       };
     } catch (error) {
+      console.error('Error en createProgramSound:', error);
       throw {status: 500, message: 'Error al crear el sonido del programa'};
     }
   }
@@ -127,11 +143,24 @@ class SoundService {
   // Actualizar un sonido de programa
   async updateProgramSound(soundId, soundData) {
     try {
-      const { name, description, duration, category, file_url } = soundData;
+      const { name, description, duration, category, category_id, file_url } = soundData;
+
+      // Resolver nombre de categoría: usar `category` si viene, sino por `category_id`
+      let categoryName = category || null;
+      if (!categoryName && category_id) {
+        const [categoryResult] = await pool.query(
+          'SELECT category_name FROM sound_categories WHERE category_id = ?', 
+          [category_id]
+        );
+        if (categoryResult.length === 0) {
+          throw {status: 400, message: 'Categoría no válida'};
+        }
+        categoryName = categoryResult[0].category_name;
+      }
       
       const [result] = await pool.query(
         'UPDATE sounds SET name = ?, description = ?, duration = ?, category = ?, file_url = ? WHERE id = ?',
-        [name, description, duration, category, file_url, soundId]
+        [name, description, duration, categoryName, file_url, soundId]
       );
       
       if (result.affectedRows === 0) {
