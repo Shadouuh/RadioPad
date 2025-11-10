@@ -64,6 +64,26 @@ class SoundService {
   }
 
   /**
+   * Actualiza un sonido existente
+   */
+  async updateSound(soundId, formData) {
+    try {
+      // Debug: Verificar los datos antes de enviarlos
+      console.log('SoundService.updateSound - FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+      
+      // Don't set Content-Type header, let axios set it with the boundary
+      const response = await axios.put(`${API_URL}/sounds/${soundId}`, formData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error al actualizar el sonido con ID ${soundId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Elimina un sonido por su ID
    */
   async deleteSound(soundId) {

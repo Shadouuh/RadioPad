@@ -2,10 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import SoundService from '../../shared/services/SoundService';
 import { useMultiAudioPlayer } from '../../shared/contexts/MultiAudioPlayerContext.jsx';
 import { UserContext } from '../../shared/contexts/UserContext.jsx';
-import { FiPlay, FiTrash2, FiInfo, FiUpload } from 'react-icons/fi';
+import { FiPlay, FiTrash2, FiInfo, FiUpload, FiEdit } from 'react-icons/fi';
 import { FaMusic as FaMusicNote } from 'react-icons/fa';
 import './styles/InstitutionalSounds.css';
 import SoundModal from './SoundModal.jsx'
+import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
 
 /**
  * Componente para mostrar y gestionar los sonidos institucionales
@@ -16,10 +17,12 @@ const InstitutionalSounds = () => {
   const [error, setError] = useState(null);
   const [selectedSound, setSelectedSound] = useState(null);
   const [soundModalOpen, setSoundModalOpen] = useState(false);
+  const [editingSound, setEditingSound] = useState(null);
   
   // Hooks de contexto
   const { playSound, players } = useMultiAudioPlayer();
   const { user } = useContext(UserContext);
+  const { isCollapsed } = useSidebar();
 
   // Funciones de permisos
   const hasFullAccess = () => {
@@ -77,7 +80,18 @@ const InstitutionalSounds = () => {
       return;
     }
     // Abrir modal de subida
-    setSelectedSound(null);
+    setEditingSound(null);
+    setSoundModalOpen(true);
+  };
+
+  // Función para editar un sonido
+  const handleEditSound = (sound) => {
+    if (!canEditInstitutionalSound()) {
+      alert('No tienes permisos para editar sonidos institucionales');
+      return;
+    }
+    console.log('handleEditSound - sound object:', sound);
+    setEditingSound(sound);
     setSoundModalOpen(true);
   };
 
@@ -97,29 +111,49 @@ const InstitutionalSounds = () => {
     }
   };
 
-  const handleSaveSound = (soundData) => {
+  const handleSaveSound = async (soundData) => {
     if (!canEditInstitutionalSound()) {
       alert('No tienes permisos para subir sonidos institucionales');
       return;
     }
     
-
-    /*
+    // Debug: Verificar los datos recibidos
+    console.log('handleSaveSound received:', soundData);
     
-    
-    // Lógica para guardar el sonido
-    if (selectedSound) {
-      // Editar sonido existente
-      await SoundService.updateSound(selectedSound.sound_id, soundData);
+    // Check if soundData is FormData before trying to iterate
+    if (soundData instanceof FormData) {
+      console.log('FormData entries:');
+      for (let [key, value] of soundData.entries()) {
+        console.log(key, value);
+      }
     } else {
-      // Subir nuevo sonido
-      await SoundService.uploadSound(soundData);
+      console.log('soundData is not FormData:', typeof soundData);
+      throw new Error('Invalid data format received');
     }
-
-    */
-
-
-    setSoundModalOpen(false);
+    
+    try {
+      // Lógica para guardar el sonido
+      if (editingSound) {
+        // Editar sonido existente
+        console.log('Updating sound with ID:', editingSound.sound_id);
+        await SoundService.updateSound(editingSound.sound_id, soundData);
+      } else {
+        // Subir nuevo sonido
+        console.log('Uploading new sound');
+        await SoundService.uploadSound(soundData);
+      }
+      
+      // Recargar la lista de sonidos después de guardar
+      const response = await SoundService.getInstitutionalSounds();
+      setSounds(response);
+      setSoundModalOpen(false);
+      setEditingSound(null);
+    } catch (error) {
+      console.error('Error al guardar el sonido:', error);
+      alert('Error al guardar el sonido. Por favor, inténtalo de nuevo.');
+      // Re-throw the error so SoundModal knows it failed
+      throw error;
+    }
   };
 
   // Cerrar el modal de detalles
@@ -128,7 +162,7 @@ const InstitutionalSounds = () => {
   };
 
   return (
-    <div className="institutional-sounds-container">
+    <div className={`institutional-sounds-container ${isCollapsed ? 'with-sidebar-collapsed' : ''}`}>
       <div className="page-header">
         <div>
           <h1><FaMusicNote /> Sonidos Institucionales</h1>
@@ -194,13 +228,23 @@ const InstitutionalSounds = () => {
                     </button>
                     
                     {canEditInstitutionalSound() && (
-                      <button 
-                        className="action-button delete-button"
-                        onClick={() => deleteSound(sound.sound_id)}
-                        title="Eliminar"
-                      >
-                        <FiTrash2 />
-                      </button>
+                      <>
+                        <button 
+                          className="action-button edit-button"
+                          onClick={() => handleEditSound(sound)}
+                          title="Editar"
+                        >
+                          <FiEdit />
+                        </button>
+                        
+                        <button 
+                          className="action-button delete-button"
+                          onClick={() => deleteSound(sound.sound_id)}
+                          title="Eliminar"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -250,9 +294,12 @@ const InstitutionalSounds = () => {
       {/* Modal de subida de sonido */}
       <SoundModal
         isOpen={soundModalOpen}
-        onClose={() => setSoundModalOpen(false)}
+        onClose={() => {
+          setSoundModalOpen(false);
+          setEditingSound(null);
+        }}
         onSave={handleSaveSound}
-        sound={selectedSound}
+        sound={editingSound}
       />
 
     </div>

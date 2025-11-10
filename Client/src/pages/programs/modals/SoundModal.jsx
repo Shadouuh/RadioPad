@@ -14,13 +14,16 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    console.log('SoundModal useEffect - sound prop:', sound);
     if (sound) {
-      setFormData({
-        name: sound.name || '',
+      const newFormData = {
+        name: sound.sound_name || '',
         description: sound.description || '',
-        duration: sound.duration || '',
+        duration: sound.duration_seconds || '',
         category: sound.category || 'Institucional'
-      });
+      };
+      console.log('Setting form data for edit:', newFormData);
+      setFormData(newFormData);
       setSelectedFile(null); // Para edición, no necesitamos archivo nuevo
     } else {
       setFormData({
@@ -89,8 +92,14 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validar campos requeridos
+    if (!formData.name || !formData.description) {
+      alert('Por favor, completa el nombre y la descripción.');
+      return;
+    }
     
     // Para edición, no requerimos archivo nuevo
     if (!sound && !selectedFile) {
@@ -98,15 +107,37 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
       return;
     }
     
-    const soundData = {
-      ...formData,
-      ...(sound && { id: sound.id }), // Incluir ID si estamos editando
-      ...(selectedFile && { file: selectedFile }) // Solo incluir archivo si hay uno nuevo
-    };
+    // Crear FormData para enviar al backend
+    const formDataToSend = new FormData();
     
-    onSave(soundData);
-    resetForm();
-    onClose();
+    // Mapear los campos correctamente para el backend
+    formDataToSend.append('sound_name', formData.name.trim());
+    formDataToSend.append('description', formData.description.trim());
+    formDataToSend.append('category_id', formData.category === 'Institucional' ? '1' : '2'); // Mapear categoría a ID
+    
+    // Si hay archivo seleccionado, agregarlo
+    if (selectedFile) {
+      formDataToSend.append('file', selectedFile);
+    }
+    
+    // Debug: Verificar que los datos se están enviando correctamente
+    console.log('FormData contents:');
+    for (let [key, value] of formDataToSend.entries()) {
+      console.log(key, value);
+    }
+    
+    try {
+      // Call onSave and wait for it to complete
+      await onSave(formDataToSend);
+      
+      // Only reset and close if onSave succeeds
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+      // Don't close modal on error - let user retry
+      // The error will be shown by the parent component
+    }
   };
 
   const resetForm = () => {

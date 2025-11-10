@@ -474,7 +474,7 @@ input:checked + .toggle-slider:before {
   }
 }
 
-@media (max-width: 465px) {
+@media (max-width: 650px) {
   .settings-container {
     margin-left: 20px;
   }

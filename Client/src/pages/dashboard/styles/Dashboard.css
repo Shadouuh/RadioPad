@@ -126,7 +126,7 @@
   }
 }
 
-@media (max-width: 465px) {
+@media (max-width: 650px) {
   .dashboard {
     margin-left: 20px;
   }

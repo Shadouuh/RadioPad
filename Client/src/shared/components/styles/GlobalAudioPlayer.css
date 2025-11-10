@@ -1,7 +1,7 @@
 /* Reproductor de audio global */
 .global-audio-player {
   position: fixed;
-  bottom: 0;
+  bottom: 0; /* default: pegado al borde inferior en desktop */
   right: 0;
   height: 80px;
   background: #ffffff;
@@ -12,7 +12,7 @@
   align-items: center;
   padding: 0 1.5rem;
   gap: 1rem;
-  z-index: 999;
+  z-index: 999; /* por debajo del user bar (1001), por encima del contenido */
   transition: all 0.3s ease;
   animation: slideUp 0.3s ease-out;
   font-family: 'Urbanist', sans-serif;
@@ -402,6 +402,14 @@
   
   .volume-slider.vertical {
     width: 70px;
+  }
+}
+
+/* En móviles donde el sidebar es barra inferior (≤650px),
+   el reproductor se posiciona por encima del menú inferior */
+@media (max-width: 650px) {
+  .global-audio-player {
+    bottom: 70px; /* altura del menú inferior definida en Sidebar.css */
   }
 }
 

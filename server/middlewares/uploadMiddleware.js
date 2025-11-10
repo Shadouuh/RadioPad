@@ -42,11 +42,23 @@ const uploadAudio = multer({
   limits: {
     fileSize: 10 * 1024 * 1024,
   }
-}).single('file');
+});
 
-// Middleware para manejar errores de multer
+// Middleware para manejar archivos opcionales - permite que no haya archivo
+const uploadOptionalFile = (req, res, next) => {
+  const upload = uploadAudio.single('file');
+  upload(req, res, function (err) {
+    if (err) {
+      return next(err);
+    }
+    // Si no hay error, continuar (incluyendo el caso donde no hay archivo)
+    next();
+  });
+};
+
+// Middleware para manejar errores de multer y procesar form data
 export const handleUpload = (req, res, next) => {
-  uploadAudio(req, res, function (err) {
+  uploadOptionalFile(req, res, function (err) {
     if (err instanceof multer.MulterError) {
       // Error de Multer
       if (err.code === 'LIMIT_FILE_SIZE') {
@@ -66,7 +78,9 @@ export const handleUpload = (req, res, next) => {
         message: err.message || 'Error al subir el archivo' 
       });
     }
-    // Todo correcto
+    // Multer should have processed the form fields now
+    console.log('Multer middleware - File:', req.file);
+    console.log('Multer middleware - Body:', req.body);
     next();
   });
 };

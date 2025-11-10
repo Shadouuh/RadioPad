@@ -35,6 +35,18 @@ const GlobalAudioPlayer = () => {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const progressBarRef = useRef(null);
   const volumeSliderRef = useRef(null);
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+
+  const truncate = (str = '', max = 15) => {
+    if (!str) return '';
+    return str.length > max ? `${str.slice(0, max)}...` : str;
+  };
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Manejar clic en la barra de progreso
   const handleProgressClick = (e) => {
@@ -102,11 +114,15 @@ const GlobalAudioPlayer = () => {
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
   const sidebarWidth = isCollapsed ? 80 : 280;
+  const isSidebarMobileMode = viewportWidth <= 650;
+  const displayName = viewportWidth <= 650 
+    ? truncate(currentSound.sound_name, 15) 
+    : (currentSound.sound_name || 'Audio');
 
   return (
     <div 
       className="global-audio-player"
-      style={{ left: `${sidebarWidth}px` }}
+      style={{ left: isSidebarMobileMode ? 0 : `${sidebarWidth}px` }}
     >
       {/* Información del sonido */}
       <div className="player-info">
@@ -114,7 +130,7 @@ const GlobalAudioPlayer = () => {
           <FiMusic />
         </div>
         <div className="sound-details">
-          <h4 className="sound-name">{currentSound.sound_name}</h4>
+          <h4 className="sound-name">{displayName}</h4>
           <p className="sound-description">
             {currentSound.description || 'Sonido institucional'}
           </p>

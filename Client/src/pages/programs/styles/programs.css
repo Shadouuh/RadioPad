@@ -688,7 +688,7 @@
   background: #a8a8a8;
 }
 
-@media (max-width: 465px) {
+@media (max-width: 650px) {
   .programs-container{
     margin-left: 20px;
   }

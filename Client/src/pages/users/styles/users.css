@@ -308,7 +308,7 @@
   }
 }
 
-@media (max-width: 465px) {
+@media (max-width: 650px) {
   .users-container{
     margin-left: 20px;
   }

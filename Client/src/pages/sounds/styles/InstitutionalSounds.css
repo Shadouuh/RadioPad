@@ -10,6 +10,10 @@
   transition: margin-left 0.3s ease;
 }
 
+.institutional-sounds-container.with-sidebar-collapsed {
+  margin-left: 80px;
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -183,6 +187,14 @@
 
 .info-button:hover {
   background-color: rgba(33, 150, 243, 0.1);
+}
+
+.edit-button {
+  color: #ff9800;
+}
+
+.edit-button:hover {
+  background-color: rgba(255, 152, 0, 0.1);
 }
 
 .delete-button {
@@ -604,7 +616,7 @@
   }
 }
 
-@media (max-width: 465px) {
+@media (max-width: 650px) {
   .institutional-sounds-container {
     margin-left: 20px;
     margin-bottom: 90px;

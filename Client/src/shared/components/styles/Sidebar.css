@@ -310,7 +310,7 @@
 }
 
 /* Responsive - Mobile (Bottom Bar + Top User) */
-@media (max-width: 465px) {
+@media (max-width: 650px) {
   /* Sidebar de navegación en la parte inferior */
   .sidebar {
     top: auto;
@@ -461,11 +461,12 @@
 }
 
 /* Clase helper para ajustar el contenido principal en mobile */
-@media (max-width: 465px) {
+@media (max-width: 650px) {
   /* Agrega esta clase al contenedor principal de tu contenido */
   .main-content {
     padding-top: 64px; /* Altura del user bar */
-    padding-bottom: 70px; /* Altura del navigation bar */
+    /* Espacio para el menú inferior (70px) + reproductor global (70px) */
+    padding-bottom: 140px;
   }
 }
 

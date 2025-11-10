@@ -183,6 +183,29 @@ class SoundService {
     }
   }
   
+  // Actualizar un sonido institucional
+  async updateSound(soundId, soundData) {
+    try {
+      const { sound_name, description, file_path, duration_seconds, file_size, category_id } = soundData;
+      
+      const [result] = await pool.query(
+        'UPDATE sound_effects SET sound_name = ?, description = ?, file_path = ?, duration_seconds = ?, file_size = ?, category_id = ? WHERE sound_id = ?',
+        [sound_name, description, file_path, duration_seconds, file_size, category_id, soundId]
+      );
+      
+      if (result.affectedRows === 0) {
+        throw {status: 404, message: 'El sonido que intenta actualizar no existe'};
+      }
+      
+      return await this.getSoundById(soundId);
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      throw {status: 500, message: 'Error al actualizar el sonido'};
+    }
+  }
+
   // Obtener sonidos institucionales
   async getInstitutionalSounds() {
     try {

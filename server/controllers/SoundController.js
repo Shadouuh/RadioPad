@@ -142,6 +142,75 @@ class SoundController {
     }
   }
   
+  // Actualizar un sonido institucional
+  updateSound = async (req, res) => {
+    try {
+      console.log('Backend updateSound - Request received:');
+      console.log('Params:', req.params);
+      console.log('Body:', req.body);
+      console.log('File:', req.file);
+      console.log('Content-Type:', req.headers['content-type']);
+      console.log('Request method:', req.method);
+      
+      const { soundId } = req.params;
+      const { sound_name, description, category_id } = req.body;
+
+      if (!soundId) {
+        return res.status(400).json({
+          error: true,
+          message: 'Se requiere el ID del sonido'
+        });
+      }
+
+      if (!sound_name || !description) {
+        console.log('Validation failed - sound_name:', sound_name, 'description:', description);
+        return res.status(400).json({
+          error: true,
+          message: 'El nombre y la descripción son requeridos'
+        });
+      }
+
+      // Si hay un nuevo archivo, subirlo a Cloudinary
+      let updateData = {
+        sound_name,
+        description,
+        category_id: category_id || null
+      };
+
+      if (req.file) {
+        // Subir nuevo archivo a Cloudinary
+        const cloudinaryResult = await this.cloudinaryService.uploadAudio(req.file);
+        updateData.file_path = cloudinaryResult.url;
+        updateData.duration_seconds = cloudinaryResult.duration || 0;
+        updateData.file_size = req.file.size;
+
+        // Eliminar el archivo anterior de Cloudinary
+        const sound = await soundService.getSoundById(soundId);
+        if (sound && sound.file_path) {
+          const urlParts = sound.file_path.split('/');
+          const fileName = urlParts[urlParts.length - 1];
+          const publicId = fileName.split('.')[0];
+          await this.cloudinaryService.deleteAudio(publicId);
+        }
+      }
+
+      const updatedSound = await soundService.updateSound(soundId, updateData);
+
+      return res.status(200).json({
+        error: false,
+        message: 'Sonido actualizado correctamente',
+        data: updatedSound
+      });
+
+    } catch (error) {
+      const errorResponse = handleError(error);
+      return res.status(errorResponse.statusCode).json({
+        error: true,
+        message: errorResponse.message
+      });
+    }
+  }
+
   // Obtener sonidos institucionales
   getInstitutionalSounds = async (req, res) => {
     try {

@@ -35,6 +35,14 @@ router.get('/:soundId',
   soundController.getSoundInfo
 );
 
+// Actualizar un sonido institucional
+router.put('/:soundId', 
+  // requireAuth,  // Comentado temporalmente para pruebas
+  handleUpload, 
+  cleanTempFiles, 
+  soundController.updateSound
+);
+
 // Eliminar un sonido por ID
 router.delete('/:soundId', 
   // requireAuth,  // Comentado temporalmente para pruebas
