@@ -73,6 +73,10 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
+  /* Mantener tamaño mínimo para que siempre entren los botones y el contenido */
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .sound-card:hover {
@@ -109,7 +113,9 @@
 
 .sound-card-body {
   padding: 1rem;
-  height: 60px;
+  /* Reservar espacio para que el contenido no achique la tarjeta en grids de 4 */
+  min-height: 80px;
+  flex: 1;
   overflow: hidden;
 }
 
@@ -128,6 +134,8 @@
   justify-content: space-around;
   padding: 0.75rem;
   border-top: 1px solid #eee;
+  /* Empuja las acciones al fondo de la tarjeta para layout consistente */
+  margin-top: auto;
 }
 
 .action-button {

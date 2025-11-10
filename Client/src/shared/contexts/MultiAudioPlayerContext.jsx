@@ -121,14 +121,39 @@ export const MultiAudioPlayerProvider = ({ children }) => {
     return playerId;
   }, [generatePlayerId, players.size]);
 
+  // Cerrar todos los reproductores excepto (opcional) uno a mantener
+  const closeAllExcept = useCallback((keepId = null) => {
+    const idsToClose = Array.from(players.keys()).filter(id => id !== keepId);
+    idsToClose.forEach(id => {
+      const audio = audioRefs.current.get(id);
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+        audioRefs.current.delete(id);
+      }
+    });
+    if (idsToClose.length > 0) {
+      setPlayers(prev => {
+        const newMap = new Map(prev);
+        idsToClose.forEach(id => newMap.delete(id));
+        return newMap;
+      });
+    }
+  }, [players]);
+
   // Función para reproducir un sonido (crear nuevo reproductor o usar existente)
   const playSound = useCallback((sound) => {
     if (!sound || !sound.file_path) return;
 
     // Buscar si ya existe un reproductor para este sonido
-    const existingPlayer = Array.from(players.entries()).find(
-      ([_, player]) => player.currentSound && player.currentSound.sound_id === sound.sound_id
-    );
+    const existingPlayer = Array.from(players.entries()).find(([_, player]) => {
+      if (!player.currentSound) return false;
+      const currentId = player.currentSound.sound_id;
+      const incomingId = sound.sound_id;
+      const sameId = currentId != null && incomingId != null && String(currentId) === String(incomingId);
+      const samePath = player.currentSound.file_path && player.currentSound.file_path === sound.file_path;
+      return sameId || samePath;
+    });
 
     if (existingPlayer) {
       const [playerId, player] = existingPlayer;
@@ -155,10 +180,13 @@ export const MultiAudioPlayerProvider = ({ children }) => {
           });
       }
     } else {
-      // Crear nuevo reproductor
+      // Modo de un solo reproductor: cerrar cualquier otro existente antes de crear el nuevo
+      if (players.size > 0) {
+        closeAllExcept(null);
+      }
       createPlayer(sound);
     }
-  }, [players, createPlayer]);
+  }, [players, createPlayer, closeAllExcept]);
 
   // Función para pausar un reproductor específico
   const pausePlayer = useCallback((playerId) => {

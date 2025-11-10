@@ -167,32 +167,78 @@
 
 /* Role Badge */
 .role-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #e8f5e8;
-  border: 2px solid #c8e6c9;
-  border-radius: 8px;
-  font-weight: 600;
-  color: #2e7d32;
-  flex-direction: column;
-  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 9999px; /* pill */
+  font-weight: 700;
+  color: #111827;
+  background: linear-gradient(90deg, #eef2ff, #e0e7ff);
+  border: 1px solid #e5e7eb;
 }
 
 .role-indicator {
-  width: 8px;
-  height: 8px;
-  background: #4caf50;
+  width: 10px;
+  height: 10px;
+  background: #111827;
   border-radius: 50%;
   display: inline-block;
 }
 
 .role-badge small {
-  color: #6c757d;
-  font-weight: 400;
+  color: #6b7280;
+  font-weight: 500;
   font-size: 12px;
-  margin-top: 4px;
+}
+
+/* Highlighted user profile header */
+.user-profile-highlight {
+  background: linear-gradient(180deg, rgba(17,24,39,0.04), rgba(17,24,39,0.02));
+  border-radius: 12px;
+}
+
+.user-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.user-avatar-big {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #111827;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 22px;
+  box-shadow: 0 6px 12px rgba(17, 24, 39, 0.15);
+}
+
+.user-ident {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-name-highlight {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.user-email-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 /* Password Input */

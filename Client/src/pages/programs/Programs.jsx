@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaPlay, FaPause, FaTimes, FaHeadphones, FaAd, FaPowerOff } from 'react-icons/fa';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { FaPlus, FaEdit, FaTrash, FaPause, FaTimes, FaHeadphones, FaAd, FaPowerOff } from 'react-icons/fa';
+import { FiPlay, FiTrash2 } from 'react-icons/fi';
 import { MdMusicNote } from 'react-icons/md';
 import ProgramModal from './modals/ProgramModal.jsx';
 import SoundModal from './modals/SoundModal.jsx';
 import './styles/programs.css';
+import '../sounds/styles/InstitutionalSounds.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
 import { useMultiAudioPlayer } from '../../shared/contexts/MultiAudioPlayerContext.jsx';
 import { UserContext } from '../../shared/contexts/UserContext.jsx';
@@ -13,7 +15,7 @@ import usePermisos from '../../shared/hooks/usePermisos.js';
 
 const ProgramsContent = () => {
   const { isCollapsed } = useSidebar();
-  const { playSound, players } = useMultiAudioPlayer();
+  const { playSound, players, closePlayer } = useMultiAudioPlayer();
   const { user, loading: userLoading } = useContext(UserContext);
   const { hasFullAccess } = usePermisos();
   const notify = useNotification();
@@ -27,6 +29,7 @@ const ProgramsContent = () => {
   const [programSounds, setProgramSounds] = useState({});
   const [loadingSounds, setLoadingSounds] = useState(false);
   const [selectedSound, setSelectedSound] = useState(null);
+  const lastAutoPlayedProgramRef = useRef(null);
 
   const canEditProgram = (program) => {
     const result = hasFullAccess();
@@ -81,6 +84,21 @@ const ProgramsContent = () => {
       loadProgramSounds(selectedProgram.id);
     }
   }, [selectedProgram]);
+
+  // Reproducir automáticamente un sonido representativo cuando los sonidos del programa estén disponibles tras la selección
+  useEffect(() => {
+    if (!selectedProgram || !selectedProgram.id) return;
+    const sounds = programSounds[selectedProgram.id];
+    if (Array.isArray(sounds) && sounds.length > 0) {
+      if (lastAutoPlayedProgramRef.current !== selectedProgram.id) {
+        const chosen = pickProgramIntroSound(sounds);
+        if (chosen) {
+          handlePlaySound(chosen);
+          lastAutoPlayedProgramRef.current = selectedProgram.id;
+        }
+      }
+    }
+  }, [programSounds, selectedProgram]);
 
   const loadPrograms = async () => {
     try {
@@ -274,8 +292,22 @@ const ProgramsContent = () => {
         const response = await ProgramService.deleteProgramSound(soundId);
         if (response.success) {
           notify('Sonido eliminado exitosamente', 'success');
-          loadProgramSounds(selectedProgram.id); // Recargar sonidos del programa
-          programs[selectedProgram.id].effects--;
+          // Cerrar cualquier reproductor que esté reproduciendo este sonido
+          Array.from(players.entries()).forEach(([playerId, player]) => {
+            if (player.currentSound?.sound_id === soundId) {
+              closePlayer(playerId);
+            }
+          });
+
+          // Recargar sonidos del programa
+          loadProgramSounds(selectedProgram.id);
+
+          // Actualizar contador de efectos del programa seleccionado en el listado
+          setPrograms(prev => prev.map(p => (
+            p.id === selectedProgram.id
+              ? { ...p, effects: Math.max(0, (p.effects || 1) - 1) }
+              : p
+          )));
         } else {
           notify('Error al eliminar sonido', 'error');
         }
@@ -295,15 +327,49 @@ const ProgramsContent = () => {
     setIsSoundModalOpen(true);
   };
 
+  // Nota: Para evitar errores, mantenemos la implementación de datos original sin modal de detalles.
+  // Elegir un sonido representativo del programa (prioriza Institucional/Jingles)
+  const pickProgramIntroSound = (sounds) => {
+    if (!Array.isArray(sounds) || sounds.length === 0) return null;
+    const priority = ['Institucional', 'Jingles', 'Jingle', 'Comerciales', 'Música', 'Efectos'];
+    for (const cat of priority) {
+      const match = sounds.find(s => (s.category || '').toLowerCase() === cat.toLowerCase());
+      if (match) return match;
+    }
+    return sounds[0];
+  };
+
+  // Al seleccionar un programa, reproducir uno de sus sonidos si ya están cargados
+  const handleSelectProgramWithPlay = (program) => {
+    setSelectedProgram(program);
+    const sounds = programSounds[program.id];
+    if (Array.isArray(sounds) && sounds.length > 0) {
+      const chosen = pickProgramIntroSound(sounds);
+      if (chosen) {
+        handlePlaySound(chosen);
+      }
+    }
+  };
+
   // Función para reproducir un sonido usando el reproductor global
   const handlePlaySound = (sound) => {
+    // Normalizar la URL del archivo para que sea absoluta (igual que en InstitutionalSounds)
+    const serverOrigin = (import.meta.env?.VITE_API_URL || '').replace(/\/?api\/?$/, '');
+    const rawPath = sound.file_url || sound.url || sound.file_path || sound.audio_url || '';
+    const isAbsolute = /^https?:\/\//i.test(rawPath);
+    const normalizedPath = isAbsolute
+      ? rawPath
+      : serverOrigin
+        ? `${serverOrigin}${rawPath.startsWith('/') ? '' : '/'}${rawPath}`
+        : rawPath; // fallback por si no tenemos serverOrigin
+
     // Preparar el objeto de sonido para el reproductor global
     const soundData = {
-      sound_id: sound.id,
-      sound_name: sound.name,
+      sound_id: sound.sound_id || sound.id || sound.soundId,
+      sound_name: sound.sound_name || sound.name || sound.title || 'Audio',
       description: sound.description || sound.category || 'Efecto de sonido',
-      file_path: sound.file_url || sound.url || sound.file_path || sound.audio_url,
-      duration_seconds: sound.duration
+      file_path: normalizedPath,
+      duration_seconds: sound.duration_seconds || sound.duration || undefined
     };
 
     playSound(soundData);
@@ -397,7 +463,7 @@ const ProgramsContent = () => {
                 <div
                   key={program.id}
                   className={`program-item ${selectedProgram?.id === program.id ? 'selected' : ''}`}
-                  onClick={() => handleSelectProgram(program)}
+                  onClick={() => handleSelectProgramWithPlay(program)}
                 >
                   <div className="program-info">
                     <h4>{program.name}</h4>
@@ -462,48 +528,37 @@ const ProgramsContent = () => {
                 ) : (
                   programSounds[selectedProgram.id].map(sound => (
                     <div key={sound.id} className="sound-card">
-                      <div className="sound-header">
-                        <div className="sound-info">
-                          <h4>{sound.name}</h4>
-                          <span className="sound-duration">{sound.duration || 'N/A'}</span>
-                        </div>
-                        <div className="sound-actions">
-                          <button
-                            className={`btn-icon play ${isSoundPlaying(sound.id) ? 'playing' : ''
-                              }`}
-                            onClick={() => handlePlaySound(sound)}
-                            title={
-                              isSoundPlaying(sound.id)
-                                ? 'Reproduciendo...'
-                                : 'Reproducir'
-                            }
-                          >
-                            <FaPlay />
-                          </button>
-                          {canEditSound(sound) && (
-                            <button
-                              className="btn-icon edit"
-                              onClick={() => handleEditSound(sound)}
-                              title="Editar"
-                            >
-                              <FaEdit />
-                            </button>
-                          )}
-                          {canEditSound(sound) && (
-                            <button
-                              className="btn-icon delete"
-                              onClick={() => handleDeleteSound(sound.id)}
-                              title="Eliminar"
-                            >
-                              <FaTrash />
-                            </button>
-                          )}
-                        </div>
+                      <div className="sound-card-header">
+                        <h3>{sound.name}</h3>
+                        <span className="sound-duration">{typeof sound.duration === 'number' ? `${Math.floor(sound.duration)}s` : (sound.duration || 'N/A')}</span>
                       </div>
-                      <p className="sound-category">{sound.category}</p>
-                      {sound.description && (
-                        <p className="sound-description">{sound.description}</p>
-                      )}
+                      <div className="sound-card-body">
+                        <p className="sound-description">{sound.description || 'Sin descripción'}</p>
+                      </div>
+                      <div className="sound-card-actions">
+                        <button 
+                          className={`action-button play-button ${
+                            isSoundPlaying(sound.id) ? 'playing' : ''
+                          }`}
+                          onClick={() => handlePlaySound(sound)}
+                          title={
+                            isSoundPlaying(sound.id)
+                              ? 'Reproduciendo...'
+                              : 'Reproducir'
+                          }
+                        >
+                          <FiPlay />
+                        </button>
+                        {canEditSound(sound) && (
+                          <button 
+                            className="action-button delete-button"
+                            onClick={() => handleDeleteSound(sound.id)}
+                            title="Eliminar"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}
@@ -536,6 +591,7 @@ const ProgramsContent = () => {
         program={editingProgram}
         onSave={handleSaveProgram}
       />
+
 
       <SoundModal
         isOpen={isSoundModalOpen}

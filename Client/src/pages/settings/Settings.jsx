@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { FaUser, FaLock, FaCog, FaShieldAlt, FaEye, FaEyeSlash, FaVolumeUp, FaBell, FaMoon, FaCheck } from 'react-icons/fa';
+import { FaUser, FaLock, FaShieldAlt, FaEye, FaEyeSlash, FaCheck, FaEnvelope } from 'react-icons/fa';
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
 import './styles/settings.css';
 import { UserContext } from '../../shared/contexts/UserContext.jsx';
@@ -16,12 +16,6 @@ const Settings = () => {
     role: user?.role || ''
   });
 
-  // Estados para preferencias
-  const [preferences, setPreferences] = useState({
-    soundEffects: true,
-    notify: true,
-    darkMode: false
-  });
 
   useEffect(() => {
     if (user) {
@@ -30,11 +24,7 @@ const Settings = () => {
         email: user.email || '',
         role: user.role || ''
       });
-      setPreferences({
-        soundEffects: user.config?.effects_sounds == 1 ? true : false,
-        notify: user.config?.notify == 1 ? true : false,
-        darkMode: user.config?.dark_mode == 1 ? true : false,
-      });
+      // Preferencias eliminadas de la interfaz
     }
   }, [user, loading]);
 
@@ -84,33 +74,9 @@ const Settings = () => {
     }));
   };
 
-  const handlePreferenceToggle = async (preference) => {
-    if (preference === 'darkMode') {
-
-
-      // Logica del front --------------------
-
-
-      alert('Cambiar a modo oscuro no está implementado');
-    }
-
-    try {
-      const response = await axios.post('/auth/update-preferences', {
-        [preference]: preferences[preference] ? 0 : 1
-      });
-
-      if (response.data?.success) {
-        setPreferences(prev => ({
-          ...prev,
-          [preference]: !prev[preference]
-        }));
-      } else {
-        alert('Error al actualizar preferencias');
-      }
-    } catch (err) {
-      alert('Error al actualizar preferencias');
-      console.error(err?.response?.data?.message || 'Error al actualizar preferencias:', err);
-    }
+  // Helper para iniciales del usuario
+  const getUserInitials = (name) => {
+    return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
   const handleUpdatePassword = async () => {
@@ -157,7 +123,7 @@ const Settings = () => {
 
       <div className="settings-content">
         <div className="settings-grid">
-          {/* Perfil de Usuario */}
+          {/* Perfil de Usuario (mejorado) */}
           <div className="settings-card">
             <div className="card-header">
               <FaUser className="card-icon" />
@@ -169,16 +135,22 @@ const Settings = () => {
             {loading ? (
               <h2 className="sidebar-user-loading">Cargando... 🥟</h2>
             ) : (
-              <div className="card-content">
-                <span>Nombre</span>
-                <h3>{userProfile.name}</h3>
-                <span>Email</span>
-                <h3>{userProfile.email}</h3>
+              <div className="card-content user-profile-highlight">
+                <div className="user-profile-top">
+                  <div className="user-avatar-big">
+                    <span>{getUserInitials(userProfile.name)}</span>
+                  </div>
+                  <div className="user-ident">
+                    <h2 className="user-name-highlight">{userProfile.name}</h2>
+                    <p className="user-email-line"><FaEnvelope /> {userProfile.email}</p>
+                  </div>
+                </div>
                 <div className="form-group">
                   <label htmlFor="role">Rol Actual</label>
-                  <div className="role-badge">
+                  <div className="role-badge emphasized">
                     <span className="role-indicator"></span>
                     {userProfile.role}
+                    <small>Estado de permisos</small>
                   </div>
                 </div>
               </div>
@@ -261,73 +233,7 @@ const Settings = () => {
             </div>
           </div>
 
-          {/* Preferencias */}
-          <div className="settings-card">
-            <div className="card-header">
-              <FaCog className="card-icon" />
-              <div>
-                <h3>Preferencias</h3>
-                <p>Personaliza tu experiencia</p>
-              </div>
-            </div>
-            {loading ? (
-              <h2 className="sidebar-user-loading">Cargando... 🥟</h2>
-            ) : (
-              <div className="card-content">
-                <div className="preference-item">
-                  <div className="preference-info">
-                    <FaVolumeUp className="preference-icon" />
-                    <div>
-                      <h4>Efectos de Sonido</h4>
-                      <p>Habilitar sonidos de la interfaz</p>
-                    </div>
-                  </div>
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={preferences.soundEffects}
-                      onChange={() => handlePreferenceToggle('soundEffects')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
-                </div>
-                <div className="preference-item">
-                  <div className="preference-info">
-                    <FaBell className="preference-icon" />
-                    <div>
-                      <h4>Notificaciones</h4>
-                      <p>Recibir notificaciones del sistema</p>
-                    </div>
-                  </div>
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={preferences.notify}
-                      onChange={() => handlePreferenceToggle('notify')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
-                </div>
-                <div className="preference-item">
-                  <div className="preference-info">
-                    <FaMoon className="preference-icon" />
-                    <div>
-                      <h4>Modo Oscuro</h4>
-                      <p>Cambiar tema de la interfaz</p>
-                    </div>
-                  </div>
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={preferences.darkMode}
-                      onChange={() => handlePreferenceToggle('darkMode')}
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Preferencias removidas según solicitud */}
 
           {/* Permisos y Accesos */}
           <div className="settings-card">

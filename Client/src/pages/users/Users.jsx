@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { FiUser, FiEdit, FiTrash2, FiPlus } from 'react-icons/fi';
+import { FiUser, FiEdit, FiTrash2, FiPlus, FiPower } from 'react-icons/fi';
 import UserModal from './modals/UserModal'; 
 import './styles/users.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext';
@@ -242,7 +242,9 @@ const Users = () => {
                     <div className="user-details">
                       <h3>{user.name}</h3>
                       <p className="user-email">{user.email}</p>
-                      <p className="user-program">{getProgramName(user.program_id)}</p>
+                      <div className="user-program-badges">
+                        <span className="program-badge">{getProgramName(user.program_id)}</span>
+                      </div>
                     </div>
                   </div>
                   
@@ -269,7 +271,7 @@ const Users = () => {
                           onClick={() => toggleUser(user.id, user.active)}
                           title={user.active ? 'Desactivar usuario' : 'Activar usuario'}
                         >
-                          🥟
+                          <FiPower />
                         </button>
                       )}
                     </div>
