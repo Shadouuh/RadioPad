@@ -160,6 +160,13 @@ const Users = () => {
     return program ? program.name : 'Programa no encontrado';
   };
 
+  const getUserPrograms = (user) => {
+    if (!user.programs || user.programs.length === 0) {
+      return ['Sin programas asignados'];
+    }
+    return user.programs.map(program => program.name);
+  };
+
   // Mostrar estado de carga mientras se obtiene el usuario
   if (userLoading || !user) {
     return (
@@ -243,7 +250,9 @@ const Users = () => {
                       <h3>{user.name}</h3>
                       <p className="user-email">{user.email}</p>
                       <div className="user-program-badges">
-                        <span className="program-badge">{getProgramName(user.program_id)}</span>
+                        {getUserPrograms(user).map((programName, index) => (
+                          <span key={index} className="program-badge">{programName}</span>
+                        ))}
                       </div>
                     </div>
                   </div>

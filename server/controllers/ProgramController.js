@@ -51,22 +51,16 @@ class ProgramController {
     getUserPrograms = async (req, res) => {
         try {
             const userRole = req.user.role;
-            const userProgramId = req.user.program_id;
+            const userId = req.user.user_id;
 
             let programs;
 
-            // Si el usuario tiene program_id null, puede ver todos los programas
-            if (userProgramId === null || userProgramId === undefined) {
-                programs = await this.programService.getAllPrograms();
-            } else if (userRole === 'Jefe de Operadores') {
+            // Jefe de Operadores puede ver todos los programas
+            if (userRole === 'Jefe de Operadores') {
                 programs = await this.programService.getAllPrograms();
             } else if (userRole === 'Operador' || userRole === 'Productor') {
-                // Operador y Productor solo ven su programa asignado
-                if (userProgramId) {
-                    programs = await this.programService.getProgramsByIds([userProgramId]);
-                } else {
-                    programs = []; // No tiene programa asignado
-                }
+                // Operador y Productor solo ven sus programas asignados
+                programs = await this.programService.getUserPrograms(userId);
             } else {
                 // Rol no válido, no mostrar nada
                 programs = [];
@@ -175,6 +169,73 @@ class ProgramController {
                 success: true,
                 message: 'Estado del programa actualizado exitosamente',
                 data: program
+            });
+
+        } catch (err) {
+            return handleError(res, err);
+        }
+    };
+
+    // Asignar un programa a un usuario
+    assignProgramToUser = async (req, res) => {
+        try {
+            const { userId, programId } = req.body;
+
+            if (!userId || !programId) {
+                throw { status: 400, message: 'El ID de usuario y el ID de programa son requeridos' };
+            }
+
+            const assignedBy = req.user.user_id;
+            const result = await this.programService.assignProgramToUser(userId, programId, assignedBy);
+
+            res.status(201).json({
+                success: true,
+                message: 'Programa asignado al usuario exitosamente',
+                data: result
+            });
+
+        } catch (err) {
+            return handleError(res, err);
+        }
+    };
+
+    // Desasignar un programa de un usuario
+    unassignProgramFromUser = async (req, res) => {
+        try {
+            const { userId, programId } = req.body;
+
+            if (!userId || !programId) {
+                throw { status: 400, message: 'El ID de usuario y el ID de programa son requeridos' };
+            }
+
+            const result = await this.programService.unassignProgramFromUser(userId, programId);
+
+            res.status(200).json({
+                success: true,
+                message: 'Programa desasignado del usuario exitosamente',
+                data: result
+            });
+
+        } catch (err) {
+            return handleError(res, err);
+        }
+    };
+
+    // Obtener usuarios asignados a un programa
+    getProgramUsers = async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            if (!id || isNaN(id)) {
+                throw { status: 400, message: 'ID de programa inválido' };
+            }
+
+            const users = await this.programService.getProgramUsers(parseInt(id));
+
+            res.status(200).json({
+                success: true,
+                message: 'Usuarios del programa obtenidos exitosamente',
+                data: users
             });
 
         } catch (err) {

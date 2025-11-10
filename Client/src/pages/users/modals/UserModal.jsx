@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
+import ProgramSelector from '../components/ProgramSelector';
 import './UserModal.css';
 
 const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
@@ -7,7 +8,7 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
     name: '',
     email: '',
     role: '',
-    program_id: ''
+    program_ids: [] // Cambiado de program_id a program_ids
   });
 
   const availableRoles = ['Jefe de Operadores', 'Productor', 'Operador'];
@@ -20,10 +21,22 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
     }));
   };
 
+  const handleProgramsChange = (programIds) => {
+    setFormData(prev => ({
+      ...prev,
+      program_ids: programIds
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Si es edición y no se proporciona contraseña, no la incluimos
+    // Validar que se haya seleccionado al menos un programa
+    if (formData.program_ids.length === 0) {
+      alert('Por favor selecciona al menos un programa');
+      return;
+    }
+
     const dataToSend = { ...formData };
 
     onSave(dataToSend);
@@ -38,14 +51,14 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
         name: user.name || '',
         email: user.email || '',
         role: user.role || availableRoles[0],
-        program_id: user.program_id ?? ''
+        program_ids: user.programs ? user.programs.map(p => p.id) : []
       });
     } else {
       setFormData({
         name: '',
         email: '',
         role: availableRoles[0],
-        program_id: ''
+        program_ids: []
       });
     }
   }, [user, isOpen]);
@@ -111,22 +124,14 @@ const UserModal = ({ isOpen, onClose, user = null, programs = [], onSave }) => {
               </select>
             </div>
 
+            {/* Nuevo selector de múltiples programas */}
             <div className="form-group">
-              <label htmlFor="program_id">Programa Asignado</label>
-              <select
-                id="program_id"
-                name="program_id"
-                value={formData.program_id}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Selecciona un programa</option>
-                {programs.map(program => (
-                  <option key={program.id} value={program.id}>
-                    {program.name}
-                  </option>
-                ))}
-              </select>
+              <ProgramSelector
+                programs={programs}
+                selectedPrograms={formData.program_ids}
+                onProgramsChange={handleProgramsChange}
+                label="Programas Asignados"
+              />
             </div>
 
             <div className="form-group">

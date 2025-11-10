@@ -16,14 +16,14 @@ class AuthService {
 
     registerUser = async (userData) => {
         try {
-            const { name, email, password, role, program_id } = userData;
+            const { name, email, password, role } = userData;
             const normalizedEmail = email.toLowerCase().trim();
 
             const hashedPassword = await this.hashPassword(password);
 
             const [user] = await this.conex.query(
-                'INSERT INTO users (name, email, password, role, program_id) VALUES (?, ?, ?, ?, ?)',
-                [name, normalizedEmail, hashedPassword, role, program_id || null]
+                'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+                [name, normalizedEmail, hashedPassword, role]
             );
 
             const [config] = await this.conex.query(
@@ -31,12 +31,21 @@ class AuthService {
                 [user.insertId]
             );
 
+            // Obtener programas asignados al usuario (si los hay)
+            const [programs] = await this.conex.query(`
+                SELECT p.id, p.name, p.description, p.status
+                FROM programs p
+                INNER JOIN user_programs up ON p.id = up.program_id
+                WHERE up.user_id = ? AND p.status = 'Active'
+                ORDER BY p.name ASC
+            `, [user.insertId]);
+
             return {
                 user_id: user.insertId,
                 name: name,
                 email: normalizedEmail,
                 role: role,
-                program_id: program_id || null,
+                programs: programs || [],
                 config: {
                     config_id: config.insertId,
                     effects_sounds: true,
@@ -104,12 +113,21 @@ class AuthService {
                 [user.user_id]
             );
 
+            // Obtener programas asignados al usuario
+            const [programs] = await this.conex.query(`
+                SELECT p.id, p.name, p.description, p.status
+                FROM programs p
+                INNER JOIN user_programs up ON p.id = up.program_id
+                WHERE up.user_id = ? AND p.status = 'Active'
+                ORDER BY p.name ASC
+            `, [user.user_id]);
+
             return {
                 user_id: user.user_id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                program_id: user.program_id,
+                programs: programs || [],
                 config: {
                     config_id: config[0].config_id,
                     effects_sounds: config[0].effects_sounds,

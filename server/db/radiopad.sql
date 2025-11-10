@@ -226,7 +226,6 @@ CREATE TABLE `users` (
   `failed_attempts` int(11) DEFAULT 0,
   `active` tinyint(1) DEFAULT 1,
   `role` enum('Productor','Operador','Jefe de Operadores') DEFAULT 'Productor',
-  `program_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -235,9 +234,31 @@ CREATE TABLE `users` (
 -- Volcado de datos para la tabla `users`
 --
 
-INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `lock_until`, `failed_attempts`, `active`, `role`, `program_id`, `created_at`, `updated_at`) VALUES
-(1, 'Productor Test', 'productor@example.com', 'hashedpassword123', NULL, 0, 0, 'Productor', NULL, '2025-10-27 23:09:04', '2025-11-07 19:14:22'),
-(2, 'Admin', 'admin@radiopad.com', '$2b$10$OIJ4a1EkkLae5qGOrJt6WefZSwwVe6nXHdbe9I9RfVpg2nQkOIp5O', NULL, 0, 1, 'Jefe de Operadores', 4, '2025-11-03 21:15:00', '2025-11-07 18:03:40');
+INSERT INTO `users` (`user_id`, `name`, `email`, `password`, `lock_until`, `failed_attempts`, `active`, `role`, `created_at`, `updated_at`) VALUES
+(1, 'Productor Test', 'productor@example.com', 'hashedpassword123', NULL, 0, 0, 'Productor', '2025-10-27 23:09:04', '2025-11-07 19:14:22'),
+(2, 'Admin', 'admin@radiopad.com', '$2b$10$OIJ4a1EkkLae5qGOrJt6WefZSwwVe6nXHdbe9I9RfVpg2nQkOIp5O', NULL, 0, 1, 'Jefe de Operadores', '2025-11-03 21:15:00', '2025-11-07 18:03:40');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `user_programs`
+--
+
+CREATE TABLE `user_programs` (
+  `user_program_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `program_id` int(11) NOT NULL,
+  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `assigned_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `user_programs`
+--
+
+INSERT INTO `user_programs` (`user_program_id`, `user_id`, `program_id`, `assigned_at`, `assigned_by`) VALUES
+(1, 2, 1, '2025-10-27 23:09:04', NULL),
+(2, 2, 4, '2025-11-03 21:15:00', NULL);
 
 --
 -- Índices para tablas volcadas
@@ -309,8 +330,17 @@ ALTER TABLE `sound_effects`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `users_ibfk_1` (`program_id`);
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- Indices de la tabla `user_programs`
+--
+ALTER TABLE `user_programs`
+  ADD PRIMARY KEY (`user_program_id`),
+  ADD UNIQUE KEY `unique_user_program` (`user_id`,`program_id`),
+  ADD KEY `idx_user_programs_user` (`user_id`),
+  ADD KEY `idx_user_programs_program` (`program_id`),
+  ADD KEY `idx_user_programs_assigned_by` (`assigned_by`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -371,6 +401,12 @@ ALTER TABLE `users`
   MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT de la tabla `user_programs`
+--
+ALTER TABLE `user_programs`
+  MODIFY `user_program_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- Restricciones para tablas volcadas
 --
 
@@ -414,10 +450,12 @@ ALTER TABLE `sound_effects`
   ADD CONSTRAINT `sound_effects_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
 
 --
--- Filtros para la tabla `users`
+-- Filtros para la tabla `user_programs`
 --
-ALTER TABLE `users`
-  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE SET NULL;
+ALTER TABLE `user_programs`
+  ADD CONSTRAINT `user_programs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_programs_ibfk_2` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_programs_ibfk_3` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

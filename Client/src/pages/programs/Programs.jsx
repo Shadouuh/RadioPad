@@ -31,12 +31,17 @@ const ProgramsContent = () => {
   const [selectedSound, setSelectedSound] = useState(null);
   const lastAutoPlayedProgramRef = useRef(null);
 
+  // Función auxiliar para verificar si el usuario tiene acceso a un programa específico
+  const hasProgramAccess = (programId) => {
+    if (!user?.programs || !Array.isArray(user.programs)) return false;
+    return user.programs.some(program => program.id === programId);
+  };
+
   const canEditProgram = (program) => {
     const result = hasFullAccess();
     if (result) return true;
     if (user?.role === 'Operador') {
-      const programMatch = user?.program_id === program.id;
-      return programMatch;
+      return hasProgramAccess(program.id);
     }
     return false;
   };
@@ -45,8 +50,7 @@ const ProgramsContent = () => {
     const result = hasFullAccess();
     if (result) return true;
     if (user?.role === 'Operador' && selectedProgram) {
-      const programMatch = user?.program_id === selectedProgram.id;
-      return programMatch;
+      return hasProgramAccess(selectedProgram.id);
     }
     return false;
   };
@@ -65,14 +69,16 @@ const ProgramsContent = () => {
     const result = hasFullAccess();
     if (result) return true;
     if (user?.role === 'Operador' && selectedProgram) {
-      const programMatch = user?.program_id === selectedProgram.id;
-      return programMatch;
+      return hasProgramAccess(selectedProgram.id);
     }
     return false;
   };
 
   // Cargar programas al montar el componente
   useEffect(() => {
+    console.log('=== DEBUG useEffect user ===');
+    console.log('User changed:', user);
+    console.log('User loading:', userLoading);
     if (user) {
       loadPrograms();
     }
@@ -103,12 +109,33 @@ const ProgramsContent = () => {
   const loadPrograms = async () => {
     try {
       setLoading(true);
+      console.log('=== DEBUG loadPrograms ===');
+      console.log('Usuario actual:', user);
+      console.log('Has full access:', hasFullAccess());
+      console.log('User programs:', user?.programs);
+      
       const response = await ProgramService.getUserPrograms();
+      console.log('Response from getUserPrograms:', response);
+      
       if (response.success) {
-        if(hasFullAccess()) setPrograms(response.data);
-        else {
-          console.log(user?.program_id);
-          setPrograms(response.data.filter(program => program.id == user?.program_id));
+        console.log('All programs from API:', response.data);
+        
+        if(hasFullAccess()) {
+          setPrograms(response.data);
+          console.log('Set programs (full access):', response.data);
+        } else {
+          // Filtrar programas a los que el usuario tiene acceso
+          const userProgramIds = user?.programs?.map(p => p.id) || [];
+          console.log('User program IDs:', userProgramIds);
+          
+          const filteredPrograms = response.data.filter(program => {
+            const hasAccess = userProgramIds.includes(program.id);
+            console.log(`Program ${program.id} (${program.name}): ${hasAccess ? 'HAS ACCESS' : 'NO ACCESS'}`);
+            return hasAccess;
+          });
+          
+          console.log('Filtered programs:', filteredPrograms);
+          setPrograms(filteredPrograms);
         }
       } else {
         notify('Error al cargar programas', 'error');
@@ -454,9 +481,14 @@ const ProgramsContent = () => {
               <div className="empty-state">
                 <p>
                   {user?.role === 'Operador' || user?.role === 'Productor'
-                    ? 'No tienes programas asignados'
+                    ? `No tienes programas asignados (Usuario: ${user?.username || 'N/A'}, Programas: ${user?.programs?.length || 0})`
                     : 'No hay programas registrados'}
                 </p>
+                {user?.role === 'Operador' || user?.role === 'Productor' ? (
+                  <small style={{ color: '#666', marginTop: '10px', display: 'block' }}>
+                    Debug: User programs IDs: {user?.programs?.map(p => p.id).join(', ') || 'Ninguno'}
+                  </small>
+                ) : null}
               </div>
             ) : (
               programs && programs.map(program => (

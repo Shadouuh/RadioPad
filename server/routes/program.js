@@ -18,4 +18,9 @@ router.put('/:id', requireAuth, programController.updateProgram);
 router.delete('/:id', requireAuth, programController.deleteProgram);
 router.patch('/:id/toggle-status', requireAuth, programController.toggleProgramStatus);
 
+// Rutas para asignación de programas a usuarios
+router.post('/assign', requireAuth, programController.assignProgramToUser);
+router.delete('/unassign', requireAuth, programController.unassignProgramFromUser);
+router.get('/:id/users', requireAuth, programController.getProgramUsers);
+
 export default router;
