@@ -16,7 +16,7 @@ const Dashboard = () => {
     message: '',
     connection: false
   });
-  const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const [time, setTime] = useState(new Date().toLocaleTimeString('es-ES', { hour12: false }));
   const [loading, setLoading] = useState(true);
   const notify = useNotification();
   const { isCollapsed } = useSidebar();
@@ -54,7 +54,7 @@ const Dashboard = () => {
     const interval = setInterval(() => {
       fetchData();
       checkApi();
-      setTime(new Date().toLocaleTimeString());
+      setTime(new Date().toLocaleTimeString('es-ES', { hour12: false }));
     }, 10000);
     return () => clearInterval(interval);
   }, []);

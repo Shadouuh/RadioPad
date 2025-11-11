@@ -5,7 +5,7 @@
   "main": "electron/main.js",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && npx electron .\"",
+    "dev": "vite",
     "build": "vite build && electron-builder",
     "start": "electron .",
     "package": "electron-forge package",

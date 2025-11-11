@@ -16,9 +16,9 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
   useEffect(() => {
     if (sound) {
       setFormData({
-        name: sound.name || '',
+        name: sound.sound_name || '',
         description: sound.description || '',
-        duration: sound.duration || '',
+        duration: sound.duration_seconds || '',
         category: sound.category || 'Institucional'
       });
       setSelectedFile(null); // Para edición, no necesitamos archivo nuevo
