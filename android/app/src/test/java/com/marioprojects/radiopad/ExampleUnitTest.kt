@@ -1,4 +1,4 @@
-package com.radioprojects.movil
+package com.marioprojects.radiopad
 
 import org.junit.Test
 

@@ -19,5 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "movil"
+rootProject.name = "RadioPad"
 include(":app")
+ 

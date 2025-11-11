@@ -1,4 +1,4 @@
-package com.radioprojects.movil.ui.theme
+package com.marioprojects.radiopad.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

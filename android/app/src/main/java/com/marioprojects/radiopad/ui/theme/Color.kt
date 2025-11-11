@@ -1,4 +1,4 @@
-package com.radioprojects.movil.ui.theme
+package com.marioprojects.radiopad.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

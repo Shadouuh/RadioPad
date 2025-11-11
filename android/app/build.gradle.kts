@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.radioprojects.movil"
+    namespace = "com.marioprojects.radiopad"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.radioprojects.movil"
+        applicationId = "com.marioprojects.radiopad"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
