@@ -25,7 +25,7 @@ const AppContent = () => {
     setShowSplash(true);
     const t = setTimeout(() => setShowSplash(false), 750);
     return () => clearTimeout(t);
-  }, [location.pathname]);
+  }, []);
 
   return (
     <div className="app-container">

@@ -57,7 +57,6 @@ const ProgramSelectionModal = ({
 
         <div className="program-modal-search">
           <div className="search-input-container">
-            <FiSearch className="search-icon" />
             <input
               type="text"
               placeholder="Buscar programas..."
@@ -65,6 +64,7 @@ const ProgramSelectionModal = ({
               onChange={(e) => setSearchTerm(e.target.value)}
               className="program-search-input"
             />
+            <FiSearch className="search-icon" size={24} />
           </div>
         </div>
 
@@ -88,7 +88,7 @@ const ProgramSelectionModal = ({
                       onChange={(e) => handleProgramToggle(program.id, e)}
                     />
                   </div>
-                  <div className="program-info">
+                  <div className={`program-info ${selectedPrograms.includes(program.id) ? 'selected' : ''}`}>
                     <h4>{program.name}</h4>
                     <p>{program.description || 'Sin descripción'}</p>
                     <span className={`program-status ${program.status.toLowerCase()}`}>

@@ -33,8 +33,9 @@ const ProgramsContent = () => {
 
   // Función auxiliar para verificar si el usuario tiene acceso a un programa específico
   const hasProgramAccess = (programId) => {
+    if(hasFullAccess()) return true;
     if (!user?.programs || !Array.isArray(user.programs)) return false;
-    return user.programs.some(program => program.id === programId);
+    return user.programs.some(program => program.id === programId) && user.programs.some(program => program.status === 'Active');
   };
 
   const canEditProgram = (program) => {
@@ -89,22 +90,22 @@ const ProgramsContent = () => {
   const loadPrograms = async () => {
     try {
       setLoading(true);
-      
+
       const response = await ProgramService.getUserPrograms();
-      
+
       if (response.success) {
-        
-        if(hasFullAccess()) {
+
+        if (hasFullAccess()) {
           setPrograms(response.data);
         } else {
           // Filtrar programas a los que el usuario tiene acceso
           const userProgramIds = user?.programs?.map(p => p.id) || [];
-          
+
           const filteredPrograms = response.data.filter(program => {
             const hasAccess = userProgramIds.includes(program.id);
             return hasAccess;
           });
-          
+
           setPrograms(filteredPrograms);
         }
       } else {
@@ -269,6 +270,13 @@ const ProgramsContent = () => {
         notify(soundData.id ? 'Sonido actualizado exitosamente' : 'Sonido agregado exitosamente', 'success');
         setIsSoundModalOpen(false);
         loadProgramSounds(selectedProgram.id); // Recargar sonidos del programa
+
+        // Actualizar contador de efectos del programa seleccionado en el listado
+        setPrograms(prev => prev.map(p => (
+          p.id === selectedProgram.id
+            ? { ...p, effects: Math.max(0, (p.effects || 1) + 1) }
+            : p
+        )));
       } else {
         notify('Error al guardar sonido', 'error');
       }
@@ -530,10 +538,9 @@ const ProgramsContent = () => {
                         <p className="sound-description">{sound.description || 'Sin descripción'}</p>
                       </div>
                       <div className="sound-card-actions">
-                        <button 
-                          className={`action-button play-button ${
-                            isSoundPlaying(sound.id) ? 'playing' : ''
-                          }`}
+                        <button
+                          className={`action-button play-button ${isSoundPlaying(sound.id) ? 'playing' : ''
+                            }`}
                           onClick={() => handlePlaySound(sound)}
                           title={
                             isSoundPlaying(sound.id)
@@ -544,7 +551,7 @@ const ProgramsContent = () => {
                           <FiPlay />
                         </button>
                         {canEditSound(sound) && (
-                          <button 
+                          <button
                             className="action-button delete-button"
                             onClick={() => handleDeleteSound(sound.id)}
                             title="Eliminar"

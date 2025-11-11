@@ -162,14 +162,12 @@
 .program-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 9999px; /* pill shape */
   font-size: 0.75rem;
   font-weight: 500;
-  color: white;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  border: 1px solid #2563eb;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  color: #111827;
+  background: #f3f4f6;
   transition: all 0.2s ease;
 }
 

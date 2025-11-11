@@ -244,18 +244,6 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="duration">Duración</label>
-                <input
-                  type="text"
-                  id="duration"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
-                  placeholder="ej: 10s"
-                />
-              </div>
-
-              <div className="form-group">
                 <label htmlFor="category">Categoría</label>
                 <select
                   id="category"
@@ -263,7 +251,6 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
                   value={formData.category}
                   onChange={handleInputChange}
                 >
-                  <option value="Institucional">Institucional</option>
                   <option value="Música">Música</option>
                   <option value="Efectos">Efectos</option>
                   <option value="Jingles">Jingles</option>

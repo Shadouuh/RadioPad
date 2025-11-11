@@ -117,28 +117,6 @@ const Login = () => {
           </button>
         </form>
 
-        {/* Usuarios de prueba */}
-        <div className="login-test-users">
-          <h3 className="login-test-users-title">Usuarios de prueba:</h3>
-          <div className="login-test-users-list">
-            {testUsers.map((user, index) => (
-              <div key={index} className="login-test-user">
-                <span 
-                  className="login-test-user-email"
-                  onClick={() => handleTestUserClick(user.email)}
-                >
-                  {user.email}
-                </span>
-                <span className="login-test-user-role">({user.role})</span>
-              </div>
-            ))}
-          </div>
-          <div className="login-forgot-password">
-            <button className="login-forgot-password-link" onClick={() => navigate('/')}>
-              ¿Olvidaste tu contraseña?
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

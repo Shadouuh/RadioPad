@@ -7,7 +7,7 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
     name: '',
     description: '',
     duration: '',
-    category: 'Institucional'
+    category: 'Efectos de ambiente'
   });
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -19,7 +19,7 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
         name: sound.sound_name || '',
         description: sound.description || '',
         duration: sound.duration_seconds || '',
-        category: sound.category || 'Institucional'
+        category: sound.category || 'Efectos de ambiente'
       });
       setSelectedFile(null); // Para edición, no necesitamos archivo nuevo
     } else {
@@ -27,7 +27,7 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
         name: '',
         description: '',
         duration: '',
-        category: 'Institucional'
+        category: 'Efectos de ambiente'
       });
       setSelectedFile(null);
     }
@@ -114,7 +114,7 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
       name: '',
       description: '',
       duration: '',
-      category: 'Institucional'
+      category: 'Efectos de ambiente'
     });
     setSelectedFile(null);
     setDragActive(false);
@@ -222,18 +222,6 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="duration">Duración</label>
-                <input
-                  type="text"
-                  id="duration"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
-                  placeholder="ej: 10s"
-                />
-              </div>
-
-              <div className="form-group">
                 <label htmlFor="category">Categoría</label>
                 <select
                   id="category"
@@ -241,7 +229,6 @@ const SoundModal = ({ isOpen, onClose, onSave, sound }) => {
                   value={formData.category}
                   onChange={handleInputChange}
                 >
-                  <option value="Institucional">Institucional</option>
                   <option value="Música">Música</option>
                   <option value="Efectos">Efectos</option>
                   <option value="Jingles">Jingles</option>
