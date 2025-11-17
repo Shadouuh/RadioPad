@@ -74,6 +74,38 @@ class ProgramService {
     }
   }
 
+  // ===== ASIGNACIÓN DE USUARIOS A PROGRAMAS =====
+
+  // Obtener usuarios asignados a un programa
+  static async getProgramUsers(programId) {
+    try {
+      const response = await axios.get(`/programs/${programId}/users`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Asignar un usuario a un programa
+  static async assignProgramToUser(userId, programId) {
+    try {
+      const response = await axios.post('/programs/assign', { userId, programId });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Desasignar un usuario de un programa
+  static async unassignProgramFromUser(userId, programId) {
+    try {
+      const response = await axios.delete('/programs/unassign', { data: { userId, programId } });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // ===== GESTIÓN DE SONIDOS DE PROGRAMAS =====
 
   // Crear un sonido asociado a un programa

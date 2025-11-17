@@ -7,6 +7,7 @@ import { FaMusic as FaMusicNote } from 'react-icons/fa';
 import './styles/InstitutionalSounds.css';
 import SoundModal from './SoundModal.jsx'
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
+import Soundboard from '../../shared/components/Soundboard.jsx';
 
 /**
  * Componente para mostrar y gestionar los sonidos institucionales
@@ -174,6 +175,30 @@ const InstitutionalSounds = () => {
           </button>
         )}
       </div>
+
+      {/* Botonera de efectos: aparece solo si hay sonidos */}
+      {Array.isArray(sounds) && sounds.length > 0 && (
+        (() => {
+          const serverOrigin = (import.meta.env?.VITE_API_URL || '').replace(/\/?api\/?$/, '');
+          const sbSounds = sounds.map((s) => {
+            const rawPath = s.file_path || s.file_url || s.url || '';
+            const isAbsolute = /^https?:\/\//i.test(rawPath);
+            const normalizedPath = isAbsolute
+              ? rawPath
+              : serverOrigin
+                ? `${serverOrigin}${rawPath.startsWith('/') ? '' : '/'}${rawPath}`
+                : rawPath;
+            return {
+              id: s.sound_id ?? s.id,
+              name: s.sound_name ?? s.name ?? 'Audio',
+              description: s.description || 'Efecto institucional',
+              duration: s.duration_seconds ?? s.duration,
+              file_path: normalizedPath,
+            };
+          });
+          return <Soundboard sounds={sbSounds} />;
+        })()
+      )}
       
       {loading ? (
         <div className="loading-container">

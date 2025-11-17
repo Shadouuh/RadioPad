@@ -226,10 +226,6 @@ class ProgramController {
         try {
             const { id } = req.params;
 
-            if (!id || isNaN(id)) {
-                throw { status: 400, message: 'ID de programa inválido' };
-            }
-
             const users = await this.programService.getProgramUsers(parseInt(id));
 
             res.status(200).json({

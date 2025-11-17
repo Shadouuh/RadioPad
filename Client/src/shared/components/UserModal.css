@@ -170,7 +170,7 @@
 }
 
 .user-option.active {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #111827;
   color: white;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }

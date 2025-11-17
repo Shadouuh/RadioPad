@@ -4,6 +4,7 @@ import { FiPlay, FiTrash2 } from 'react-icons/fi';
 import { MdMusicNote } from 'react-icons/md';
 import ProgramModal from './modals/ProgramModal.jsx';
 import SoundModal from './modals/SoundModal.jsx';
+import AssignUsersModal from './modals/AssignUsersModal.jsx';
 import './styles/programs.css';
 import '../sounds/styles/InstitutionalSounds.css';
 import { useSidebar } from '../../shared/contexts/SidebarContext.jsx';
@@ -12,6 +13,7 @@ import { UserContext } from '../../shared/contexts/UserContext.jsx';
 import ProgramService from '../../shared/services/ProgramService.js';
 import useNotification from '../../shared/hooks/useNotification';
 import usePermisos from '../../shared/hooks/usePermisos.js';
+import Soundboard from '../../shared/components/Soundboard.jsx';
 
 const ProgramsContent = () => {
   const { isCollapsed } = useSidebar();
@@ -25,6 +27,7 @@ const ProgramsContent = () => {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isProgramModalOpen, setIsProgramModalOpen] = useState(false);
   const [isSoundModalOpen, setIsSoundModalOpen] = useState(false);
+  const [isAssignUsersOpen, setIsAssignUsersOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
   const [programSounds, setProgramSounds] = useState({});
   const [loadingSounds, setLoadingSounds] = useState(false);
@@ -516,7 +519,40 @@ const ProgramsContent = () => {
                 <span className={`status-badge ${selectedProgram.status.toLowerCase()}`}>
                   {selectedProgram.status === 'Active' ? 'Activo' : 'Inactivo'}
                 </span>
+                {hasFullAccess() && (
+                  <button
+                    className="new-program-btn"
+                    style={{ marginLeft: 'auto' }}
+                    onClick={() => setIsAssignUsersOpen(true)}
+                  >
+                    Asignar usuarios
+                  </button>
+                )}
               </div>
+
+              {/* Botonera de efectos: aparece solo si hay sonidos */}
+              {Array.isArray(programSounds[selectedProgram.id]) && programSounds[selectedProgram.id].length > 0 && (
+                (() => {
+                  const serverOrigin = (import.meta.env?.VITE_API_URL || '').replace(/\/?api\/?$/, '');
+                  const sbSounds = programSounds[selectedProgram.id].map((s) => {
+                    const rawPath = s.file_url || s.url || s.file_path || s.audio_url || '';
+                    const isAbsolute = /^https?:\/\//i.test(rawPath);
+                    const normalizedPath = isAbsolute
+                      ? rawPath
+                      : serverOrigin
+                        ? `${serverOrigin}${rawPath.startsWith('/') ? '' : '/'}${rawPath}`
+                        : rawPath;
+                    return {
+                      id: s.id ?? s.sound_id ?? s.soundId,
+                      name: s.name ?? s.sound_name ?? s.title ?? 'Audio',
+                      description: s.description ?? s.category ?? 'Efecto de sonido',
+                      duration: s.duration ?? s.duration_seconds,
+                      file_path: normalizedPath,
+                    };
+                  });
+                  return <Soundboard sounds={sbSounds} />;
+                })()
+              )}
 
               <div className="effects-grid">
                 {loadingSounds ? (
@@ -603,6 +639,15 @@ const ProgramsContent = () => {
         onSave={handleSaveSound}
         sound={selectedSound}
       />
+
+      {selectedProgram && (
+        <AssignUsersModal
+          isOpen={isAssignUsersOpen}
+          onClose={() => setIsAssignUsersOpen(false)}
+          program={selectedProgram}
+          canManage={hasFullAccess()}
+        />
+      )}
 
     </div>
   );
