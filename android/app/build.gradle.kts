@@ -30,12 +30,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        // AGP 8.x recomienda JDK 17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = freeCompilerArgs + listOf("-language-version=1.9")
+        // Alinear con JDK 17 y evitar forzar language-version antigua
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
