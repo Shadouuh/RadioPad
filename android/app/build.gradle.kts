@@ -3,7 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
-    alias(libs.plugins.kotlin.kapt)
+    // Migramos Hilt a KSP para evitar fallos de KAPT
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -65,10 +66,10 @@ dependencies {
     // Gson
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
 
-    // Hilt for dependency injection
+    // Hilt for dependency injection (usando KSP en lugar de KAPT)
     implementation(libs.hilt.android)
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
@@ -85,6 +86,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
-kapt {
-    correctErrorTypes = true
-}
+// KAPT eliminado: usamos KSP para la generación de código de Hilt
