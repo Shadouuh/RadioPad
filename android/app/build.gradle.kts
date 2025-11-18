@@ -63,12 +63,14 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.moshi)
     implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.okhttp.core)
+    implementation(libs.okhttp.urlconnection)
 
     // Lifecycle + ViewModel + StateFlow (Kotlin)
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 
     // Gson
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
     // Hilt for dependency injection (usando KSP en lugar de KAPT)
     implementation(libs.hilt.android)
