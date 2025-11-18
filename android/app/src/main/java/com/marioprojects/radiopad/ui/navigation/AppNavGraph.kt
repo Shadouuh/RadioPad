@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.marioprojects.radiopad.ui.screens.auth.ui.LoginScreen
+import com.marioprojects.radiopad.ui.auth.screens.LoginScreen
 
 // Definición de rutas de la app (simple y coherente con las secciones)
 sealed class Screen(val route: String) {
