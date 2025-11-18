@@ -1,6 +1,5 @@
 package com.marioprojects.radiopad.ui.navigation
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
@@ -18,13 +17,12 @@ import com.marioprojects.radiopad.ui.programs.viewmodel.ProgramsViewModel
 // Definición de rutas de la app (simple y coherente con las secciones)
 sealed class Screen(val route: String) {
     data object Login : Screen("auth/login")
-    data object Register : Screen("auth/register")
     data object Programs : Screen("programs")
+    data object ProgramSounds : Screen("program/{programId}/sounds")
 }
 
 /**
- * NavHost principal de la app: inicia en Login y navega a Dashboard o Register.
- * Por ahora las pantallas de Register/Dashboard son placeholders para facilitar el flujo.
+ * NavHost principal de la app: inicia en Login y navega a Programs al autenticarse.
  */
 @Composable
 fun AppNavHost(
@@ -41,21 +39,17 @@ fun AppNavHost(
             LoginScreen(
                 isLoading = state is AuthState.Loading,
                 errorMessage = (state as? AuthState.Error)?.message,
-                onLogin = { email, password, _ -> vm.login(email, password) },
-                onNavigateToRegister = { navController.navigate(Screen.Register.route) }
+                onLogin = { email, password, _ -> vm.login(email, password) }
             )
 
-            if (state is AuthState.Success) {
-                // Navegar a la lista de programas una vez logueado
-                navController.navigate(Screen.Programs.route) {
-                    popUpTo(Screen.Login.route) { inclusive = true }
+            // Navegar solo cuando el estado cambie a Success (evitar múltiples navegaciones)
+            LaunchedEffect(state) {
+                if (state is AuthState.Success) {
+                    navController.navigate(Screen.Programs.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
                 }
             }
-        }
-
-        composable(Screen.Register.route) {
-            // TODO: Implementar RegisterScreen más adelante
-            Text("Registro (próximamente)")
         }
 
         composable(Screen.Programs.route) {
@@ -63,6 +57,7 @@ fun AppNavHost(
             val programs = vm.programs.collectAsState().value
             val isLoading = vm.loading.collectAsState().value
             val errorMessage = vm.error.collectAsState().value
+            val soundsByProgram = vm.soundsByProgram.collectAsState().value
 
             // Cargar una sola vez al entrar en la pantalla
             LaunchedEffect(Unit) {
@@ -72,7 +67,34 @@ fun AppNavHost(
             ProgramsScreen(
                 programs = programs,
                 isLoading = isLoading,
-                errorMessage = errorMessage
+                errorMessage = errorMessage,
+                soundsCountByProgram = soundsByProgram.mapValues { it.value.size },
+                onRequestProgramSounds = { id -> vm.loadProgramSounds(id) },
+                onProgramClick = { program ->
+                    navController.navigate("program/${program.id}/sounds")
+                }
+            )
+        }
+
+        composable(
+            route = Screen.ProgramSounds.route,
+            arguments = listOf(
+                androidx.navigation.navArgument("programId") { type = androidx.navigation.NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val vm: ProgramsViewModel = hiltViewModel()
+            val programId = backStackEntry.arguments?.getLong("programId") ?: 0L
+            val soundsMap = vm.soundsByProgram.collectAsState().value
+            val errorMessage = vm.error.collectAsState().value
+
+            LaunchedEffect(programId) {
+                vm.loadProgramSounds(programId)
+            }
+
+            com.marioprojects.radiopad.ui.sounds.screens.ProgramSoundsScreen(
+                sounds = soundsMap[programId] ?: emptyList(),
+                errorMessage = errorMessage,
+                onBack = { navController.popBackStack() }
             )
         }
     }

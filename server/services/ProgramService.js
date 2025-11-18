@@ -33,7 +33,8 @@ class ProgramService {
     // Obtener todos los programas
     getAllPrograms = async () => {
         try {
-            console.log('=== DEBUG getAllPrograms SQL ===');
+            const DEBUG_PROGRAMS = process.env.DEBUG_PROGRAMS === 'true';
+            if (DEBUG_PROGRAMS) console.log('=== DEBUG getAllPrograms SQL ===');
             const [programs] = await this.conex.query(`
                 SELECT 
                     p.id,
@@ -49,8 +50,10 @@ class ProgramService {
                 ORDER BY p.created_at DESC
             `);
             
-            console.log('Programas encontrados:', programs.length);
-            console.log('Primeros programas:', programs.slice(0, 3));
+            if (DEBUG_PROGRAMS) {
+                console.log('Programas encontrados:', programs.length);
+                console.log('Primeros programas:', programs.slice(0, 3));
+            }
 
             return programs;
 
@@ -63,16 +66,19 @@ class ProgramService {
     // Obtener programas por IDs
     getProgramsByIds = async (programIds) => {
         try {
-            console.log('=== DEBUG getProgramsByIds ===');
-            console.log('programIds recibidos:', programIds);
+            const DEBUG_PROGRAMS = process.env.DEBUG_PROGRAMS === 'true';
+            if (DEBUG_PROGRAMS) {
+                console.log('=== DEBUG getProgramsByIds ===');
+                console.log('programIds recibidos:', programIds);
+            }
             
             if (!programIds || programIds.length === 0) {
-                console.log('No hay programIds, devolviendo array vacío');
+                if (DEBUG_PROGRAMS) console.log('No hay programIds, devolviendo array vacío');
                 return [];
             }
 
             const placeholders = programIds.map(() => '?').join(',');
-            console.log('Placeholders:', placeholders);
+            if (DEBUG_PROGRAMS) console.log('Placeholders:', placeholders);
             
             const [programs] = await this.conex.query(`
                 SELECT 
@@ -90,8 +96,10 @@ class ProgramService {
                 ORDER BY p.created_at DESC
             `, programIds);
             
-            console.log('Programas encontrados por IDs:', programs.length);
-            console.log('Programas:', programs);
+            if (DEBUG_PROGRAMS) {
+                console.log('Programas encontrados por IDs:', programs.length);
+                console.log('Programas:', programs);
+            }
 
             return programs;
 
@@ -104,8 +112,11 @@ class ProgramService {
     // Obtener programas de un usuario específico
     getUserPrograms = async (userId) => {
         try {
-            console.log('=== DEBUG getUserPrograms ===');
-            console.log('userId recibido:', userId);
+            const DEBUG_PROGRAMS = process.env.DEBUG_PROGRAMS === 'true';
+            if (DEBUG_PROGRAMS) {
+                console.log('=== DEBUG getUserPrograms ===');
+                console.log('userId recibido:', userId);
+            }
             
             const [programs] = await this.conex.query(`
                 SELECT 
@@ -125,8 +136,10 @@ class ProgramService {
                 ORDER BY p.created_at DESC
             `, [userId]);
             
-            console.log('Programas del usuario encontrados:', programs.length);
-            console.log('Programas:', programs);
+            if (DEBUG_PROGRAMS) {
+                console.log('Programas del usuario encontrados:', programs.length);
+                console.log('Programas:', programs);
+            }
 
             return programs;
 

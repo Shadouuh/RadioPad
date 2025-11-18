@@ -40,8 +40,7 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
     errorMessage: String? = null,
-    onLogin: (email: String, password: String, rememberMe: Boolean) -> Unit = { _, _, _ -> },
-    onNavigateToRegister: () -> Unit = {}
+    onLogin: (email: String, password: String, rememberMe: Boolean) -> Unit = { _, _, _ -> }
 ) {
 
     var email by remember { mutableStateOf("") }
@@ -142,13 +141,6 @@ fun LoginScreen(
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
-
-                TextButton(
-                    onClick = { if (!isLoading) onNavigateToRegister() },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text("¿No tenés cuenta? Crear cuenta")
-                }
             }
         }
     }

@@ -31,6 +31,8 @@ class ProgramsViewModel @Inject constructor(
     val loading: StateFlow<Boolean> = _loading
 
     fun loadUserPrograms() = viewModelScope.launch {
+        // Evitar llamadas duplicadas si ya estamos cargando o ya cargamos datos
+        if (_loading.value || _programs.value.isNotEmpty()) return@launch
         _loading.value = true
         _error.value = null
         val result = getUserPrograms()
@@ -42,6 +44,8 @@ class ProgramsViewModel @Inject constructor(
     }
 
     fun loadProgramSounds(programId: Long) = viewModelScope.launch {
+        // Evitar recargar si ya tenemos los sonidos de este programa
+        if (_soundsByProgram.value.containsKey(programId)) return@launch
         val result = getProgramSounds(programId)
         result.fold(
             onSuccess = { sounds ->
