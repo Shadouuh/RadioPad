@@ -51,6 +51,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
+    // Provide text APIs like KeyboardOptions, VisualTransformation
+    implementation("androidx.compose.ui:ui-text")
+    // Compose Foundation (some text/input helpers are here depending on BOM)
+    implementation("androidx.compose.foundation:foundation")
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)

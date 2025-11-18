@@ -15,10 +15,10 @@ fun LoginResponseDto.toDomain(): User {
 
     val configDomain = this.user.config?.let { configDto ->
         Config(
-            configId = configDto.configId,
-            effectsSounds = configDto.effectsSounds,
-            notify = configDto.notify,
-            darkMode = configDto.darkMode
+            configId = configDto.configId ?: 0L,
+            effectsSounds = (configDto.effectsSounds == 1),
+            notify = (configDto.notify == 1),
+            darkMode = (configDto.darkMode == 1)
         )
     }
 
