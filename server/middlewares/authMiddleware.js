@@ -1,8 +1,13 @@
 import { verifyToken } from '../utils/jwt.js';
 import pool from './../db/conex.js';
 
+const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true';
+
 export async function requireAuth(req, res, next) {
   const token = req.cookies?.token;
+  if (!token && DEBUG_AUTH) {
+    console.warn('[AUTH] Cookie token ausente en la solicitud a', req.originalUrl);
+  }
 
   if (!token) {
     return res.status(401).json({
@@ -13,6 +18,9 @@ export async function requireAuth(req, res, next) {
 
   try {
     const decoded = verifyToken(token);
+    if (DEBUG_AUTH) {
+      console.info('[AUTH] Token recibido y verificado para user_id:', decoded.user_id);
+    }
 
     // Obtener datos básicos del usuario y configuración
     const [userResult] = await pool.query('SELECT u.*, c.* FROM users u JOIN config c ON u.user_id = c.user_id WHERE u.user_id = ?', [decoded.user_id]);

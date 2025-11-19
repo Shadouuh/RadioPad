@@ -17,10 +17,12 @@ class AuthController {
 
             const token = generateToken(user);
 
+            const isProduction = process.env.NODE_ENV === 'production';
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: true, // usar HTTPS en producción
-                sameSite: 'Strict',
+                secure: isProduction, // HTTPS en producción, HTTP en desarrollo
+                sameSite: 'Lax',      // más tolerante en desarrollo
+                path: '/',            // asegurar que aplica a todas las rutas
                 maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
             });
 
@@ -51,10 +53,12 @@ class AuthController {
             
             console.log('Token generado exitosamente');
 
+            const isProduction = process.env.NODE_ENV === 'production';
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: true, // usar HTTPS en producción
-                sameSite: 'Strict',
+                secure: isProduction, // HTTPS en producción, HTTP en desarrollo
+                sameSite: 'Lax',      // más tolerante en desarrollo
+                path: '/',            // asegurar que aplica a todas las rutas
                 maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
             });
 

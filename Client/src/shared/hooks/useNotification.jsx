@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 
 // Ejemploz de uso!
-//   notify('todo viento!', 'success')
+//   notify('todo viento!', 'success')  
 //   notify('malardo!', 'error')
 //   notify('RED LIGHT!', 'warning')
 //   notify('you computer has virus!', 'info')
