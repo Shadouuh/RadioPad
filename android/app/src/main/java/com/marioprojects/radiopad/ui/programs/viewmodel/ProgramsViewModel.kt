@@ -6,6 +6,8 @@ import com.marioprojects.radiopad.domain.model.auth.Programs
 import com.marioprojects.radiopad.domain.model.sounds.ProgramSound
 import com.marioprojects.radiopad.domain.use_case.programs.GetUserProgramsUseCase
 import com.marioprojects.radiopad.domain.use_case.sounds.GetProgramSoundsUseCase
+import com.marioprojects.radiopad.domain.use_case.sounds.DeleteProgramSoundUseCase
+import com.marioprojects.radiopad.domain.usecase.programs.ToggleProgramStatusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +17,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ProgramsViewModel @Inject constructor(
     private val getUserPrograms: GetUserProgramsUseCase,
-    private val getProgramSounds: GetProgramSoundsUseCase
+    private val getProgramSounds: GetProgramSoundsUseCase,
+    private val toggleProgramStatusUseCase: ToggleProgramStatusUseCase,
+    private val deleteProgramSoundUseCase: DeleteProgramSoundUseCase
 ) : ViewModel() {
 
     private val _programs = MutableStateFlow<List<Programs>>(emptyList())
@@ -52,6 +56,49 @@ class ProgramsViewModel @Inject constructor(
                 val map = _soundsByProgram.value.toMutableMap()
                 map[programId] = sounds
                 _soundsByProgram.value = map
+            },
+            onFailure = { _error.value = it.message }
+        )
+    }
+
+    fun toggleProgramStatus(programId: Long) = viewModelScope.launch {
+        _error.value = null
+        val result = toggleProgramStatusUseCase(programId)
+        result.fold(
+            onSuccess = { updatedProgram ->
+                val current = _programs.value.toMutableList()
+                val idx = current.indexOfFirst { it.id == programId }
+                if (idx >= 0) {
+                    current[idx] = updatedProgram
+                    _programs.value = current
+                } else {
+                    // Si no se encuentra, recargar por seguridad
+                    loadUserPrograms()
+                }
+            },
+            onFailure = { _error.value = it.message }
+        )
+    }
+
+    fun deleteProgramSound(programId: Long, soundId: Long) = viewModelScope.launch {
+        _error.value = null
+        val result = deleteProgramSoundUseCase(soundId)
+        result.fold(
+            onSuccess = {
+                // Remover el sonido del estado local
+                val currentMap = _soundsByProgram.value.toMutableMap()
+                val list = currentMap[programId]?.toMutableList() ?: mutableListOf()
+                val idx = list.indexOfFirst { it.id == soundId }
+                if (idx >= 0) {
+                    list.removeAt(idx)
+                    currentMap[programId] = list
+                    _soundsByProgram.value = currentMap
+                } else {
+                    // Si no estaba cargado, forzar recarga de sonidos
+                    _soundsByProgram.value = currentMap
+                    // Opcional: recargar
+                    // loadProgramSounds(programId)
+                }
             },
             onFailure = { _error.value = it.message }
         )

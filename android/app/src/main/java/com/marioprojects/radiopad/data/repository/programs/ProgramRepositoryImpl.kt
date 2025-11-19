@@ -29,4 +29,22 @@ class ProgramRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun toggleProgramStatus(programId: Long): Result<Programs> {
+        return try {
+            val response = api.toggleProgramStatus(programId)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null && body.success) {
+                    Result.success(body.data.toDomain())
+                } else {
+                    Result.failure(Exception(body?.message ?: "Respuesta inválida"))
+                }
+            } else {
+                Result.failure(Exception("Error HTTP ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

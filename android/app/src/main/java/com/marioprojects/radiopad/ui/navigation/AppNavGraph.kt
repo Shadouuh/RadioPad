@@ -81,6 +81,9 @@ fun AppNavHost(
                 onProgramClick = { program ->
                     navController.navigate("program/${program.id}/sounds")
                 },
+                onToggleProgramStatus = { programId, _ ->
+                    vm.toggleProgramStatus(programId)
+                },
                 onLogout = {
                     currentUser = null
                     navController.navigate(Screen.Login.route) {
@@ -118,6 +121,9 @@ fun AppNavHost(
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Programs.route) { inclusive = true }
                     }
+                },
+                onDeleteSound = { pid, soundId ->
+                    vm.deleteProgramSound(pid, soundId)
                 }
             )
         }

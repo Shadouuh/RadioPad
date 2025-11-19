@@ -29,4 +29,22 @@ class SoundRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun deleteProgramSound(soundId: Long): Result<Unit> {
+        return try {
+            val response = api.deleteProgramSound(soundId)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null && body.success) {
+                    Result.success(Unit)
+                } else {
+                    Result.failure(Exception(body?.message ?: "No se pudo eliminar el sonido"))
+                }
+            } else {
+                Result.failure(Exception("Error HTTP ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -47,18 +52,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Headset
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 
 @Composable
 fun ProgramSoundsScreen(
@@ -67,9 +80,11 @@ fun ProgramSoundsScreen(
     onBack: () -> Unit,
     user: User? = null,
     program: Programs? = null,
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onDeleteSound: (programId: Long, soundId: Long) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
+    var confirmDelete by remember { mutableStateOf<Pair<Long, ProgramSound>?>(null) }
     val mediaPlayer = remember { MediaPlayer() }
     var currentSoundId by remember { mutableStateOf<Long?>(null) }
     var isPlaying by remember { mutableStateOf(false) }
@@ -100,15 +115,14 @@ fun ProgramSoundsScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-        // Navbar superior con datos del usuario + botón volver
+        // Solo botón de atrás al inicio
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Flecha atrás negra para contrastar con el fondo
             IconButton(
                 onClick = onBack,
                 modifier = Modifier
@@ -122,32 +136,6 @@ fun ProgramSoundsScreen(
                     tint = Color(0xFF111827)
                 )
             }
-
-            // Mini navbar a la derecha con nombre y rol
-            UserNavbarCompact(user, onLogout)
-        }
-
-        // Header del programa (título, descripción y estado) al estilo del client
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(imageVector = Icons.Filled.Headset, contentDescription = null, tint = Color(0xFF111827))
-                Text(
-                    text = program?.name ?: "Programa",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFF111827)
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = program?.description ?: "Efectos de sonido activos predefinidos",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF6B7280)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            StatusChip(isActive = program?.status ?: true)
-            Spacer(modifier = Modifier.height(12.dp))
-            // divisor sutil
-            Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().background(Color(0xFFE5E7EB)))
         }
 
         if (!errorMessage.isNullOrBlank()) {
@@ -163,6 +151,7 @@ fun ProgramSoundsScreen(
                 .weight(1f)
                 .padding(16.dp)
         ) {
+            val isProducer = user?.role?.equals("Productor", ignoreCase = true) == true
             items(sounds) { sound ->
                 SoundCard(
                     sound = sound,
@@ -189,6 +178,12 @@ fun ProgramSoundsScreen(
                                 mediaPlayer.prepareAsync()
                             }
                         } catch (_: Exception) {}
+                    },
+                    showDeleteButton = !isProducer,
+                    onDelete = {
+                        // Usar siempre un programId válido: si el programa no está cargado aún, tomarlo del propio sonido
+                        val pid = program?.id ?: sound.programId
+                        confirmDelete = pid to sound
                     }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -218,10 +213,48 @@ fun ProgramSoundsScreen(
                         mediaPlayer.seekTo(newPositionMs)
                         positionMs = mediaPlayer.currentPosition
                     } catch (_: Exception) {}
+                },
+                onClose = {
+                    try {
+                        mediaPlayer.pause()
+                        mediaPlayer.reset()
+                    } catch (_: Exception) {}
+                    isPlaying = false
+                    currentSound = null
+                    currentSoundId = null
+                    positionMs = 0
+                    durationMs = 0
                 }
             )
         }
     }
+
+    // Diálogo de confirmación de borrado
+    if (confirmDelete != null) {
+        val (pid, snd) = confirmDelete!!
+        AlertDialog(
+            onDismissRequest = { confirmDelete = null },
+            title = { Text(text = "Eliminar sonido") },
+            text = {
+                Text(text = "¿Seguro que deseas eliminar \"${snd.name}\"? Esta acción no se puede deshacer.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDeleteSound(pid, snd.id)
+                    confirmDelete = null
+                    Toast.makeText(context, "Sonido eliminado", Toast.LENGTH_SHORT).show()
+                }) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
 
     // Actualizar el progreso mientras se reproduce
     LaunchedEffect(isPlaying, currentSoundId) {
@@ -259,48 +292,70 @@ private fun UserNavbarCompact(user: User?, onLogout: () -> Unit = {}) {
             Text(
                 text = user?.name ?: "Usuario",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface
+                color = Color(0xFF111827)
             )
             Text(
                 text = user?.role ?: "Rol",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = Color(0xFF111827)
             )
         }
     }
 
-    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+    DropdownMenu(
+        expanded = menuOpen,
+        onDismissRequest = { menuOpen = false },
+        offset = DpOffset(0.dp, 8.dp)
+    ) {
         Card(
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Column(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color(0xFF0F172A))
-                            .padding(12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        val initial2 = (user?.name?.firstOrNull() ?: 'U').uppercaseChar()
-                        Text(text = initial2.toString(), color = Color.White, style = MaterialTheme.typography.titleMedium)
-                    }
-                    Column {
-                        Text(text = user?.name ?: "Usuario", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.onSurface)
-                        Text(text = user?.role ?: "Rol", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column {
+                Column(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                        .background(Color(0xFFF3F4F6))
+                        .padding(16.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Column(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color(0xFF0F172A))
+                                .padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val initial2 = (user?.name?.firstOrNull() ?: 'U').uppercaseChar()
+                            Text(text = initial2.toString(), color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        }
+                        Column {
+                            Text(text = user?.name ?: "Usuario", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = Color(0xFF111827))
+                            Text(text = user?.role ?: "Rol", style = MaterialTheme.typography.bodySmall, color = Color(0xFF111827))
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = { menuOpen = false; onLogout() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFE4E6)),
-                    modifier = Modifier.fillMaxWidth(),
+
+                Divider(color = Color(0xFFF1F5F9))
+
+                Column(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                        .background(Color.White)
+                        .padding(16.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(imageVector = Icons.Filled.Logout, contentDescription = null, tint = Color(0xFFEF4444))
-                        Text(text = "Cerrar Sesión", color = Color(0xFFEF4444))
+                    Button(
+                        onClick = { menuOpen = false; onLogout() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFE4E6)),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color(0xFFFECACA))
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(imageVector = Icons.Filled.Logout, contentDescription = null, tint = Color(0xFFEF4444))
+                            Text(text = "Cerrar Sesión", color = Color(0xFFEF4444))
+                        }
                     }
                 }
             }
@@ -314,7 +369,9 @@ private fun SoundCard(
     sound: ProgramSound,
     isPlaying: Boolean,
     onPlayPause: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showDeleteButton: Boolean = true,
+    onDelete: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -391,21 +448,31 @@ private fun SoundCard(
                         .padding(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.PlayArrow,
-                        contentDescription = if (isPlaying) "Pausar" else "Reproducir",
-                        tint = Color(0xFF22C55E),
-                        modifier = Modifier.size(24.dp)
-                    )
+                    val playTint = Color(0xFF22C55E)
+                    Crossfade(targetState = isPlaying, animationSpec = tween(durationMillis = 200)) { playing ->
+                        Icon(
+                            imageVector = if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                            contentDescription = if (playing) "Pausar" else "Reproducir",
+                            tint = playTint,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
 
-                // Basura roja
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "Eliminar",
-                    tint = Color(0xFFEF4444),
-                    modifier = Modifier.size(20.dp)
-                )
+                // Basura roja (solo si no es productor)
+                if (showDeleteButton) {
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier
+                            .size(36.dp) // aumentar área táctil para que sea más fácil de presionar
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Eliminar",
+                            tint = Color(0xFFEF4444)
+                        )
+                    }
+                }
             }
         }
     }
@@ -418,26 +485,89 @@ private fun PlaybackBar(
     positionMs: Int,
     durationMs: Int,
     onPlayPause: () -> Unit,
-    onSeekTo: (Int) -> Unit
+    onSeekTo: (Int) -> Unit,
+    onClose: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
+            // Fila principal: icono + textos, botón play/pause, tiempo y cerrar en una misma línea
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = sound.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                GradientPlayButton(isPlaying = isPlaying, onClick = onPlayPause)
+                // Bloque izquierdo (ocupa el espacio disponible)
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFF3F4F6)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.MusicNote,
+                            contentDescription = null,
+                            tint = Color(0xFF9CA3AF)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = sound.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = Color(0xFF111827)
+                        )
+                        val subtitle = sound.description ?: ""
+                        if (subtitle.isNotBlank()) {
+                            Text(
+                                text = subtitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = Color(0xFF6B7280)
+                            )
+                        }
+                    }
+                }
+
+                // Botón circular azul con icono Play/Pause y anillos
+                RingPlayPauseButton(isPlaying = isPlaying, onClick = onPlayPause)
+
+                // Tiempo y botón cerrar (a la derecha)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    val safeDuration = if (durationMs > 0) durationMs else 1
+                    Text(
+                        text = "${formatMs(positionMs)}/${formatMs(safeDuration)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF6B7280)
+                    )
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Cerrar",
+                        tint = Color(0xFF111827),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clip(CircleShape)
+                            .clickable { onClose() }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -455,16 +585,13 @@ private fun PlaybackBar(
                 onValueChangeFinished = {
                     val targetMs = (sliderPos * safeDuration).toInt()
                     onSeekTo(targetMs)
-                }
+                },
+                colors = SliderDefaults.colors(
+                    thumbColor = Color(0xFF111827), // negro
+                    activeTrackColor = Color(0xFF111827), // barra activa negra
+                    inactiveTrackColor = Color(0xFFE5E7EB) // barra inactiva gris claro
+                )
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = formatMs(positionMs), style = MaterialTheme.typography.bodySmall)
-                Text(text = formatMs(safeDuration), style = MaterialTheme.typography.bodySmall)
-            }
         }
     }
 }
@@ -500,6 +627,41 @@ private fun GradientPlayButton(
             color = Color.White,
             style = MaterialTheme.typography.bodyMedium
         )
+    }
+}
+
+@Composable
+private fun RingPlayPauseButton(
+    isPlaying: Boolean,
+    onClick: () -> Unit
+) {
+    // Botón circular azul (#2563EB) con anillos sutiles, animando el ícono Play/Pause
+    val blue = Color(0xFF2563EB)
+    val ring = Color(0xFF93C5FD)
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .border(BorderStroke(2.dp, ring), CircleShape)
+            .padding(2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(blue)
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Crossfade(targetState = isPlaying, animationSpec = tween(durationMillis = 200)) { playing ->
+                Icon(
+                    imageVector = if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    contentDescription = if (playing) "Pausar" else "Reproducir",
+                    tint = Color.White,
+                )
+            }
+        }
     }
 }
 
