@@ -3,6 +3,10 @@ package com.marioprojects.radiopad.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,6 +17,7 @@ import com.marioprojects.radiopad.ui.auth.viewmodel.LoginViewModel
 import com.marioprojects.radiopad.ui.auth.viewmodel.AuthState
 import com.marioprojects.radiopad.ui.programs.screens.ProgramsScreen
 import com.marioprojects.radiopad.ui.programs.viewmodel.ProgramsViewModel
+import com.marioprojects.radiopad.domain.model.auth.User
 
 // Definición de rutas de la app (simple y coherente con las secciones)
 sealed class Screen(val route: String) {
@@ -29,6 +34,7 @@ fun AppNavHost(
     navController: NavHostController = rememberNavController(),
     startDestination: String = Screen.Login.route
 ) {
+    var currentUser by remember { mutableStateOf<User?>(null) }
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -45,6 +51,7 @@ fun AppNavHost(
             // Navegar solo cuando el estado cambie a Success (evitar múltiples navegaciones)
             LaunchedEffect(state) {
                 if (state is AuthState.Success) {
+                    currentUser = state.user
                     navController.navigate(Screen.Programs.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
@@ -68,10 +75,17 @@ fun AppNavHost(
                 programs = programs,
                 isLoading = isLoading,
                 errorMessage = errorMessage,
+                user = currentUser,
                 soundsCountByProgram = soundsByProgram.mapValues { it.value.size },
                 onRequestProgramSounds = { id -> vm.loadProgramSounds(id) },
                 onProgramClick = { program ->
                     navController.navigate("program/${program.id}/sounds")
+                },
+                onLogout = {
+                    currentUser = null
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Programs.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -86,6 +100,8 @@ fun AppNavHost(
             val programId = backStackEntry.arguments?.getLong("programId") ?: 0L
             val soundsMap = vm.soundsByProgram.collectAsState().value
             val errorMessage = vm.error.collectAsState().value
+            val programs = vm.programs.collectAsState().value
+            val currentProgram = programs.firstOrNull { it.id == programId }
 
             LaunchedEffect(programId) {
                 vm.loadProgramSounds(programId)
@@ -94,7 +110,15 @@ fun AppNavHost(
             com.marioprojects.radiopad.ui.sounds.screens.ProgramSoundsScreen(
                 sounds = soundsMap[programId] ?: emptyList(),
                 errorMessage = errorMessage,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                user = currentUser,
+                program = currentProgram,
+                onLogout = {
+                    currentUser = null
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Programs.route) { inclusive = true }
+                    }
+                }
             )
         }
     }

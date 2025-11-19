@@ -38,12 +38,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.marioprojects.radiopad.domain.model.sounds.ProgramSound
+import com.marioprojects.radiopad.domain.model.auth.User
+import com.marioprojects.radiopad.domain.model.auth.Programs
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Headset
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.RectangleShape
 
 @Composable
 fun ProgramSoundsScreen(
     sounds: List<ProgramSound>,
     errorMessage: String?,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    user: User? = null,
+    program: Programs? = null,
+    onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val mediaPlayer = remember { MediaPlayer() }
@@ -75,19 +99,55 @@ fun ProgramSoundsScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Encabezado simple con botón de volver
+    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        // Navbar superior con datos del usuario + botón volver
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = onBack) { Text("Volver") }
+            // Flecha atrás negra para contrastar con el fondo
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color(0xFFF3F4F6))
+                    .border(androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB)))
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Volver",
+                    tint = Color(0xFF111827)
+                )
+            }
+
+            // Mini navbar a la derecha con nombre y rol
+            UserNavbarCompact(user, onLogout)
+        }
+
+        // Header del programa (título, descripción y estado) al estilo del client
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(imageVector = Icons.Filled.Headset, contentDescription = null, tint = Color(0xFF111827))
+                Text(
+                    text = program?.name ?: "Programa",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = Color(0xFF111827)
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Sonidos del programa",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                text = program?.description ?: "Efectos de sonido activos predefinidos",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFF6B7280)
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            StatusChip(isActive = program?.status ?: true)
+            Spacer(modifier = Modifier.height(12.dp))
+            // divisor sutil
+            Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().background(Color(0xFFE5E7EB)))
         }
 
         if (!errorMessage.isNullOrBlank()) {
@@ -175,6 +235,81 @@ fun ProgramSoundsScreen(
 }
 
 @Composable
+private fun UserNavbarCompact(user: User?, onLogout: () -> Unit = {}) {
+    var menuOpen by remember { mutableStateOf(false) }
+    androidx.compose.foundation.layout.Box {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable { menuOpen = true }
+    ) {
+        val initial = (user?.name?.firstOrNull() ?: 'U').uppercaseChar()
+        Column(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(Color(0xFF0F172A))
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = initial.toString(), color = Color.White, style = MaterialTheme.typography.bodyMedium)
+        }
+        Column {
+            Text(
+                text = user?.name ?: "Usuario",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = user?.role ?: "Rol",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+
+    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+        Card(
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color(0xFF0F172A))
+                            .padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        val initial2 = (user?.name?.firstOrNull() ?: 'U').uppercaseChar()
+                        Text(text = initial2.toString(), color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    }
+                    Column {
+                        Text(text = user?.name ?: "Usuario", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.onSurface)
+                        Text(text = user?.role ?: "Rol", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = { menuOpen = false; onLogout() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFE4E6)),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(imageVector = Icons.Filled.Logout, contentDescription = null, tint = Color(0xFFEF4444))
+                        Text(text = "Cerrar Sesión", color = Color(0xFFEF4444))
+                    }
+                }
+            }
+        }
+    }
+    }
+}
+
+@Composable
 private fun SoundCard(
     sound: ProgramSound,
     isPlaying: Boolean,
@@ -182,36 +317,46 @@ private fun SoundCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        modifier = modifier
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isPlaying)
-                MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
-            else MaterialTheme.colorScheme.surface
-        )
+            containerColor = Color.White
+        ),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Encabezado: título + duración estilo badge
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            // Encabezado con fondo gris claro, título + duración estilo badge
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFF3F4F6))
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
-                Text(
-                    text = sound.name,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = (sound.duration ?: "N/A"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = sound.name,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = Color(0xFF111827),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = (sound.duration ?: "—"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF6B7280),
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color(0xFFE5E7EB))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -221,19 +366,46 @@ private fun SoundCard(
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF6B7280),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Fila inferior: categoría (badge) y botón play/pause con gradiente
+            // divisor interior
+            Spacer(modifier = Modifier.height(1.dp).fillMaxWidth().background(Color(0xFFE5E7EB)))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Fila inferior: acciones con colores del client
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                CategoryBadge(category = sound.category)
-                GradientPlayButton(isPlaying = isPlaying, onClick = onPlayPause)
+                // Play/Pause icono verde
+                Row(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable { onPlayPause() }
+                        .padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = if (isPlaying) "Pausar" else "Reproducir",
+                        tint = Color(0xFF22C55E),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                // Basura roja
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Eliminar",
+                    tint = Color(0xFFEF4444),
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
@@ -309,22 +481,24 @@ private fun GradientPlayButton(
     isPlaying: Boolean,
     onClick: () -> Unit
 ) {
+    // Conservamos este botón para la barra de reproducción inferior, pero
+    // ajustamos su gradiente para acercarlo al estilo del client.
     val gradient = if (isPlaying) {
         Brush.linearGradient(colors = listOf(Color(0xFFEF4444), Color(0xFFDC2626)))
     } else {
-        Brush.linearGradient(colors = listOf(Color(0xFF3B82F6), Color(0xFF1D4ED8)))
+        Brush.linearGradient(colors = listOf(Color(0xFF111827), Color(0xFF0F172A)))
     }
     Row(
         modifier = Modifier
             .clip(CircleShape)
             .background(brush = gradient)
             .clickable { onClick() }
-            .padding(14.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
-            text = if (isPlaying) "⏸" else "▶",
+            text = if (isPlaying) "Pausar" else "Reproducir",
             color = Color.White,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
@@ -343,6 +517,21 @@ private fun CategoryBadge(category: String?) {
         text = category ?: "Sin categoría",
         style = MaterialTheme.typography.bodySmall,
         color = fg,
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(bg)
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    )
+}
+
+@Composable
+private fun StatusChip(isActive: Boolean) {
+    val bg = if (isActive) Color(0xFFD1FAE5) else Color(0xFFFEE2E2)
+    val fg = if (isActive) Color(0xFF10B981) else Color(0xFFDC2626)
+    Text(
+        text = if (isActive) "Activo" else "Inactivo",
+        color = fg,
+        style = MaterialTheme.typography.bodySmall,
         modifier = Modifier
             .clip(CircleShape)
             .background(bg)
