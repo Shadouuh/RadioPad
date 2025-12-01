@@ -1,0 +1,144 @@
+.contenido-home{
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0px;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+
+.contenedor-dashboard{
+    display: flex;
+    flex-direction: row;
+    width: 95%;
+    height: 95%;
+    gap: 20px;
+}
+
+.dashboard{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 8px;
+    background-color: #16243ebe;
+    border: 1px solid #414147;
+    border-radius: 10px;
+    width: 50%;
+    height: 101%;
+}
+
+.celda-dashboard{
+    display: flex;
+    border-radius: 6px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, .2);
+    background-color: #1c2e4f;
+    width: 49%;
+    height: 42%;
+    transition: .3s;
+}
+
+.celda-dashboard:hover{
+    box-shadow: 2px 6px 6px rgba(0, 0, 0, .4);
+    transform: translateY(-4px);
+}
+
+
+.dashboard-botonera{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    padding: 10px;
+    background-color: #16243ebe;
+    border: 1px solid #414147;
+    border-radius: 10px;
+    width: 50%;
+    height: 101%;
+}
+
+.botones{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    border-radius: 6px;
+    background-color: #1c2e4f;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, .1);
+}
+
+.boton{
+    width: 106px;
+    height: 104px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;    
+    border-radius: 10px;    
+}
+
+.boton-input{
+    cursor: pointer;
+    transition: .3s;
+}
+
+.boton-input img{
+    width: 50px;
+    background-color: #2564db;
+    border-radius: 100px;
+}
+
+.boton-input:hover{
+    filter: brightness(1.2) drop-shadow(0px 0px 6px #2564db);
+}
+
+.titulos{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.titulo{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.titulo img{
+    width: 25px;
+}
+
+/*-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_Estado de la emisora CSS-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-*/
+
+.emisora-estado{
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    width: 95%;
+    height: 230px;
+    border: 1px solid #414147;
+    background-color: #16243ebe;
+    border-radius: 8px;
+}
+
+.emisora-estado-contenido{
+    margin-top: 6px;
+    height: 70%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+.emisora-estado-celda{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #2564db;
+    background-color: #1c2e4f;
+    border-radius: 6px;
+    height: 100%;
+    width: 33%;
+}
