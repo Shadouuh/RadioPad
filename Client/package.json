@@ -2,53 +2,57 @@
   "name": "radiopad",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
   "main": "electron/main.js",
+  "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"electron .\"",
+    "dev": "vite",
     "build": "vite build && electron-builder",
-    "lint": "eslint .",
     "start": "electron .",
-    "preview": "vite preview"
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .js,.ts ."
   },
   "build": {
-    "appId": "com.radiopad.app",
+    "appId": "com.lagoom.RadioPad",
     "productName": "RadioPad",
-    "directories": {
-      "output": "dist_electron"
-    },
     "win": {
-      "icon": "public/icon.ico",
-      "target": [
-        "nsis"
-      ]
+      "icon": "assets/images/icon.ico"
+    },
+    "files": [
+      "dist/",
+      "electron/"
+    ],
+    "directories": {
+      "buildResources": "assets"
     }
   },
   "dependencies": {
-    "@cloudinary/react": "^1.14.1",
-    "@cloudinary/url-gen": "^1.21.0",
-    "axios": "^1.8.4",
-    "cloudinary": "^2.6.0",
-    "firebase": "^11.6.0",
-    "prop-types": "^15.8.1",
-    "react": "^19.0.0",
-    "react-confirm-alert": "^3.0.6",
-    "react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "axios": "^1.12.2",
+    "concurrently": "^9.2.1",
+    "electron-forge": "^5.2.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.5.0"
+    "react-router-dom": "^7.9.1",
+    "react-toastify": "^11.0.5",
+    "wait-on": "^9.0.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "@vitejs/plugin-react-swc": "^3.8.0",
-    "concurrently": "^9.1.2",
-    "electron": "^35.1.4",
-    "electron-builder": "^26.0.12",
-    "eslint": "^9.21.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^15.15.0",
-    "vite": "^6.2.0"
+    "@eslint/js": "^9.35.0",
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react-swc": "^4.0.1",
+    "autoprefixer": "^10.4.21",
+    "electron": "^38.1.2",
+    "eslint": "^9.35.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.4.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
+    "vite": "^7.1.6"
   }
 }

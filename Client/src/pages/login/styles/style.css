@@ -1,0 +1,252 @@
+/* Login Page Styles */
+
+/* Container principal */
+.login-container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(17, 24, 39, 0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Card principal */
+.login-card {
+  background-color: white;
+  border-radius: 1rem;
+  border: 1px solid rgba(156, 163, 175, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 2rem;
+  width: 100%;
+  max-width: 28rem;
+}
+
+/* Header section */
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  background-color: #111827;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.login-logo-icon {
+  color: white;
+  font-size: 1.5rem;
+}
+
+.login-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+  margin: 0;
+}
+
+.login-subtitle {
+  color: #4b5563;
+  font-size: 0.875rem;
+  margin: 0;
+  margin-top: 0.5rem;
+}
+
+/* Form styles */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.login-input-wrapper {
+  position: relative;
+}
+
+.login-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  height: 1.25rem;
+  width: 1.25rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.login-input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+}
+
+.login-input:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.login-input-password {
+  padding-right: 3rem;
+}
+
+.login-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.login-password-toggle-icon {
+  height: 1.25rem;
+  width: 1.25rem;
+  color: #9ca3af;
+  transition: color 0.2s ease-in-out;
+}
+
+.login-password-toggle:hover .login-password-toggle-icon {
+  color: #4b5563;
+}
+
+/* Button styles */
+.login-button {
+  width: 100%;
+  background-color: #111827;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 1rem;
+}
+
+.login-button:hover:not(:disabled) {
+  background-color: #1f2937;
+}
+
+.login-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #6b7280, 0 0 0 4px rgba(107, 114, 128, 0.1);
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Test users section */
+.login-test-users {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.login-test-users-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.75rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.login-test-users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.login-test-user {
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.login-test-user-email {
+  color: #4b5563;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.login-test-user-email:hover {
+  text-decoration: underline;
+  color: #111827;
+}
+
+.login-test-user-role {
+  margin-left: 0.5rem;
+}
+
+.login-forgot-password {
+  margin-top: 0.75rem;
+}
+
+.login-forgot-password-link {
+  font-size: 0.75rem;
+  color: #4b5563;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+
+.login-forgot-password-link:hover {
+  text-decoration: underline;
+  color: #111827;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .login-container {
+    padding: 0.5rem;
+  }
+  
+  .login-card {
+    padding: 1.5rem;
+  }
+  
+  .login-logo {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  
+  .login-title {
+    font-size: 1.25rem;
+  }
+}
